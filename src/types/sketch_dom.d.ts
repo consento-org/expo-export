@@ -212,10 +212,12 @@ declare module "sketch/dom" {
     fileFormat: FileFormat
   }
 
-  export class TextLayer extends Layer {
+  export class Text extends Layer {
     type: 'Text'
     style: TextStyle
     fixedWidth: number
+    text: string
+    lineSpacing: number
   }
 
   export class Page extends Selectable implements ISelectable, ILayerContainer {
