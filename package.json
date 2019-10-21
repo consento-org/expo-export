@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Text-Style and Asset export for sketch to be used in Expo",
-  "author": "Martin Heidegger <martin@consento.org>",
+  "author": "Consento <keepsafe@consento.org>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/consento-org/expo-export"
