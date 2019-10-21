@@ -30,15 +30,14 @@ export function writeAssets (document: Document, target: (path: string) => strin
     }
   })
   if (assetFound) {
-    write(target('src/Asset.ts'), `
-const { Image } from 'react-native'
+    write(target('src/Asset.ts'), `const { Image } from 'react-native'
 
 const cache: { [key: string]: Image } = {}
 
 export class Asset {
 ${Object.keys(assets).map(name => {
   const asset = assets[name]
-  return `  static get ${name} () {
+  return `  static ${name} () {
     if (cache.${name} === undefined) {
       cache.${name} = require('../${asset}')
     }
