@@ -7,7 +7,7 @@
 </p>
 
 # Installation
-1. <a href="https://github.com/consento-org/expo-export/archive/master.zip" title="Download Expo-Export">Download the plugin</a>.
+1. <a href="https://github.com/consento-org/expo-export/releases/download/v1.0.0/expoexport.sketchplugin.zip" title="Download Expo-Export">Download the plugin</a>.
 2. Unzip the downloaded file.
 3. Double click on expoexport.sketchplugin
 
