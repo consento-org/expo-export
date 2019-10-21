@@ -13,7 +13,8 @@
 
 # Expo-Export?
 
-Expo-Export is a Sketch plugin which provides you with a command/short-cut to generate a 
+Expo-Export is a Sketch plugin which provides you with a command/short-cut to generate a set of assets and configurations
+to be used with expo/react-native.
 
 # License
 
