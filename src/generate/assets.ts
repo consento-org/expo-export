@@ -1,6 +1,6 @@
 import sketch, { Document } from 'sketch/dom'
 import { write } from '../util/fs'
-import { forEachLayer } from '../util/dom'
+import { iterateDocument } from '../util/dom'
 import { slugify } from '../util/string'
 
 function slugifyName (name: string): string[] {
@@ -11,7 +11,7 @@ export function writeAssets (document: Document, target: (path: string) => strin
   const idNameMap: { [id: string]: string } = {}
   const assets: { [key: string]: string } = {}
   let assetFound = false
-  forEachLayer(document, item => {
+  iterateDocument(document, item => {
     if (item.exportFormats.length > 0) {
       const name = slugifyName(item.name)
       const fileName = `assets/${name.join('/')}`
