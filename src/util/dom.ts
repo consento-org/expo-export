@@ -1,4 +1,4 @@
-import { Document, Layer, ILayerContainer } from 'sketch/dom'
+import { Document, Layer, ILayerContainer, Text, Artboard } from 'sketch/dom'
 
 interface IDocumentData {
   textStyleWithID(id: string): undefined | {
@@ -37,6 +37,13 @@ export function isLayerContainer (item: any): item is ILayerContainer {
 }
 
 export type FTreeWalker = (item: Layer) => void
+export function isTextLayer (item: Layer): item is Text {
+  return item.type === 'Text'
+}
+
+export function isArtboard (item: Layer): item is Artboard {
+  return item.type === 'Artboard'
+}
 
 function iterate (item: Layer, handler: FTreeWalker): void {
   if (isLayerContainer(item)) {
