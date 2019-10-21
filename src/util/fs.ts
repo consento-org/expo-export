@@ -1,7 +1,19 @@
 import fs from '@skpm/fs'
 
+export function dirname (name: string) {
+  const pos = name.lastIndexOf('/')
+  if (pos === -1) {
+    return '.'
+  }
+  if (pos === 0) {
+    return '/'
+  }
+  return name.substr(0, pos)
+}
+
 export function write (pth: string, data: any): boolean {
   // const current = fs.readFileSync(pth)
+  mkdirp(dirname(pth))
   const res = fs.writeFileSync(pth, data)
   console.log(`Wrote ${pth}.`)
   return res

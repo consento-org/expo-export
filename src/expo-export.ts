@@ -1,6 +1,6 @@
 import { alert } from 'sketch/ui'
 import { Document } from 'sketch/dom'
-import { mkdirp, write } from './util/fs'
+import { write } from './util/fs'
 import { generateColors } from './generate/color'
 import { generateFonts } from './generate/font'
 import { generateTextStyles } from './generate/text'
@@ -48,8 +48,6 @@ export default function (context: any): void {
     return alert('URL missing', 'Please save the document first!')
   }
   const target = folder(url)
-  const styleFolder = target('src/styles')
-  mkdirp(styleFolder)
   const fontNameLookup = fontNameForSet.bind(null, context.document.documentData() as IDocumentData)
   write(target('src/styles/Color.ts'), generateColors(document))
   write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
