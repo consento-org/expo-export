@@ -2,17 +2,21 @@ import { Hierarchy } from '../../util/hierarchy'
 import { TextFormat, ITextFormat } from './TextFormat'
 import { Document } from 'sketch/dom'
 import { toMaxDecimals } from '../../util/number'
+import { Imports, addImport } from '../../util/render'
 
-type FGetColor = (color: string) => string
+export type FGetColor = (color: string, imports?: Imports) => string
 
-function getColorFactory (document: Document): FGetColor {
+export function getColorFactory (document: Document): FGetColor {
   const lookup: { [color: string]: string } = {}
   document.colors.forEach(color => {
     lookup[color.color] = color.name
   })
-  return (color: string) => {
+  return (color: string, imports?: Imports) => {
     const mappedColor = lookup[color]
     if (mappedColor === undefined) return `'${color}'`
+    if (imports !== undefined) {
+      addImport(imports, 'src/styles/Color', 'Color')
+    }
     return `Color.${lookup[color]}`
   }
 }
@@ -30,17 +34,17 @@ function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[])
   if (has(style.color)) props.push(`color: ${getColor(style.color)}`)
   if (has(style.fontFamily)) props.push(`fontFamily: Font.${style.fontFamily}`)
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
-  if (has(style.textAlign)) props.push(`textAlign: '${style.textAlign}'`)
-  if (has(style.textTransform)) props.push(`textTransform: '${style.textTransform}'`)
+  if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${style.textAlign}`)
+  if (has(style.textTransform)) props.push(`textTransform: ETextTransform.${style.textTransform}`)
   if (props.length === 0) {
     return `export const ${stack.join('_')} = {}`
   }
-  return `export const ${stack.join('_')} = {
+  return `export const ${stack.join('_')}: ITextStyle = {
   ${props.join(',\n  ')}
 }`
 }
 
-export type TIDLookup = { [id: string]: string }
+export interface TIDLookup { [id: string]: string }
 
 function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, stack: string[], entries: string[], textStyles: TIDLookup): void {
   for (const name in styles) {

@@ -20,6 +20,11 @@
       "script": "./expo-export-color.ts"
     },
     {
+      "name": "export components",
+      "identifier": "expo-export-components",
+      "script": "./expo-export-components.ts"
+    },
+    {
       "name": "export font",
       "identifier": "expo-export-font",
       "script": "./expo-export-font.ts"
@@ -36,6 +41,7 @@
       "expo-export-all",
       "expo-export-assets",
       "expo-export-color",
+      "expo-export-components",
       "expo-export-font",
       "expo-export-textStyle"
     ]

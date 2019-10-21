@@ -2,10 +2,10 @@ import { expoExport } from './expo-export'
 
 export default function (context: any): void {
   expoExport({
-    color: true,
-    font: true,
-    textStyle: true,
-    assets: true,
+    color: false,
+    font: false,
+    textStyle: false,
+    assets: false,
     components: true
   }, context)
 }

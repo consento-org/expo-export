@@ -145,12 +145,7 @@ declare module "sketch/dom" {
   }
 
   abstract class TreeItem extends Selectable {
-    frame: {
-      x: number
-      y: number
-      width: number
-      height: number
-    }
+    frame: Rectangle
     exportFormats: ExportFormat[]
   }
 
@@ -182,6 +177,36 @@ declare module "sketch/dom" {
       includedInExport: boolean
       color: string
     }
+  }
+  
+  export class Rectangle {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  export class Override {
+    path: string
+    property: 'stringValue' | 'symbolID' | 'layerStyle' | 'textStyle' | 'flowDestination' | 'image'
+    // The unique ID of the override (${path}_${property}).
+    id: string
+    value: string | ImageData
+    isDefault: boolean
+    affectedLayer: Text | Image | Symbol
+    editable: boolean
+    getFrame (): Rectangle
+  }
+
+  export class SymbolInstance extends Layer {
+    text: 'SymbolInstance'
+    symbolId: string
+  }
+
+  export class SymbolMaster extends Artboard {
+    text: 'SymbolMaster'
+    symbolId: string
+    overrides: Override[]
   }
 
   export class Group extends TreeLeaf implements IVisibleLayer {
@@ -220,6 +245,18 @@ declare module "sketch/dom" {
     lineSpacing: number
   }
 
+  export interface NSImage {
+    nsdata: any
+  }
+
+  export interface ImageData extends Identifyable {
+    nsimage: NSImage
+  }
+
+  export class Image extends Layer {
+    image: ImageData
+  }
+
   export class Page extends Selectable implements ISelectable, ILayerContainer {
     layers: Layer[]
     type: 'Page'
@@ -234,6 +271,8 @@ declare module "sketch/dom" {
     colors: ColorAsset[]
     gradients: GradientAsset[]
     sharedTextStyles: SharedStyle<TextStyle>[]
+    getSymbolMasterWithID(symbolId: string): SymbolMaster
+    getSymbols(): SymbolMaster[]
   }
 
   export interface IExportOptions {

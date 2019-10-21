@@ -5,6 +5,7 @@ export default function (context: any): void {
     color: false,
     font: false,
     textStyle: true,
-    assets: false
+    assets: false,
+    components: false
   }, context)
 }

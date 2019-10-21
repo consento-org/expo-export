@@ -1,6 +1,6 @@
 import fs from '@skpm/fs'
 
-export function dirname (name: string) {
+export function dirname (name: string): string {
   const pos = name.lastIndexOf('/')
   if (pos === -1) {
     return '.'

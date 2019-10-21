@@ -21,7 +21,7 @@ ${fonts.map((font) => `  ${fontShortID(font)} = '${font}'`).join(',\n')}
 
 export async function loadFonts (): Promise<void> {
   await ExpoFont.loadAsync({
-${fonts.map((font) => `    [Font.${fontShortID(font)}]: require('../assets/fonts/${font}.ttf')`).join(',\n')}
+${fonts.map((font) => `    [Font.${fontShortID(font)}]: require('../../assets/fonts/${font}.ttf')`).join(',\n')}
   })
 }
 `
