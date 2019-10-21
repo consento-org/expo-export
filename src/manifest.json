@@ -1,0 +1,19 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "export",
+      "shortcut": "ctrl shift j",
+      "identifier": "expo-export",
+      "script": "./expo-export.ts"
+    }
+  ],
+  "menu": {
+    "title": "Consento Expo",
+    "items": [
+      "expo-export"
+    ]
+  }
+}
