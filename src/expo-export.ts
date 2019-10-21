@@ -14,8 +14,14 @@ function folder (path: string): (sub: string) => string {
   return (sub: string) => sub === '' ? base : `${base}/${sub}`
 }
 
+export interface IExpoExportOpts {
+  color: boolean
+  font: boolean
+  textStyle: boolean
+  assets: boolean
+}
 
-export default function (context: any): void {
+export function expoExport (opts: IExpoExportOpts, context: any): void {
   const document = Document.getSelectedDocument()
   if (document === undefined) {
     return alert('Document missing', 'Please open a document first!')
@@ -26,9 +32,10 @@ export default function (context: any): void {
   }
   const target = folder(url)
   const fontNameLookup = createFontNameLookup(document, context.document as any)
-  write(target('src/styles/Color.ts'), generateColors(document))
-  write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
-  write(target('src/styles/TextStyle.ts'), generateTextStyles(document, fontNameLookup))
+  if (opts.color === true) write(target('src/styles/Color.ts'), generateColors(document))
+  if (opts.font === true) write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
+  const { textStyles, textStyleData } = generateTextStyles(document, fontNameLookup)
+  if (opts.textStyle === true) write(target('src/styles/TextStyle.ts'), textStyleData)
 
-  writeAssets(document, target)
+  if (opts.assets === true) writeAssets(document, target)
 }

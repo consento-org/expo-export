@@ -4,16 +4,40 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "export",
+      "name": "export all",
       "shortcut": "ctrl shift j",
-      "identifier": "expo-export",
-      "script": "./expo-export.ts"
+      "identifier": "expo-export-all",
+      "script": "./expo-export-all.ts"
+    },
+    {
+      "name": "export assets",
+      "identifier": "expo-export-assets",
+      "script": "./expo-export-assets.ts"
+    },
+    {
+      "name": "export color",
+      "identifier": "expo-export-color",
+      "script": "./expo-export-color.ts"
+    },
+    {
+      "name": "export font",
+      "identifier": "expo-export-font",
+      "script": "./expo-export-font.ts"
+    },
+    {
+      "name": "export textStyle",
+      "identifier": "expo-export-textStyle",
+      "script": "./expo-export-textStyle.ts"
     }
   ],
   "menu": {
     "title": "Consento Expo",
     "items": [
-      "expo-export"
+      "expo-export-all",
+      "expo-export-assets",
+      "expo-export-color",
+      "expo-export-font",
+      "expo-export-textStyle"
     ]
   }
 }
