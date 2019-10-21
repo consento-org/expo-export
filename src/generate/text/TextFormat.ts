@@ -1,4 +1,5 @@
 export interface ITextFormat {
+  id?: string
   fontFamily?: string
   fontSize?: number
   color?: string
@@ -21,8 +22,10 @@ export class TextFormat implements ITextFormat {
   public lineHeight: number
   public textTransform: string
   public textAlign: string
+  public id: string
 
-  constructor ({ fontFamily, fontSize, color, lineHeight, textTransform, textAlign }: ITextFormat) {
+  constructor ({ id, fontFamily, fontSize, color, lineHeight, textTransform, textAlign }: ITextFormat) {
+    this.id = id
     this.fontFamily = fontFamily !== undefined ? fontFamily : DEFAULT_FONTFAMILY
     this.fontSize = fontSize !== undefined ? fontSize : DEFAULT_FONTSIZE
     this.color = color !== undefined ? color : DEFAULT_TEXT_COLOR

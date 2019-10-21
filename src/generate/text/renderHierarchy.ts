@@ -40,29 +40,31 @@ function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[])
 }`
 }
 
-function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, stack: string[], entries: string[], list: string[]): void {
+export type TIDLookup = { [id: string]: string }
+
+function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, stack: string[], entries: string[], textStyles: TIDLookup): void {
   for (const name in styles) {
     stack.push(name)
     const node = styles[name]
-    list.push(stack.join('_'))
+    textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = stack.join('_')
     entries.push(
       node.item !== undefined ? renderFormat(getColor, node.item, stack) : renderFormat(getColor, {}, stack)
     )
-    _renderHierarchy(getColor, node.children, stack, entries, list)
+    _renderHierarchy(getColor, node.children, stack, entries, textStyles)
     stack.pop()
   }
 }
 
 export function renderHierarchy (document: Document, styles: Hierarchy<TextFormat>): {
   entries: string[]
-  list: string[]
+  textStyles: TIDLookup
 } {
   const getColor = getColorFactory(document)
-  const list: string[] = []
+  const textStyles: TIDLookup = {}
   const entries: string[] = []
-  _renderHierarchy(getColor, styles, [], entries, list)
+  _renderHierarchy(getColor, styles, [], entries, textStyles)
   return {
     entries,
-    list
+    textStyles
   }
 }

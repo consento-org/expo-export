@@ -7,6 +7,7 @@ export type TFontName = (id: string) => string
 
 function processShared (shared: SharedStyle<TextStyle>, fontName: TFontName): TextFormat {
   return new TextFormat({
+    id: shared.id,
     fontFamily: fontShortID(fontName(shared.id)),
     fontSize: shared.style.fontSize,
     color: shared.style.textColor,

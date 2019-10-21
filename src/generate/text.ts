@@ -4,13 +4,13 @@ import { Document } from 'sketch/dom'
 
 export function generateTextStyles (document: Document, fontName: (id: string) => string): string {
   const styles = collectTextStyles(document, fontName)
-  const { entries, list } = renderHierarchy(document, styles)
+  const { entries, textStyles } = renderHierarchy(document, styles)
   return `import { Color } from './Color'
 import { Font } from './Font'
 
 ${entries.join('\n')}
 export const TextStyle = {
-  ${list.join(',\n  ')}
+  ${Object.values(textStyles).join(',\n  ')}
 }
 `
 }
