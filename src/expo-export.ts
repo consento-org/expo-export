@@ -4,6 +4,7 @@ import { write } from './util/fs'
 import { generateColors } from './generate/color'
 import { generateFonts } from './generate/font'
 import { generateTextStyles } from './generate/text'
+import { writeAssets } from './generate/assets'
 
 function folder (path: string): (sub: string) => string {
   const reg = /^(.*)(\.sketch)$/ig
@@ -52,4 +53,6 @@ export default function (context: any): void {
   write(target('src/styles/Color.ts'), generateColors(document))
   write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
   write(target('src/styles/TextStyle.ts'), generateTextStyles(document, fontNameLookup))
+
+  writeAssets(document, target)
 }

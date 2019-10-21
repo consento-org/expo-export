@@ -113,29 +113,69 @@ declare module "sketch/dom" {
     style: T
   }
 
-  export class TreeItem {
+  export interface IIdentifyable {
     id: string
+    type: string
     name: string
+  }
+
+  export interface ISelectable extends IIdentifyable {
     selected: boolean
     sharedStyleId: string
+  }
+
+  export interface ITreeItem extends ISelectable {
     frame: {
       x: number
       y: number
       width: number
       height: number
     }
+    exportFormats: ExportFormat[]
   }
 
-  export class TreeLeaf {
-    layers: TreeItem[]
+  abstract class Identifyable {
+    id: string
+    name: string
   }
 
-  export class VisibleLeaf {
+  abstract class Selectable extends Identifyable {
+    selected: boolean
+    sharedStyleId: string
+  }
+
+  abstract class TreeItem extends Selectable {
+    frame: {
+      x: number
+      y: number
+      width: number
+      height: number
+    }
+    exportFormats: ExportFormat[]
+  }
+
+  export class Layer extends TreeItem implements ITreeItem {
+    hidden: boolean
+    locked: boolean
+    type: string
+  }
+
+  export interface ILayerContainer {
+    layers: Layer[]
+  }
+
+  abstract class TreeLeaf extends Layer {
+    layers: Layer[]
+  }
+
+  export interface ITreeLeaf extends ITreeItem, ILayerContainer {}
+
+  export interface IVisibleLayer extends Layer {
     hidden: boolean
     locked: boolean
   }
 
-  export class Artboard extends VisibleLeaf {
+  export class Artboard extends Layer {
     type: 'Artboard'
     background: {
       enabled: boolean
@@ -144,7 +184,7 @@ declare module "sketch/dom" {
     }
   }
 
-  export class Group extends VisibleLeaf {
+  export class Group extends TreeLeaf implements IVisibleLayer {
     type: 'Group'
     transform: {
       flippedVertically: false
@@ -153,20 +193,36 @@ declare module "sketch/dom" {
     }
   }
 
-  export class VisibleItem extends TreeItem {
-    hidden: boolean
-    locked: boolean
+  export enum FileFormat {
+    eps = 'eps',
+    svg = 'svg',
+    jpg = 'jpg',
+    tiff = 'tiff',
+    png = 'png',
+    gif = 'gif',
+    webp = 'webp',
+    pdf = 'pdf'
   }
 
-  export class TextLayer extends VisibleItem {
+  export class ExportFormat {
+    size: string
+    suffix?: string
+    prefix?: string
+    type: 'ExportFormat'
+    fileFormat: FileFormat
+  }
+
+  export class TextLayer extends Layer {
     type: 'Text'
     style: TextStyle
     fixedWidth: number
   }
 
-  export class Page extends TreeLeaf {
+  export class Page extends Selectable implements ISelectable, ILayerContainer {
+    layers: Layer[]
     type: 'Page'
   }
+
   export class Document {
     pages: Page[]
     static getSelectedDocument (): Document | undefined
@@ -177,4 +233,32 @@ declare module "sketch/dom" {
     gradients: GradientAsset[]
     sharedTextStyles: SharedStyle<TextStyle>[]
   }
+
+  export interface IExportOptions {
+    formats?: string
+    scales?: string
+    'use-id-for-name'?: boolean
+    'group-contents-only'?: boolean
+    overwriting?: boolean
+    trimmed?: boolean
+    'save-for-web'?: boolean
+    compact?: boolean
+    'include-namespaces'?: boolean
+    progressive?: boolean
+    compression?: number
+  }
+  export interface IDirectExportOptions extends IExportOptions {
+    output: false | 0
+  }
+  export interface INamedExportOptions extends IExportOptions {
+    output: string | undefined
+  }
+
+  export interface ISketch {
+    export (obj: Layer[] | Page[], opts: IDirectExportOptions): Buffer[]
+    export (obj: Layer | Page, opts: IDirectExportOptions): Buffer
+    export (obj: Layer | Page | Layer[] | Page[], opts: INamedExportOptions): void
+  }
+  const sketch: ISketch
+  export default sketch
 }
