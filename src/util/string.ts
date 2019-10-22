@@ -8,6 +8,14 @@ const map: { [ key: string ]: string } = Array.from(from).reduce((map: { [key: s
   return map
 }, {})
 
+const NON_ALPHA_PREFIX = 'x'
+
+export function safeChildName (input: string): string {
+  input = input.replace(/_(.)/ig, (_, char) => char.toUpperCase())
+  // Using the asset name as variable means that the name needs to start with an alphabetical character
+  return /^[a-z]/i.test(input) ? input : `${NON_ALPHA_PREFIX}${input}`
+}
+
 export function slugifyRaw (str: string, separator: string = '-'): string {
   reg.lastIndex = -1
   return str

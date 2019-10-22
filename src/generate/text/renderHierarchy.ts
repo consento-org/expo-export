@@ -3,9 +3,14 @@ import { TextFormat, ITextFormat } from './TextFormat'
 import { Document } from 'sketch/dom'
 import { toMaxDecimals } from '../../util/number'
 import { FGetColor, getColorFactory } from '../color'
+import { safeChildName } from '../../util/string'
 
 function has<T = any> (entry: T | null | undefined): entry is T {
   return entry !== null && entry !== undefined
+}
+
+export function fontStyleName (stack: string[]): string {
+  return safeChildName(stack.map(entry => entry.replace(/[ \t\r]/ig, '_')).join('_'))
 }
 
 function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[]): string {
@@ -13,7 +18,7 @@ function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[])
   const hierarchy = []
   for (let i = 0; i < stack.length - 1; i++) {
     hierarchy.push(stack[i])
-    props.push(`...${hierarchy.join('_')}`)
+    props.push(`...${fontStyleName(hierarchy)}`)
   }
   if (has(style.color)) props.push(`color: ${getColor(style.color)}`)
   if (has(style.fontFamily)) props.push(`fontFamily: Font.${style.fontFamily}`)
@@ -21,9 +26,9 @@ function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[])
   if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${style.textAlign}`)
   if (has(style.textTransform)) props.push(`textTransform: ETextTransform.${style.textTransform}`)
   if (props.length === 0) {
-    return `export const ${stack.join('_')} = {}`
+    return `export const ${fontStyleName(stack)} = {}`
   }
-  return `export const ${stack.join('_')}: ITextStyle = {
+  return `export const ${fontStyleName(stack)}: ITextStyle = {
   ${props.join(',\n  ')}
 }`
 }
@@ -34,7 +39,7 @@ function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, s
   for (const name in styles) {
     stack.push(name)
     const node = styles[name]
-    textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = stack.join('_')
+    textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = fontStyleName(stack)
     entries.push(
       node.item !== undefined ? renderFormat(getColor, node.item, stack) : renderFormat(getColor, {}, stack)
     )

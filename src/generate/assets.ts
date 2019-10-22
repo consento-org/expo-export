@@ -1,7 +1,7 @@
 import sketch, { Document, Layer } from 'sketch/dom'
 import { write } from '../util/fs'
 import { iterateDocument, isIgnoredLayer } from '../util/dom'
-import { slugify } from '../util/string'
+import { slugify, safeChildName } from '../util/string'
 
 function slugifyName (name: string, separator: string = '-'): string[] {
   return name.split('/').map(part => slugify(part, separator))
@@ -25,15 +25,11 @@ export function assetPathForLayer (item: Layer): string {
   return assetPath(item.name, '1', item.exportFormats[0].fileFormat)
 }
 
-const NON_ALPHA_PREFIX = 'x'
-
 export function assetNameForLayer (layer: Layer): string {
   if (isIgnoredLayer(layer)) {
     throw new Error(`Layer ${layer.name} is ignored.`)
   }
-  const name = slugifyName(layer.name, '_').join('_')
-  // Using the asset name as variable means that the name needs to start with an alphabetical character
-  return /^[a-z]/i.test(name) ? name : `${NON_ALPHA_PREFIX}${name}`
+  return safeChildName(slugifyName(layer.name, '_').join('_')) 
 }
 
 export function writeAssets (document: Document, target: (path: string) => string): { [id: string]: string } {
