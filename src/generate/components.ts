@@ -98,7 +98,6 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       component.items[assetNameForLayer(layer)] = new Link(name, assetNameForLayer(master))
       return
     }
-    // console.log(`${parentNames.map(entry => slugify(entry)).join('_')}_${slugify(layer.name)}`)
     if (isTextLayer(layer)) {
       const style = textStyles[layer.sharedStyleId]
       if (style !== undefined) {
