@@ -9,7 +9,7 @@ function slugifyName (name: string, separator: string = '-'): string[] {
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
-  if (size !== '1') {
+  if (size !== '1' && size !== '1x') {
     fileName = `${fileName}@${size}`
   }
   return `assets/${fileName}.${fileFormat}`
