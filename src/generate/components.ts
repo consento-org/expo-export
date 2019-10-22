@@ -1,5 +1,5 @@
 import { Document, Artboard } from 'sketch/dom'
-import { iterateDocument, isTextLayer, isArtboard, isImage, isSymbolInstance, isIgnoredLayer } from '../util/dom'
+import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnoredLayer } from '../util/dom'
 import { assetNameForLayer } from './assets'
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
@@ -88,7 +88,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       return true
     }
     const name = assetNameForLayer(layer)
-    if (isImage(layer) && layer.exportFormats.length > 0) {
+    if (layer.exportFormats.length > 0) {
       component.items[assetNameForLayer(layer)] = new Image(name)
       return
     }
