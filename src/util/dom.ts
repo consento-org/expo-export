@@ -33,32 +33,45 @@ export function createFontNameLookup (document: Document, contextDocument: any):
 }
 
 export function isLayerContainer (item: any): item is ILayerContainer {
+  if (isIgnoredLayer(item)) return false
   return item.layers !== undefined
 }
 
 export function isTextLayer (item: Layer): item is Text {
+  if (isIgnoredLayer(item)) return false
   return item.type === 'Text'
 }
 
 export function isArtboard (item: Layer): item is Artboard {
+  if (isIgnoredLayer(item)) return false
   return item.type === 'Artboard' || isSymbolMaster(item)
 }
 
 export function isImage (item: Layer): item is Image {
+  if (isIgnoredLayer(item)) return false
   return item.type === 'Image'
 }
 
 export function isSymbolInstance (item: Layer): item is SymbolInstance {
+  if (isIgnoredLayer(item)) return false
   return item.type === 'SymbolInstance'
 }
 
 export function isSymbolMaster (item: Layer): item is SymbolMaster {
+  if (isIgnoredLayer(item)) return false
   return item.type === 'SymbolMaster'
 }
 
 export type FTreeWalker = (item: Layer, stackNames: string[]) => void | true | false
 
+export function isIgnoredLayer (item: Layer): boolean {
+  return /^\s*\#/.test(item.name)
+}
+
 export function iterate (item: Layer, handler: FTreeWalker, stackNames: string[]): void {
+  if (isIgnoredLayer(item)) {
+    return
+  }
   if (handler(item, stackNames) === true) {
     return
   }

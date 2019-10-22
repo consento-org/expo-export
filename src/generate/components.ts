@@ -1,5 +1,5 @@
 import { Document, Artboard } from 'sketch/dom'
-import { iterateDocument, isTextLayer, isArtboard, isImage, isSymbolInstance } from '../util/dom'
+import { iterateDocument, isTextLayer, isArtboard, isImage, isSymbolInstance, isIgnoredLayer } from '../util/dom'
 import { assetNameForLayer } from './assets'
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
@@ -94,6 +94,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     }
     if (isSymbolInstance(layer)) {
       const master = document.getSymbolMasterWithID(layer.symbolId)
+      if (isIgnoredLayer(master)) return
       component.items[assetNameForLayer(layer)] = new Link(name, assetNameForLayer(master))
       return
     }

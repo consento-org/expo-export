@@ -1,6 +1,6 @@
 import sketch, { Document, Layer } from 'sketch/dom'
 import { write } from '../util/fs'
-import { iterateDocument } from '../util/dom'
+import { iterateDocument, isIgnoredLayer } from '../util/dom'
 import { slugify } from '../util/string'
 
 function slugifyName (name: string, separator: string = '-'): string[] {
@@ -16,6 +16,9 @@ export function assetPath (name: string, size: string, fileFormat: string): stri
 }
 
 export function assetPathForLayer (item: Layer): string {
+  if (isIgnoredLayer(item)) {
+    throw new Error(`Layer ${item.name} is ignored and should not be exported.`)
+  }
   if (item.exportFormats.length === 0) {
     throw new Error(`Layer ${item.name} is not exported and cant be turned into an asset path.`)
   }
@@ -25,6 +28,9 @@ export function assetPathForLayer (item: Layer): string {
 const NON_ALPHA_PREFIX = 'x'
 
 export function assetNameForLayer (layer: Layer): string {
+  if (isIgnoredLayer(layer)) {
+    throw new Error(`Layer ${layer.name} is ignored.`)
+  }
   const name = slugifyName(layer.name, '_').join('_')
   // Using the asset name as variable means that the name needs to start with an alphabetical character
   return /^[a-z]/i.test(name) ? name : `${NON_ALPHA_PREFIX}${name}`
