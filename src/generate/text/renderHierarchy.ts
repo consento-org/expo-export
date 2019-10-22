@@ -16,9 +16,10 @@ export function fontStyleName (stack: string[]): string {
 function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[]): string {
   const props = []
   const hierarchy = []
+  const inherits = []
   for (let i = 0; i < stack.length - 1; i++) {
     hierarchy.push(stack[i])
-    props.push(`...${fontStyleName(hierarchy)}`)
+    inherits.push(`...${fontStyleName(hierarchy)}`)
   }
   if (has(style.color)) props.push(`color: ${getColor(style.color)}`)
   if (has(style.fontFamily)) props.push(`fontFamily: Font.${style.fontFamily}`)
@@ -26,10 +27,12 @@ function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[])
   if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${style.textAlign}`)
   if (has(style.textTransform)) props.push(`textTransform: ETextTransform.${style.textTransform}`)
   if (props.length === 0) {
-    return `export const ${fontStyleName(stack)} = {}`
+    return `export const ${fontStyleName(stack)} = {
+  ${inherits.join(',\n  ')}
+}`
   }
   return `export const ${fontStyleName(stack)}: ITextStyle = {
-  ${props.join(',\n  ')}
+  ${inherits.concat(props).join(',\n  ')}
 }`
 }
 
