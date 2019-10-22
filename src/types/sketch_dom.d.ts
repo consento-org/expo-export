@@ -1,7 +1,7 @@
 declare module "sketch/dom" {
   export class ColorAsset {
     type: 'ColorAsset'
-    name: string
+    name?: string
     color: string
   }
   export class GradientAsset {

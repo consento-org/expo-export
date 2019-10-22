@@ -2,7 +2,7 @@ import { Document, Artboard } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isImage, isSymbolInstance } from '../util/dom'
 import { assetNameForLayer } from './assets'
 import { write } from '../util/fs'
-import { getColorFactory, FGetColor } from './text/renderHierarchy'
+import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
 
 abstract class Component {

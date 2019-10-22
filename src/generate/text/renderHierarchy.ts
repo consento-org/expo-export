@@ -2,24 +2,8 @@ import { Hierarchy } from '../../util/hierarchy'
 import { TextFormat, ITextFormat } from './TextFormat'
 import { Document } from 'sketch/dom'
 import { toMaxDecimals } from '../../util/number'
-import { Imports, addImport } from '../../util/render'
+import { FGetColor, getColorFactory } from '../color'
 
-export type FGetColor = (color: string, imports?: Imports) => string
-
-export function getColorFactory (document: Document): FGetColor {
-  const lookup: { [color: string]: string } = {}
-  document.colors.forEach(color => {
-    lookup[color.color] = color.name
-  })
-  return (color: string, imports?: Imports) => {
-    const mappedColor = lookup[color]
-    if (mappedColor === undefined) return `'${color}'`
-    if (imports !== undefined) {
-      addImport(imports, 'src/styles/Color', 'Color')
-    }
-    return `Color.${lookup[color]}`
-  }
-}
 function has<T = any> (entry: T | null | undefined): entry is T {
   return entry !== null && entry !== undefined
 }
