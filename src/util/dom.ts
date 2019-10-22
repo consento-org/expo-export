@@ -65,7 +65,7 @@ export function isSymbolMaster (item: Layer): item is SymbolMaster {
 export type FTreeWalker = (item: Layer, stackNames: string[]) => void | true | false
 
 export function isIgnoredLayer (item: Layer): boolean {
-  return /^\s*\#/.test(item.name)
+  return /^\s*#/.test(item.name)
 }
 
 export function iterate (item: Layer, handler: FTreeWalker, stackNames: string[]): void {

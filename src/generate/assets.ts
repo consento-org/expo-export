@@ -29,7 +29,7 @@ export function assetNameForLayer (layer: Layer): string {
   if (isIgnoredLayer(layer)) {
     throw new Error(`Layer ${layer.name} is ignored.`)
   }
-  return safeChildName(slugifyName(layer.name, '_').join('_')) 
+  return safeChildName(slugifyName(layer.name, '_').join('_'))
 }
 
 export function writeAssets (document: Document, target: (path: string) => string): { [id: string]: string } {
