@@ -1,6 +1,6 @@
 import sketch, { Document, Layer } from 'sketch/dom'
 import { write } from '../util/fs'
-import { iterateDocument, isIgnoredLayer } from '../util/dom'
+import { iterateDocument, isIgnored } from '../util/dom'
 import { slugify, safeChildName } from '../util/string'
 
 function slugifyName (name: string, separator: string = '-'): string[] {
@@ -16,7 +16,7 @@ export function assetPath (name: string, size: string, fileFormat: string): stri
 }
 
 export function assetPathForLayer (item: Layer): string {
-  if (isIgnoredLayer(item)) {
+  if (isIgnored(item)) {
     throw new Error(`Layer ${item.name} is ignored and should not be exported.`)
   }
   if (item.exportFormats.length === 0) {
@@ -26,7 +26,7 @@ export function assetPathForLayer (item: Layer): string {
 }
 
 export function assetNameForLayer (layer: Layer): string {
-  if (isIgnoredLayer(layer)) {
+  if (isIgnored(layer)) {
     throw new Error(`Layer ${layer.name} is ignored.`)
   }
   return safeChildName(slugifyName(layer.name, '_').join('_'))

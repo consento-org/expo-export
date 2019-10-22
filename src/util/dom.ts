@@ -1,4 +1,4 @@
-import { Document, Layer, ILayerContainer, Text, Artboard, SymbolMaster, Image, SymbolInstance } from 'sketch/dom'
+import { Document, Layer, ILayerContainer, Text, Artboard, SymbolMaster, Image, SymbolInstance, IIdentifyable } from 'sketch/dom'
 
 interface IDocumentData {
   textStyleWithID(id: string): undefined | {
@@ -33,43 +33,43 @@ export function createFontNameLookup (document: Document, contextDocument: any):
 }
 
 export function isLayerContainer (item: any): item is ILayerContainer {
-  if (isIgnoredLayer(item)) return false
+  if (isIgnored(item)) return false
   return item.layers !== undefined
 }
 
 export function isTextLayer (item: Layer): item is Text {
-  if (isIgnoredLayer(item)) return false
+  if (isIgnored(item)) return false
   return item.type === 'Text'
 }
 
 export function isArtboard (item: Layer): item is Artboard {
-  if (isIgnoredLayer(item)) return false
+  if (isIgnored(item)) return false
   return item.type === 'Artboard' || isSymbolMaster(item)
 }
 
 export function isImage (item: Layer): item is Image {
-  if (isIgnoredLayer(item)) return false
+  if (isIgnored(item)) return false
   return item.type === 'Image'
 }
 
 export function isSymbolInstance (item: Layer): item is SymbolInstance {
-  if (isIgnoredLayer(item)) return false
+  if (isIgnored(item)) return false
   return item.type === 'SymbolInstance'
 }
 
 export function isSymbolMaster (item: Layer): item is SymbolMaster {
-  if (isIgnoredLayer(item)) return false
+  if (isIgnored(item)) return false
   return item.type === 'SymbolMaster'
 }
 
 export type FTreeWalker = (item: Layer, stackNames: string[]) => void | true | false
 
-export function isIgnoredLayer (item: Layer): boolean {
+export function isIgnored (item: IIdentifyable): boolean {
   return /^\s*#/.test(item.name)
 }
 
 export function iterate (item: Layer, handler: FTreeWalker, stackNames: string[]): void {
-  if (isIgnoredLayer(item)) {
+  if (isIgnored(item)) {
     return
   }
   if (handler(item, stackNames) === true) {
@@ -89,5 +89,7 @@ function eachItem (container: ILayerContainer, handler: FTreeWalker, stackNames:
 }
 
 export function iterateDocument (document: Document, handler: FTreeWalker): void {
-  document.pages.forEach(page => eachItem(page, handler, []))
+  document.pages
+    .filter(page => !isIgnored(page))
+    .forEach(page => eachItem(page, handler, []))
 }
