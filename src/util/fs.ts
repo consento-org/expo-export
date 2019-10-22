@@ -12,7 +12,10 @@ export function dirname (name: string): string {
 }
 
 export function write (pth: string, data: any): boolean {
-  // const current = fs.readFileSync(pth)
+  if (data === undefined) {
+    console.log(`Skipping ${pth}.`)
+    return
+  }
   mkdirp(dirname(pth))
   const res = fs.writeFileSync(pth, data)
   console.log(`Wrote ${pth}.`)

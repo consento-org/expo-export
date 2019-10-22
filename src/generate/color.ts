@@ -27,6 +27,9 @@ export function isActiveColor (color: ColorAsset): boolean {
 
 export function generateColors (document: Document): string | undefined {
   const colors = document.colors.filter(color => isActiveColor(color))
+  if (colors.length === 0) {
+    return
+  }
   return `export enum Color {
 ${colors.map(color => `  ${slugify(color.name, '_')} = '${color.color}'`).join(',\n')}
 }
