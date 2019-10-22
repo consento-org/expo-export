@@ -22,8 +22,12 @@ export function assetPathForLayer (item: Layer): string {
   return assetPath(item.name, '1', item.exportFormats[0].fileFormat)
 }
 
+const NON_ALPHA_PREFIX = 'x'
+
 export function assetNameForLayer (layer: Layer): string {
-  return slugifyName(layer.name, '_').join('_')
+  const name = slugifyName(layer.name, '_').join('_')
+  // Using the asset name as variable means that the name needs to start with an alphabetical character
+  return /^[a-z]/i.test(name) ? name : `${NON_ALPHA_PREFIX}${name}`
 }
 
 export function writeAssets (document: Document, target: (path: string) => string): { [id: string]: string } {
