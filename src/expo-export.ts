@@ -9,6 +9,7 @@ import { writeComponents } from './generate/components'
 import { createFontNameLookup } from './util/dom'
 
 function folder (path: string): (sub: string) => string {
+  path = decodeURI(path)
   const reg = /^(.*)(\.sketch)$/ig
   const parts = reg.exec(path)
   const base = parts !== null ? `${parts[1]}@expo` : `${path}@expo`
