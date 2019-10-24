@@ -62,8 +62,13 @@ class Link extends Component {
 
   format (name: string, imports: Imports): string {
     addImport(imports, `src/styles/component/${this.target}`, this.target)
-    return `  ${name} = ${this.target}`
+    addImport(imports, `src/styles/Component`, 'Link')
+    return `  ${name} = new Link(${this.target}, ${this.renderFrame()})`
   }
+}
+
+function classForTarget (target: string) {
+  return `${target}Class`
 }
 
 type TComponentItem = Image | TextComponent | Link
@@ -130,7 +135,7 @@ function renderComponent (component: IComponent, getColor: FGetColor): string {
 
   return `${renderImports(imports, 'src/styles/component')}
 
-class ${component.name}Class extends Component {
+export class ${classForTarget(component.name)} extends Component {
 ${body}
   constructor () {
     ${constructorBody}
@@ -215,6 +220,16 @@ export class AssetPlacement {
   }
   img () {
     this.asset().img()
+  }
+}
+
+export class Link <T> {
+  place: Placement
+  component: T
+
+  constructor (component: T, frame: IFrameData) {
+    this.component = component
+    this.place = new Placement(frame)
   }
 }
 
