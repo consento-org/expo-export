@@ -1,11 +1,11 @@
 declare module "sketch/dom" {
   export class ColorAsset {
-    type: 'ColorAsset'
+    type: Type.colorAsset
     name?: string
     color: string
   }
   export class GradientAsset {
-    type: 'GradientAsset'
+    type: Type.gradientAsset
     name: string
     gradient: Gradient
   }
@@ -149,29 +149,19 @@ declare module "sketch/dom" {
     exportFormats: ExportFormat[]
   }
 
-  export class Layer extends TreeItem implements ITreeItem {
+
+  export type AnyLayer = SymbolInstance | SymbolMaster | Text | Image | Group | Artboard | Shape | ShapePath | HotSpot | Slice
+  export type AnyGroup = Group | Page | Artboard
+  interface LayerParent extends Group<Type.group | Type.page, Page | LayerParent> {}
+  export type AnyParent = Document | LayerParent
+
+  export class Layer<Type extends string, Parent = LayerParent> extends TreeItem implements ITreeItem {
     hidden: boolean
     locked: boolean
-    type: string
+    type: Type
   }
 
-  export interface ILayerContainer {
-    layers: Layer[]
-  }
-
-  abstract class TreeLeaf extends Layer {
-    layers: Layer[]
-  }
-
-  export interface ITreeLeaf extends ITreeItem, ILayerContainer {}
-
-  export interface IVisibleLayer extends Layer {
-    hidden: boolean
-    locked: boolean
-  }
-
-  export class Artboard extends Layer {
-    type: 'Artboard'
+  export class Artboard extends Group<Type.artboard> {
     background: {
       enabled: boolean
       includedInExport: boolean
@@ -198,19 +188,47 @@ declare module "sketch/dom" {
     getFrame (): Rectangle
   }
 
-  export class SymbolInstance extends Layer {
-    text: 'SymbolInstance'
+  export enum Type {
+    document = 'Document',
+    page = 'Page',
+    instance = 'SymbolInstance',
+    master = 'SymbolMaster',
+    text = 'Text',
+    image = 'Image',
+    group = 'Group',
+    artboard = 'Artboard',
+    shape = 'Shape',
+    shapePath = 'ShapePath',
+    hotSpot = 'HotSpot',
+    slice = 'Slice',
+    exportFormat = 'ExportFormat',
+    colorAsset = 'ColorAsset',
+    gradientAsset = 'GradientAsset'
+  }
+
+  export class Shape extends Layer<Type.shape> {
+  }
+
+  export class ShapePath extends Layer<Type.shapePath> {
+  }
+
+  export class HotSpot extends Layer<Type.hotSpot> {
+  }
+
+  export class Slice extends Layer<Type.slice> {
+  }
+
+  export class SymbolInstance extends Layer<Type.instance> {
     symbolId: string
   }
 
-  export class SymbolMaster extends Artboard {
-    text: 'SymbolMaster'
+  export class SymbolMaster extends Layer<Type.master> {
     symbolId: string
     overrides: Override[]
   }
 
-  export class Group extends TreeLeaf implements IVisibleLayer {
-    type: 'Group'
+  export class Group<Type extends string = Type.group, Parent = LayerParent>  extends Layer<Type, Parent> {
+    layers: AnyLayer[]
     transform: {
       flippedVertically: false
       flippedHorizontally: false
@@ -233,12 +251,11 @@ declare module "sketch/dom" {
     size: string
     suffix?: string
     prefix?: string
-    type: 'ExportFormat'
+    type: Type.exportFormat
     fileFormat: FileFormat
   }
 
-  export class Text extends Layer {
-    type: 'Text'
+  export class Text extends Layer<Type.text> {
     style: TextStyle
     fixedWidth: number
     text: string
@@ -253,13 +270,12 @@ declare module "sketch/dom" {
     nsimage: NSImage
   }
 
-  export class Image extends Layer {
+  export class Image extends Layer<Type.image> {
     image: ImageData
   }
 
-  export class Page extends Selectable implements ISelectable, ILayerContainer {
-    layers: Layer[]
-    type: 'Page'
+  export class Page extends Group<Type.page, Document> {
+    parent: Document
   }
 
   export class Document {
@@ -296,9 +312,9 @@ declare module "sketch/dom" {
   }
 
   export interface ISketch {
-    export (obj: Layer[] | Page[], opts: IDirectExportOptions): Buffer[]
-    export (obj: Layer | Page, opts: IDirectExportOptions): Buffer
-    export (obj: Layer | Page | Layer[] | Page[], opts: INamedExportOptions): void
+    export (obj: AnyLayer[] | Page[], opts: IDirectExportOptions): Buffer[]
+    export (obj: AnyLayer | Page, opts: IDirectExportOptions): Buffer
+    export (obj: AnyLayer | Page | AnyLayer[] | Page[], opts: INamedExportOptions): void
   }
   const sketch: ISketch
   export default sketch

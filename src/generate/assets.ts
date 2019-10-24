@@ -1,4 +1,4 @@
-import sketch, { Document, Layer } from 'sketch/dom'
+import sketch, { Document, AnyLayer } from 'sketch/dom'
 import { write } from '../util/fs'
 import { iterateDocument, isIgnored } from '../util/dom'
 import { slugifyName, childName } from '../util/string'
@@ -11,7 +11,7 @@ export function assetPath (name: string, size: string, fileFormat: string): stri
   return `assets/${fileName}.${fileFormat}`
 }
 
-export function assetPathForLayer (item: Layer): string {
+export function assetPathForLayer (item: AnyLayer): string {
   if (isIgnored(item)) {
     throw new Error(`Layer ${item.name} is ignored and should not be exported.`)
   }

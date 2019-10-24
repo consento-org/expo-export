@@ -1,4 +1,4 @@
-import { Document, Layer, ILayerContainer, Text, Artboard, SymbolMaster, Image, SymbolInstance, IIdentifyable } from 'sketch/dom'
+import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent } from 'sketch/dom'
 
 interface IDocumentData {
   textStyleWithID(id: string): undefined | {
@@ -32,57 +32,57 @@ export function createFontNameLookup (document: Document, contextDocument: any):
   }
 }
 
-export function isLayerContainer (item: any): item is ILayerContainer {
+export function isGroup (item: AnyLayer): item is Group {
   if (isIgnored(item)) return false
-  return item.layers !== undefined
+  return item.type === 'Group' || item.type === 'Artboard'
 }
 
-export function isTextLayer (item: Layer): item is Text {
+export function isTextLayer (item: AnyLayer): item is Text {
   if (isIgnored(item)) return false
   return item.type === 'Text'
 }
 
-export function isArtboard (item: Layer): item is Artboard {
+export function isArtboard (item: AnyLayer): item is Artboard {
   if (isIgnored(item)) return false
   return item.type === 'Artboard' || isSymbolMaster(item)
 }
 
-export function isImage (item: Layer): item is Image {
+export function isImage (item: AnyLayer): item is Image {
   if (isIgnored(item)) return false
   return item.type === 'Image'
 }
 
-export function isSymbolInstance (item: Layer): item is SymbolInstance {
+export function isSymbolInstance (item: AnyLayer): item is SymbolInstance {
   if (isIgnored(item)) return false
   return item.type === 'SymbolInstance'
 }
 
-export function isSymbolMaster (item: Layer): item is SymbolMaster {
+export function isSymbolMaster (item: AnyLayer): item is SymbolMaster {
   if (isIgnored(item)) return false
   return item.type === 'SymbolMaster'
 }
 
-export type FTreeWalker = (item: Layer, stackNames: string[]) => void | true | false
+export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false
 
 export function isIgnored (item: IIdentifyable): boolean {
   return /^\s*#/.test(item.name)
 }
 
-export function iterate (item: Layer, handler: FTreeWalker, stackNames: string[]): void {
+export function iterate (item: AnyLayer, handler: FTreeWalker, stackNames: string[]): void {
   if (isIgnored(item)) {
     return
   }
   if (handler(item, stackNames) === true) {
     return
   }
-  if (isLayerContainer(item)) {
+  if (item instanceof Group) {
     stackNames.push(item.name)
     eachItem(item, handler, stackNames)
     stackNames.pop()
   }
 }
 
-function eachItem (container: ILayerContainer, handler: FTreeWalker, stackNames: string[]): void {
+function eachItem (container: AnyGroup, handler: FTreeWalker, stackNames: string[]): void {
   for (const item of container.layers) {
     iterate(item, handler, stackNames)
   }
