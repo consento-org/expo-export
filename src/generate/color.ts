@@ -1,5 +1,5 @@
 import { Document, ColorAsset } from 'sketch/dom'
-import { slugify } from '../util/string'
+import { slugify, safeChildName } from '../util/string'
 import { Imports, addImport } from '../util/render'
 
 export type FGetColor = (color: string, imports?: Imports) => string
