@@ -1,4 +1,4 @@
-import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent } from 'sketch/dom'
+import { Document, AnyLayer, Type, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent } from 'sketch/dom'
 import { LRUCache } from './string'
 
 interface IDocumentData {
@@ -35,32 +35,32 @@ export function createFontNameLookup (document: Document, contextDocument: any):
 
 export function isGroup (item: AnyLayer): item is Group {
   if (isIgnored(item)) return false
-  return item.type === 'Group' || item.type === 'Artboard'
+  return item.type === Type.group || item.type === Type.artboard
 }
 
 export function isTextLayer (item: AnyLayer): item is Text {
   if (isIgnored(item)) return false
-  return item.type === 'Text'
+  return item.type === Type.text
 }
 
 export function isArtboard (item: AnyLayer): item is Artboard {
   if (isIgnored(item)) return false
-  return item.type === 'Artboard' || isSymbolMaster(item)
+  return item.type === Type.artboard || isSymbolMaster(item)
 }
 
 export function isImage (item: AnyLayer): item is Image {
   if (isIgnored(item)) return false
-  return item.type === 'Image'
+  return item.type === Type.image
 }
 
 export function isSymbolInstance (item: AnyLayer): item is SymbolInstance {
   if (isIgnored(item)) return false
-  return item.type === 'SymbolInstance'
+  return item.type === Type.instance
 }
 
 export function isSymbolMaster (item: AnyLayer): item is SymbolMaster {
   if (isIgnored(item)) return false
-  return item.type === 'SymbolMaster'
+  return item.type === Type.master
 }
 
 export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false
