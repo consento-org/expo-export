@@ -1,4 +1,22 @@
 declare module "sketch/dom" {
+  enum Type {
+    document = 'Document',
+    page = 'Page',
+    instance = 'SymbolInstance',
+    master = 'SymbolMaster',
+    text = 'Text',
+    image = 'Image',
+    group = 'Group',
+    artboard = 'Artboard',
+    shape = 'Shape',
+    shapePath = 'ShapePath',
+    hotSpot = 'HotSpot',
+    slice = 'Slice',
+    exportFormat = 'ExportFormat',
+    colorAsset = 'ColorAsset',
+    gradientAsset = 'GradientAsset'
+  }
+  
   export class ColorAsset {
     type: Type.colorAsset
     name?: string
@@ -199,23 +217,6 @@ declare module "sketch/dom" {
     getFrame (): Rectangle
   }
 
-  export enum Type {
-    document = 'Document',
-    page = 'Page',
-    instance = 'SymbolInstance',
-    master = 'SymbolMaster',
-    text = 'Text',
-    image = 'Image',
-    group = 'Group',
-    artboard = 'Artboard',
-    shape = 'Shape',
-    shapePath = 'ShapePath',
-    hotSpot = 'HotSpot',
-    slice = 'Slice',
-    exportFormat = 'ExportFormat',
-    colorAsset = 'ColorAsset',
-    gradientAsset = 'GradientAsset'
-  }
 
   export class Shape extends Layer<Type.shape> {
   }

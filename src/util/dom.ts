@@ -1,4 +1,4 @@
-import { Document, AnyLayer, Type, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent } from 'sketch/dom'
+import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape } from 'sketch/dom'
 import { LRUCache } from './string'
 
 interface IDocumentData {
@@ -13,6 +13,24 @@ interface IDocumentData {
       }
     }
   }
+}
+
+export enum Type {
+  document = 'Document',
+  page = 'Page',
+  instance = 'SymbolInstance',
+  master = 'SymbolMaster',
+  text = 'Text',
+  image = 'Image',
+  group = 'Group',
+  artboard = 'Artboard',
+  shape = 'Shape',
+  shapePath = 'ShapePath',
+  hotSpot = 'HotSpot',
+  slice = 'Slice',
+  exportFormat = 'ExportFormat',
+  colorAsset = 'ColorAsset',
+  gradientAsset = 'GradientAsset'
 }
 
 export function createFontNameLookup (document: Document, contextDocument: any): (id: string) => string | undefined {
