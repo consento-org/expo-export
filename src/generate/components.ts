@@ -79,7 +79,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     if (parentNames.length === 0) {
       if (isArtboard(layer)) {
         component = {
-          name: assetNameForLayer(layer),
+          name: childName(layer.name),
           artboard: layer,
           items: {}
         }
@@ -93,8 +93,9 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     if (component === undefined) {
       return true
     }
+    const name = childName(layer.name)
     if (layer.exportFormats.length > 0) {
-      component.items[assetNameForLayer(layer)] = new Image(layer)
+      component.items[name] = new Image(layer)
       return
     }
     if (isSymbolInstance(layer)) {
@@ -108,7 +109,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     if (isTextLayer(layer)) {
       const style = textStyles[layer.sharedStyleId]
       if (style !== undefined) {
-        component.items[assetNameForLayer(layer)] = new TextComponent(layer, style)
+        component.items[name] = new TextComponent(layer, style)
       }
     }
   })
