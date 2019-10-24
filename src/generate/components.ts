@@ -103,7 +103,11 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       if (isIgnored(master)) {
         return
       }
-      component.items[assetNameForLayer(layer)] = new Link(layer, assetNameForLayer(master))
+      if (master.exportFormats.length > 0) {
+        component.items[name] = new Image(layer, childName(master.name))
+      } else {
+        component.items[name] = new Link(layer, childName(master.name))
+      }
       return
     }
     if (isTextLayer(layer)) {
