@@ -26,13 +26,13 @@ export function slugifyRaw (str: string, separator: string = '-'): string {
     .replace(/-/ig, separator)
 }
 
-export function LRUCache<T> (handler: (key: string) => T, max: number = 1000): (key: string) => T {
+export function LRUCache<T, X = any> (handler: (key: string, arg?: X) => T, max: number = 1000): (key: string, arg?: X) => T {
   let count = 0
   const items = {}
-  return (key: string): T => {
+  return (key: string, arg: X = null): T => {
     let result = items[key]
     if (result === undefined) {
-      result = handler(key)
+      result = handler(key, arg)
       if (count === max) {
         for (const key in items) {
           delete items[key]
