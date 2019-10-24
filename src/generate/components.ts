@@ -99,7 +99,9 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     }
     if (isSymbolInstance(layer)) {
       const master = document.getSymbolMasterWithID(layer.symbolId)
-      if (isIgnored(master)) return
+      if (isIgnored(master)) {
+        return
+      }
       component.items[assetNameForLayer(layer)] = new Link(layer, assetNameForLayer(master))
       return
     }
