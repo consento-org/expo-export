@@ -1,4 +1,4 @@
-import { Document, Artboard, AnyLayer } from 'sketch/dom'
+import { Document, Artboard, Text, AnyLayer } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored } from '../util/dom'
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
