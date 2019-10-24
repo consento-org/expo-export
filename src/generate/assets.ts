@@ -43,20 +43,37 @@ export function writeAssets (document: Document, target: (path: string) => strin
     }
   })
   if (assetFound) {
-    write(target('src/Asset.ts'), `import { Image } from 'react-native'
+    write(target('src/Asset.tsx'), `import React, { Image } from 'react-native'
 
-const cache: { [key: string]: Image } = {}
+class Assets {
+  cache: { [key: string]: Asset } = {}
 
-export const Asset = {
-${Object.keys(assets).map(name => {
-    const asset = assets[name]
-    return `  ${name} () {
-    if (cache.${name} === undefined) {
-      cache.${name} = require('../${asset}')
+  fetch (key: string, load: () => any): Asset {
+    let result = this.cache[key]
+    if (result === undefined) {
+      result = new Asset(load())
+      this.cache[key] = result
     }
-    return cache.${name}
+    return result
+  }
+}
+
+const assets = new Assets ()
+
+export class Asset {
+  data: any
+  constructor (data: any) {
+    this.data = data
+  }
+  img () {
+    return <Image source={ this.data } />
+  }
+${Object.keys(assets).map(name => {
+  const asset = assets[name]
+  return `  static ${name} () {
+    return assets.fetch('${name}', () => require('../${asset}'))
   }`
-  }).join(', \n')}
+}).join('\n')}
 }
 `)
   }
