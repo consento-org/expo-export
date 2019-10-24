@@ -159,6 +159,17 @@ declare module "sketch/dom" {
     hidden: boolean
     locked: boolean
     type: Type
+    index: number
+    parent: Parent | undefined
+    duplicate (): Layer<Type, Parent>
+    remove (): this
+    moveToFront (): this
+    moveForward (): this
+    moveToBack (): this
+    moveBackward (): this
+    getParentPage (): Page | undefined
+    getParentArtboard (): Artboard | undefined
+    getParentSymbolMaster (): SymbolMaster | undefined
   }
 
   export class Artboard extends Group<Type.artboard> {
