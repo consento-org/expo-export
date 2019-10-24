@@ -142,6 +142,7 @@ export function writeComponents (document: Document, target: (path: string) => s
   }
   if (hasComponent) {
     write(target('src/styles/Component.ts'), `import { ITextStyle } from './TextStyle'
+import { Asset } from '../Asset'
 
 export class Component {
   name: string
