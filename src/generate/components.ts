@@ -1,4 +1,4 @@
-import { Document, Artboard } from 'sketch/dom'
+import { Document, Artboard, AnyLayer } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored } from '../util/dom'
 import { assetNameForLayer } from './assets'
 import { write } from '../util/fs'
@@ -6,19 +6,24 @@ import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
 
 abstract class Component {
-  name: string
+  layer: AnyLayer
   type: string
-  constructor (name: string, type: string) {
-    this.name = name
+
+  constructor (layer: AnyLayer, type: string) {
+    this.layer = layer
     this.type = type
   }
 
   abstract format (imports: Imports): string
+
+  renderFrame (): string {
+    return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
+  }
 }
 
 class Image extends Component {
-  constructor (name: string) {
-    super(name, 'image')
+  constructor (layer: AnyLayer) {
+    super(layer, 'image')
   }
 
   format (imports: Imports): string {
@@ -32,23 +37,23 @@ class Image extends Component {
 class TextComponent extends Component {
   text: string
   textStyle: string
-  constructor (name: string, text: string, textStyle: string) {
-    super(name, 'text')
-    this.text = text
+  constructor (layer: Text, textStyle: string) {
+    super(layer, 'text')
+    this.text = layer.text
     this.textStyle = textStyle
   }
 
   format (imports: Imports): string {
     addImport(imports, 'src/styles/Component', 'Text')
     addImport(imports, 'src/styles/TextStyle', 'TextStyle')
-    return `  ${this.name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyle.${this.textStyle})`
+    return `  ${this.name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyle.${this.textStyle}, ${this.renderFrame()})`
   }
 }
 
 class Link extends Component {
   target: string
-  constructor (name: string, target: string) {
-    super(name, 'link')
+  constructor (layer: AnyLayer, target: string) {
+    super(layer, 'link')
     this.target = target
   }
 
@@ -87,21 +92,20 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     if (component === undefined) {
       return true
     }
-    const name = assetNameForLayer(layer)
     if (layer.exportFormats.length > 0) {
-      component.items[assetNameForLayer(layer)] = new Image(name)
+      component.items[assetNameForLayer(layer)] = new Image(layer)
       return
     }
     if (isSymbolInstance(layer)) {
       const master = document.getSymbolMasterWithID(layer.symbolId)
       if (isIgnored(master)) return
-      component.items[assetNameForLayer(layer)] = new Link(name, assetNameForLayer(master))
+      component.items[assetNameForLayer(layer)] = new Link(layer, assetNameForLayer(master))
       return
     }
     if (isTextLayer(layer)) {
       const style = textStyles[layer.sharedStyleId]
       if (style !== undefined) {
-        component.items[assetNameForLayer(layer)] = new TextComponent(name, layer.text, style)
+        component.items[assetNameForLayer(layer)] = new TextComponent(layer, style)
       }
     }
   })
@@ -147,13 +151,71 @@ export class Component {
   }
 }
 
+export interface IFrameData {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export class Placement {
+  x: number
+  left: number
+  y: number
+  top: number
+  right: number
+  bottom: number
+  width: number
+  height: number
+
+  constructor({ x, y, w, h }: IFrameData) {
+    this.x = x
+    this.left = x
+    this.y = y
+    this.top = y
+    this.width = w
+    this.right = this.x + w
+    this.height = h
+    this.bottom = y + h
+  }
+
+  ySpace (other: Placement): number {
+    if (this.y > other.y) {
+      return other.ySpace(this)
+    }
+    return other.top - this.bottom
+  }
+
+  xSpace (other: Placement): number {
+    if (this.x > other.x) {
+      return other.xSpace(this)
+    }
+    return other.x - this.right
+  }
+}
+
+export class AssetPlacement {
+  place: Placement
+  asset: () => Asset
+
+  constructor (asset: () => Asset, frame: IFrameData) {
+    this.asset = asset
+    this.place = new Placement(frame)
+  }
+  img () {
+    this.asset().img()
+  }
+}
+
 export class Text {
   text: string
   style: ITextStyle
+  place: Placement
 
-  constructor (text: string, style: ITextStyle) {
+  constructor (text: string, style: ITextStyle, frame: IFrameData) {
     this.text = text
     this.style = style
+    this.place = new Placement(frame)
   }
 }
 `)
