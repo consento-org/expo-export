@@ -1,4 +1,5 @@
 import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent } from 'sketch/dom'
+import { LRUCache } from './string'
 
 interface IDocumentData {
   textStyleWithID(id: string): undefined | {
@@ -64,8 +65,18 @@ export function isSymbolMaster (item: AnyLayer): item is SymbolMaster {
 
 export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false
 
-export function isIgnored (item: IIdentifyable): boolean {
+const _isIgnored = LRUCache<boolean, AnyLayer | Page> ((_: string, item: AnyLayer | Page) => {
+  let parent: AnyParent = item.parent
+  if (!(parent instanceof Document)) {
+    if (isIgnored(parent as AnyLayer)) {
+      return true
+    }
+  }
   return /^\s*#/.test(item.name)
+}, 1000)
+
+export function isIgnored (item: AnyLayer | Page): boolean {
+  return _isIgnored(item.id, item)
 }
 
 export function iterate (item: AnyLayer, handler: FTreeWalker, stackNames: string[]): void {
