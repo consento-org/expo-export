@@ -3,6 +3,7 @@ import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored }
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
+import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
 
 abstract class Component {
