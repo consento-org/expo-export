@@ -77,7 +77,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
   let component: IComponent
   iterateDocument(document, (layer, parentNames): boolean => {
     if (parentNames.length === 0) {
-      if (isArtboard(layer)) {
+      if (isArtboard(layer) && layer.exportFormats.length === 0) {
         component = {
           name: childName(layer.name),
           artboard: layer,
