@@ -53,6 +53,14 @@ const cache: {
   [separator: string]: (key: string) => string
 } = {}
 
+export function childName (name: string): string {
+  return safeChildName(slugifyName(name, '_').join('_'))
+}
+
+export function slugifyName (name: string, separator: string = '-'): string[] {
+  return name.split('/').map(part => slugify(part, separator))
+}
+
 export function slugify (str: string, separator: string = '-'): string {
   let bySeparator = cache[separator]
   if (bySeparator === undefined) {

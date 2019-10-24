@@ -1,11 +1,7 @@
 import sketch, { Document, Layer } from 'sketch/dom'
 import { write } from '../util/fs'
 import { iterateDocument, isIgnored } from '../util/dom'
-import { slugify, safeChildName } from '../util/string'
-
-function slugifyName (name: string, separator: string = '-'): string[] {
-  return name.split('/').map(part => slugify(part, separator))
-}
+import { slugifyName, childName } from '../util/string'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
@@ -25,13 +21,6 @@ export function assetPathForLayer (item: Layer): string {
   return assetPath(item.name, '1', item.exportFormats[0].fileFormat)
 }
 
-export function assetNameForLayer (layer: Layer): string {
-  if (isIgnored(layer)) {
-    throw new Error(`Layer ${layer.name} is ignored.`)
-  }
-  return safeChildName(slugifyName(layer.name, '_').join('_'))
-}
-
 export function writeAssets (document: Document, target: (path: string) => string): { [id: string]: string } {
   const idNameMap: { [id: string]: string } = {}
   const assets: { [key: string]: string } = {}
@@ -47,7 +36,7 @@ export function writeAssets (document: Document, target: (path: string) => strin
         write(target(assetPath(item.name, format.size, format.fileFormat)), buffer)
       })
       if (assetFound) {
-        const assetName = assetNameForLayer(item)
+        const assetName = childName(item.name)
         assets[assetName] = assetPathForLayer(item)
         idNameMap[item.id] = assetName
       }
