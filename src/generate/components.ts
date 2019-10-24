@@ -1,9 +1,9 @@
 import { Document, Artboard, AnyLayer } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored } from '../util/dom'
-import { assetNameForLayer } from './assets'
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
+import { childName } from '../util/string'
 
 abstract class Component {
   layer: AnyLayer
@@ -14,7 +14,7 @@ abstract class Component {
     this.type = type
   }
 
-  abstract format (imports: Imports): string
+  abstract format (name: string, imports: Imports): string
 
   renderFrame (): string {
     return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
@@ -26,10 +26,10 @@ class Image extends Component {
     super(layer, 'image')
   }
 
-  format (imports: Imports): string {
+  format (name: string, imports: Imports): string {
     addImport(imports, 'src/Asset', 'Asset')
-    return `  ${this.name} () {
-    return Asset.${this.name}()
+    return `  ${name} () {
+    return Asset.${name}()
   }`
   }
 }
@@ -43,10 +43,10 @@ class TextComponent extends Component {
     this.textStyle = textStyle
   }
 
-  format (imports: Imports): string {
+  format (name: string, imports: Imports): string {
     addImport(imports, 'src/styles/Component', 'Text')
     addImport(imports, 'src/styles/TextStyle', 'TextStyle')
-    return `  ${this.name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyle.${this.textStyle}, ${this.renderFrame()})`
+    return `  ${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyle.${this.textStyle}, ${this.renderFrame()})`
   }
 }
 
@@ -57,9 +57,9 @@ class Link extends Component {
     this.target = target
   }
 
-  format (imports: Imports): string {
+  format (name: string, imports: Imports): string {
     addImport(imports, `src/styles/component/${this.target}`, this.target)
-    return `  ${this.name} = ${this.target}`
+    return `  ${name} = ${this.target}`
   }
 }
 
@@ -115,7 +115,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
 function renderComponent (component: IComponent, getColor: FGetColor): string {
   const imports: Imports = {}
   addImport(imports, 'src/styles/Component', 'Component')
-  const body = Object.values(component.items).map(item => item.format(imports)).join('\n')
+  const body = Object.keys(component.items).map(name => component.items[name].format(name, imports)).join('\n')
   const constructorBody = `super('${component.name}'${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})`
 
   return `${renderImports(imports, 'src/styles/component')}
