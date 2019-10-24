@@ -8,7 +8,7 @@ export function getColorFactory (document: Document): FGetColor {
   const lookup: { [color: string]: string } = {}
   document.colors.forEach(color => {
     if (isActiveColor(color)) {
-      lookup[color.color] = color.name
+      lookup[color.color] = nameForColor(color)
     }
   })
   return (color: string, imports?: Imports) => {
@@ -25,13 +25,17 @@ export function isActiveColor (color: ColorAsset): boolean {
   return color.name !== undefined && color.name !== null && color.name !== ''
 }
 
+export function nameForColor (color: ColorAsset): string {
+  return safeChildName(slugify(color.name, '_'))
+}
+
 export function generateColors (document: Document): string | undefined {
   const colors = document.colors.filter(color => isActiveColor(color))
   if (colors.length === 0) {
     return
   }
   return `export enum Color {
-${colors.map(color => `  ${slugify(color.name, '_')} = '${color.color}'`).join(',\n')}
+${colors.map(color => `  ${nameForColor(color)} = '${color.color}'`).join(',\n')}
 }
 `
 }
