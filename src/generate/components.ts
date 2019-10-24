@@ -23,15 +23,17 @@ abstract class Component {
 }
 
 class Image extends Component {
-  constructor (layer: AnyLayer) {
+  asset: string
+
+  constructor (layer: AnyLayer, asset?: string) {
     super(layer, 'image')
+    this.asset = asset
   }
 
   format (name: string, imports: Imports): string {
     addImport(imports, 'src/Asset', 'Asset')
-    return `  ${name} () {
-    return Asset.${name}()
-  }`
+    addImport(imports, 'src/styles/Component', 'AssetPlacement')
+    return `  ${name} = new AssetPlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
