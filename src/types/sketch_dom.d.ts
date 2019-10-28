@@ -46,19 +46,30 @@ declare module "sketch/dom" {
       y: number
     }
   }
-  export class Fill {
-    fillType: 'Color' | 'Gradient'
-    enabled: boolean
-    gradient: Gradient
-    color: string
+
+  export interface Pattern {
+    patternType: PatternFillType
+    image: ImageData
+    tileScale: number | null
   }
-  export class Border {
-    thickness: number
-    fillType: 'Color'
+
+  export type FillType = 'Color' | 'Gradient' | 'Pattern'
+
+  export type PatternFillType = 'Tile' | 'Fill' | 'Stretch' | 'Fit'
+
+  export type BorderPosition = 'Center' | 'Inside' | 'Outside'
+
+  export class Fill {
+    fillType: FillType
     enabled: boolean
     gradient: Gradient
-    position: 'Center'
     color: string
+    pattern: Pattern
+  }
+
+  export class Border extends Fill {
+    position: BorderPosition
+    thickness: number
   }
   export class Blur {
     radius: number
@@ -100,24 +111,24 @@ declare module "sketch/dom" {
   }
   export class Style {
     id: string
-  }
-  export class TextStyle extends Style {
     fills: Fill[]
-    verticalAlignment: 'center' | 'top' | 'bottom'
-    textColor: string
     borders: Border[]
-    lineHeight: number
-    textTransform: 'uppercase' | 'lowercase' | 'none'
     blendingMode: BlendingMode
-    styleType: 'Text'
     shadows: Shadow[]
     innerShadows: Shadow[]
     blur: Blur
+  }
+  export class TextStyle extends Style {
+    verticalAlignment: 'center' | 'top' | 'bottom'
+    textColor: string
+    lineHeight: number | null
+    textTransform: 'uppercase' | 'lowercase' | 'none'
+    styleType: 'Text'
     opacity: number // 0 ~ 1
     fontSize: number
     fontFamily: string
     paragraphSpacing: number
-    kerning: number
+    kerning: number | null
     fontWeight: number
     alignment: 'center' | 'right' | 'left' | 'justified'
     textUnderline?: 'single'
@@ -129,6 +140,9 @@ declare module "sketch/dom" {
     name: string
     styleType: 'Style'
     style: T
+  }
+  class ShapeStyle extends Style {
+    borderOptions: BorderOptions
   }
 
   export interface IIdentifyable {
@@ -217,11 +231,49 @@ declare module "sketch/dom" {
     getFrame (): Rectangle
   }
 
-
   export class Shape extends Layer<Type.shape> {
+    style: ShapeStyle
+    layers: ShapePath[]
+  }
+
+  export type CurvePointType = 'Undefined' | 'Straight' | 'Mirrored' | 'Asymmetric' | 'Disconnected'
+
+  export class CurvePoint {
+    pointType: CurvePointType
+    cornerRadius: number
+    type: 'CurvePoint'
+    point: {
+      x: number
+      y: number
+    }
+    curveTo: {
+      x: number
+      y: number
+    }
+    curveFrom: {
+      x: number
+      y: number
+    }
+  }
+
+  export type ShapeType = 'Rectangle' | 'Oval' | 'Triangle' | 'Polygon' | 'Star' | 'Custom'
+  export type ArrowHead = 'None' | 'OpenArrow' | 'FilledArrow' | 'Line' | 'OpenCircle' | 'FilledCircle' | 'OpenSquare' | 'FilledSquare'
+  export type LineEnd = 'Butt' | 'Round' | 'Projecting'
+  export type LineJoin = 'Miter' | 'Round' | 'Bevel'
+
+  export class BorderOptions {
+    startArrowhead: ArrowHead
+    endArrowhead: ArrowHead
+    dashPattern: number[]
+    lineEnd: LineEnd
+    lineJoin: LineJoin
   }
 
   export class ShapePath extends Layer<Type.shapePath> {
+    points: CurvePoint[]
+    shapeType: ShapeType
+    style: ShapeStyle
+    borderOptions: BorderOptions
   }
 
   export class HotSpot extends Layer<Type.hotSpot> {

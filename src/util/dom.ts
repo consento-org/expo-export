@@ -1,4 +1,4 @@
-import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape } from 'sketch/dom'
+import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath } from 'sketch/dom'
 import { LRUCache } from './string'
 
 interface IDocumentData {
@@ -54,6 +54,31 @@ export function createFontNameLookup (document: Document, contextDocument: any):
 export function isGroup (item: AnyLayer): item is Group {
   if (isIgnored(item)) return false
   return item.type === Type.group || item.type === Type.artboard
+}
+
+export enum ShapeType {
+  Rectangle = 'Rectangle',
+  Oval = 'Oval',
+  Triangle = 'Triangle',
+  Polygon = 'Polygon',
+  Star = 'Star',
+  Custom = 'Custom'
+}
+
+export enum FillType {
+  Color = 'Color',
+  Gradient = 'Gradient',
+  Pattern = 'Pattern'
+}
+
+export function isShape (item: AnyLayer): item is Shape {
+  if (isIgnored(item)) return false
+  return item.type === Type.shape
+}
+
+export function isShapePath (item: AnyLayer): item is ShapePath {
+  if (isIgnored(item)) return false
+  return item.type === Type.shapePath
 }
 
 export function isTextLayer (item: AnyLayer): item is Text {
