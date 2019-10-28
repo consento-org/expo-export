@@ -69,11 +69,11 @@ export class Asset {
     return <Image source={ this.data } />
   }
 ${Object.keys(assets).map(name => {
-  const asset = assets[name]
-  return `  static ${name} () {
+    const asset = assets[name]
+    return `  static ${name} () {
     return assets.fetch('${name}', () => require('../${asset}'))
   }`
-}).join('\n')}
+  }).join('\n')}
 }
 `)
   }

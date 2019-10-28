@@ -108,8 +108,8 @@ export function isSymbolMaster (item: AnyLayer): item is SymbolMaster {
 
 export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false
 
-const _isIgnored = LRUCache<boolean, AnyLayer | Page> ((_: string, item: AnyLayer | Page) => {
-  let parent: AnyParent = item.parent
+const _isIgnored = LRUCache<boolean, AnyLayer | Page>((_: string, item: AnyLayer | Page) => {
+  const parent: AnyParent = item.parent
   if (!(parent instanceof Document)) {
     if (isIgnored(parent as AnyLayer)) {
       return true

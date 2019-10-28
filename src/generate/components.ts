@@ -62,7 +62,7 @@ class Link extends Component {
 
   format (name: string, imports: Imports): string {
     addImport(imports, `src/styles/component/${this.target}`, this.target)
-    addImport(imports, `src/styles/Component`, 'Link')
+    addImport(imports, 'src/styles/Component', 'Link')
     return `  ${name} = new Link(${this.target}, ${this.renderFrame()})`
   }
 }
@@ -72,7 +72,6 @@ const DEFAULT_LINE_END = 'Projecting'
 const DEFAULT_LINE_JOIN = 'Miter'
 
 class Polygon extends Component {
-
   fills: Fill[]
   borders: Border[]
   borderOptions: BorderOptions
@@ -85,7 +84,7 @@ class Polygon extends Component {
   }
 
   format (name: string, imports: Imports, getColor: FGetColor): string {
-    addImport(imports, `src/styles/Component`, 'Polygon')
+    addImport(imports, 'src/styles/Component', 'Polygon')
     return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)})`
   }
 
@@ -94,31 +93,31 @@ class Polygon extends Component {
       return this.renderBorder(this.borders[0], imports, getColor)
     }
     // TODO: multiple borders.
-    return `null`
+    return 'null'
   }
 
   renderBorder (border: Border, imports: Imports, getColor: FGetColor): string {
     const options = this.borderOptions
     const props = [
-      [ 'fill', this.renderFill(border, imports, getColor) ],
-      [ 'thickness', border.thickness ]
+      ['fill', this.renderFill(border, imports, getColor)],
+      ['thickness', border.thickness]
     ]
     if (options.endArrowhead !== DEFAULT_ARROWHEAD) {
-      props.push([ 'endArrowhead', `'${options.endArrowhead}'` ])
+      props.push(['endArrowhead', `'${options.endArrowhead}'`])
     }
     if (options.startArrowhead !== DEFAULT_ARROWHEAD) {
-      props.push([ 'startArrowhead', `'${options.startArrowhead}'` ])
+      props.push(['startArrowhead', `'${options.startArrowhead}'`])
     }
     if (options.lineEnd !== DEFAULT_LINE_END) {
-      props.push([ 'lineEnd', `'${options.lineEnd}'` ])
+      props.push(['lineEnd', `'${options.lineEnd}'`])
     }
     if (options.lineJoin !== DEFAULT_LINE_JOIN) {
-      props.push([ 'lineJoin', `'${options.lineJoin}'` ])
+      props.push(['lineJoin', `'${options.lineJoin}'`])
     }
     if (options.dashPattern.length > 0) {
-      props.push([ 'dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
+      props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
     }
-    return `{ ${props.map(([ prop, value ]) => `
+    return `{ ${props.map(([prop, value]) => `
   ${prop}: ${value}`).join(',')}
 }`
   }
@@ -128,7 +127,7 @@ class Polygon extends Component {
       return this.renderFill(this.fills[0], imports, getColor)
     }
     // TODO: multiple fills
-    return `null`
+    return 'null'
   }
 
   renderFill (fill: Fill, imports: Imports, getColor: FGetColor): string {
@@ -163,7 +162,7 @@ class Polygon extends Component {
   }
 }
 
-function classForTarget (target: string) {
+function classForTarget (target: string): string {
   return `${target}Class`
 }
 
@@ -220,7 +219,6 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       if (layer.shapeType === ShapeType.Custom) {
         component.items[name] = new Polygon(layer)
       }
-      `new ShapePath(${layer.style.fills})`
     }
     if (isTextLayer(layer)) {
       const style = textStyles[layer.sharedStyleId]
