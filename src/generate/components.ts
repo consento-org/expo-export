@@ -234,7 +234,7 @@ function renderComponent (component: IComponent, getColor: FGetColor): string {
   const imports: Imports = {}
   addImport(imports, 'src/styles/Component', 'Component')
   const body = Object.keys(component.items).map(name => component.items[name].format(name, imports, getColor)).join('\n')
-  const constructorBody = `super('${component.name}'${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})`
+  const constructorBody = `super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})`
 
   return `${renderImports(imports, 'src/styles/component')}
 
@@ -264,9 +264,13 @@ import { Asset } from '../Asset'
 export class Component {
   name: string
   backgroundColor: string | undefined
-  constructor (name: string, backgroundColor?: string) {
+  width: number
+  height: number
+  constructor (name: string, width: number, height: number, backgroundColor?: string) {
     this.name = name
     this.backgroundColor = backgroundColor
+    this.width = width
+    this.height = height
   }
 }
 
