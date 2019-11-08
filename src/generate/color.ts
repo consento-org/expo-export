@@ -1,6 +1,7 @@
 import { Document, ColorAsset } from 'sketch/dom'
 import { slugify, safeChildName } from '../util/string'
 import { Imports, addImport } from '../util/render'
+import { disclaimer } from './disclaimer'
 
 export type FGetColor = (color: string, imports?: Imports) => string
 
@@ -34,7 +35,8 @@ export function generateColors (document: Document): string | undefined {
   if (colors.length === 0) {
     return
   }
-  return `export enum Color {
+  return `${disclaimer}
+export enum Color {
 ${colors.map(color => `  ${nameForColor(color)} = '${color.color}'`).join(',\n')}
 }
 `

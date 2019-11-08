@@ -5,6 +5,7 @@ import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
+import { disclaimer } from './disclaimer'
 
 abstract class Component {
   layer: AnyLayer
@@ -236,7 +237,8 @@ function renderComponent (component: IComponent, getColor: FGetColor): string {
   const body = Object.keys(component.items).map(name => component.items[name].format(name, imports, getColor)).join('\n')
   const constructorBody = `super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})`
 
-  return `${renderImports(imports, 'src/styles/component')}
+  return `${disclaimer}
+${renderImports(imports, 'src/styles/component')}
 
 export class ${classForTarget(component.name)} extends Component {
 ${body}
@@ -258,7 +260,8 @@ export function writeComponents (document: Document, target: (path: string) => s
     write(target(`src/styles/component/${name}.ts`), renderComponent(components[name], getColor))
   }
   if (hasComponent) {
-    write(target('src/styles/Component.ts'), `import { ITextStyle } from './TextStyle'
+    write(target('src/styles/Component.ts'), `${disclaimer}
+import { ITextStyle } from './TextStyle'
 import { Asset } from '../Asset'
 
 export class Component {

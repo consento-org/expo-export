@@ -2,6 +2,7 @@ import sketch, { Document, AnyLayer } from 'sketch/dom'
 import { write } from '../util/fs'
 import { iterateDocument, isIgnored } from '../util/dom'
 import { slugifyName, childName } from '../util/string'
+import { disclaimer } from './disclaimer'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
@@ -43,7 +44,8 @@ export function writeAssets (document: Document, target: (path: string) => strin
     }
   })
   if (assetFound) {
-    write(target('src/Asset.tsx'), `import React, { Image } from 'react-native'
+    write(target('src/Asset.tsx'), `${disclaimer}
+import React, { Image } from 'react-native'
 
 class Assets {
   cache: { [key: string]: Asset } = {}

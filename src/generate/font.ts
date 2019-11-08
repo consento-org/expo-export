@@ -1,4 +1,5 @@
 import { Document } from 'sketch/dom'
+import { disclaimer } from './disclaimer'
 
 export function fontShortID (fontFamily: string): string {
   return fontFamily.replace(/ |-/ig, '')
@@ -13,7 +14,8 @@ export function generateFonts (document: Document, fontName: (id: string) => str
 
   const fonts = Object.keys(fontMap)
 
-  return `import * as ExpoFont from 'expo-font'
+  return `${disclaimer}
+import * as ExpoFont from 'expo-font'
 
 export enum Font {
 ${fonts.map((font) => `  ${fontShortID(font)} = '${font}'`).join(',\n')}

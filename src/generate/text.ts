@@ -1,6 +1,7 @@
 import { renderHierarchy, TIDLookup } from './text/renderHierarchy'
 import { collectTextStyles } from './text/collectTextStyles'
 import { Document } from 'sketch/dom'
+import { disclaimer } from './disclaimer'
 
 export function generateTextStyles (document: Document, fontName: (id: string) => string): {
   textStyles: TIDLookup
@@ -10,7 +11,8 @@ export function generateTextStyles (document: Document, fontName: (id: string) =
   const { entries, textStyles } = renderHierarchy(document, styles)
   return {
     textStyles,
-    textStyleData: `import { Color } from './Color'
+    textStyleData: `${disclaimer}
+import { Color } from './Color'
 import { Font } from './Font'
 
 export enum ETextAlign {
