@@ -45,7 +45,8 @@ export function writeAssets (document: Document, target: (path: string) => strin
   })
   if (assetFound) {
     write(target('src/Asset.tsx'), `${disclaimer}
-import React, { Image } from 'react-native'
+import React from 'react'
+import { Image } from 'react-native'
 
 class Assets {
   cache: { [key: string]: Asset } = {}
