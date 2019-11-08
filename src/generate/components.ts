@@ -337,16 +337,15 @@ export class Link <T> {
 }
 
 export type TFillData = string | IGradient | IError
+export interface IStop {
+  color: string
+  position: number
+}
 
 export interface IGradient {
   gradient: {
     type: 'linear',
-    stops: {
-      color: string,
-      position: number,
-      lineHeight: number,
-      textColor: string
-    }[],
+    stops: IStop[],
     from: {
       x: number,
       y: number
@@ -357,6 +356,12 @@ export interface IGradient {
     }
   }
 }
+export function isError (err: any): err is IError {
+  if (err === null || typeof err !== 'object') {
+    return false
+  }
+  return err.error !== undefined
+}
 
 export interface IError {
   error: string
@@ -366,7 +371,7 @@ export type TArrowHead = 'None' | 'OpenArrow' | 'FilledArrow' | 'Line' | 'OpenCi
 export type TLineEnd = 'Butt' | 'Round' | 'Projecting'
 export type TLineJoin = 'Miter' | 'Round' | 'Bevel'
 
-export interface IBorder {
+export interface TBorderData {
   fill: TFillData,
   thickness: number
   endArrowhead?: TArrowHead
@@ -376,38 +381,90 @@ export interface IBorder {
   dashPattern?: number[]
 }
 
+const reg = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?/ig
+const hex = (c: number): string => (c >= 0x10) ? c.toString(16) : \`0\${c.toString(16)}\`
+
+export class RGBA {
+  r: number
+  g: number
+  b: number
+  a: number
+  constructor (string: string) {
+    reg.lastIndex = 0
+    const parts = reg.exec(string)
+    this.r = parts ? parseInt(parts[1], 16) : 255
+    this.g = parts ? parseInt(parts[2], 16) : 255
+    this.b = parts ? parseInt(parts[3], 16) : 255
+    this.a = parts && parts[4] ? parseInt(parts[4], 16) : 255
+  }
+  toString (): string {
+    return \`#\${hex(this.r | 0)}\${hex(this.g | 0)}\${hex(this.b | 0)}\${hex(this.a | 0)}\`
+  }
+  avg (other: RGBA): this {
+    this.r = (this.r + other.r) / 2
+    this.g = (this.g + other.g) / 2
+    this.b = (this.b + other.b) / 2
+    this.a = (this.a + other.a) / 2
+    return this
+  }
+}
+
+function calcAvgColor (stops: IStop[]): string {
+  let rgba: RGBA
+  for (const stop of stops) {
+    const col = new RGBA(stop.color)
+    if (rgba === undefined) {
+      rgba = col
+    } else {
+      rgba = rgba.avg(col)
+    }
+  }
+  return rgba.toString()
+}
+
+export class Fill {
+  data: TFillData
+  color: string
+  constructor (data: TFillData) {
+    this.data = data
+    if (this.data === null || isError(this.data)) {
+      this.color = '#ffffffff'
+    } else if (typeof this.data === 'string') {
+      this.color = this.data
+    } else {
+      this.color = calcAvgColor(this.data.gradient.stops)
+    }
+  }
+}
+
 export class Border {
   endArrowhead: TArrowHead
   startArrowhead: TArrowHead
   lineEnd: TLineEnd
   lineJoin: TLineJoin
   dashPattern: number[]
-  fill: TFillData
+  fill: Fill
   thickness: number
-  constructor (options: IBorder) {
-    this.fill = options.fill
-    this.thickness = options.thickness
-    this.endArrowhead = options === null || options.endArrowhead === undefined ? '${DEFAULT_ARROWHEAD}' : options.endArrowhead
-    this.startArrowhead = options === null || options.startArrowhead === undefined ? '${DEFAULT_ARROWHEAD}' : options.startArrowhead
-    this.lineEnd = options === null || options.lineEnd === undefined ? '${DEFAULT_LINE_END}' : options.lineEnd
-    this.lineJoin = options === null || options.lineJoin === undefined ? '${DEFAULT_LINE_JOIN}' : options.lineJoin
+  constructor (options: TBorderData | null) {
+    this.fill = new Fill(options === null ? null : options.fill)
+    this.thickness = options === null ? 0 : options.thickness
+    this.endArrowhead = options === null || options.endArrowhead === undefined ? 'None' : options.endArrowhead
+    this.startArrowhead = options === null || options.startArrowhead === undefined ? 'None' : options.startArrowhead
+    this.lineEnd = options === null || options.lineEnd === undefined ? 'Projecting' : options.lineEnd
+    this.lineJoin = options === null || options.lineJoin === undefined ? 'Miter' : options.lineJoin
     this.dashPattern = options === null || options.dashPattern === undefined ? [] : options.dashPattern
   }
 }
 
 export class Polygon {
   place: Placement
-  fill?: TFillData
-  border?: Border
+  fill: Fill
+  border: Border
 
-  constructor (frame: IFrameData, fill: TFillData | null, border: IBorder | null) {
+  constructor (frame: IFrameData, fill: TFillData | null, border: TBorderData | null) {
     this.place = new Placement(frame)
-    if (this.fill !== null) {
-      this.fill = fill
-    }
-    if (border !== null) {
-      this.border = new Border(border)
-    }
+    this.fill = new Fill(fill)
+    this.border = new Border(border)
   }
 }
 
