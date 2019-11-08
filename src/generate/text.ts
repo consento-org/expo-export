@@ -17,7 +17,7 @@ export enum ETextAlign {
   left = 'left',
   right = 'right',
   center = 'center',
-  justified = 'justified'
+  justify = 'justify'
 }
 export enum ETextTransform {
   uppercase = 'uppercase',

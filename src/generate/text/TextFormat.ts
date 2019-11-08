@@ -1,3 +1,5 @@
+export type TAlignment = 'center' | 'right' | 'left' | 'justified'
+
 export interface ITextFormat {
   id?: string
   fontFamily?: string
@@ -5,7 +7,7 @@ export interface ITextFormat {
   color?: string
   lineHeight?: number
   textTransform?: string
-  textAlign?: string
+  textAlign?: TAlignment
 }
 
 const DEFAULT_FONTSIZE = 12
@@ -21,7 +23,7 @@ export class TextFormat implements ITextFormat {
   public color: string
   public lineHeight: number
   public textTransform: string
-  public textAlign: string
+  public textAlign: TAlignment
   public id: string
 
   constructor ({ id, fontFamily, fontSize, color, lineHeight, textTransform, textAlign }: ITextFormat) {

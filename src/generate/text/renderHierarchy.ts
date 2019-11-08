@@ -1,5 +1,5 @@
 import { Hierarchy } from '../../util/hierarchy'
-import { TextFormat, ITextFormat } from './TextFormat'
+import { TextFormat, ITextFormat, TAlignment } from './TextFormat'
 import { Document } from 'sketch/dom'
 import { toMaxDecimals } from '../../util/number'
 import { FGetColor, getColorFactory } from '../color'
@@ -13,6 +13,13 @@ export function fontStyleName (stack: string[]): string {
   return safeChildName(stack.map(entry => entry.replace(/[ \t\r]/ig, '_')).join('_'))
 }
 
+export function adjustAlignment (alignment: TAlignment): 'left' | 'right' | 'center' | 'justify' {
+  if (alignment === 'justified') {
+    return 'justify'
+  }
+  return alignment
+}
+
 function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[]): string {
   const props = []
   const hierarchy = []
@@ -23,7 +30,7 @@ function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[])
   if (has(style.color)) props.push(`color: ${getColor(style.color)}`)
   if (has(style.fontFamily)) props.push(`fontFamily: Font.${style.fontFamily}`)
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
-  if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${style.textAlign}`)
+  if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${adjustAlignment(style.textAlign)}`)
   if (has(style.textTransform)) props.push(`textTransform: ETextTransform.${style.textTransform}`)
   if (props.length === 0) {
     return `export const ${fontStyleName(stack)} = {${inherits}
