@@ -46,7 +46,7 @@ export function writeAssets (document: Document, target: (path: string) => strin
   if (assetFound) {
     write(target('src/Asset.tsx'), `${disclaimer}
 import React from 'react'
-import { Image } from 'react-native'
+import { Image, ImageStyle } from 'react-native'
 
 class Assets {
   cache: { [key: string]: Asset } = {}
@@ -68,8 +68,8 @@ export class Asset {
   constructor (data: any) {
     this.data = data
   }
-  img () {
-    return <Image source={ this.data } />
+  img (style?: ImageStyle) {
+    return <Image source={ this.data } style={ style } />
   }
 ${Object.keys(assets).map(name => {
     const asset = assets[name]
