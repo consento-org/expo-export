@@ -305,6 +305,25 @@ export class Placement {
     this.bottom = y + h
   }
 
+  dynWidthStyle (): { left: number, top: number, right: number } {
+    return {
+      left: this.left,
+      top: this.top,
+      right: this.right
+    }
+  }
+
+  style<T extends IStylePlace> (style?: T): T {
+    if (style === undefined || style === null) {
+      style = {} as T
+    }
+    style.top = this.top
+    style.left = this.left
+    style.width = this.width
+    style.height = this.height
+    return style
+  }
+
   ySpace (other: Placement): number {
     if (this.y > other.y) {
       return other.ySpace(this)
