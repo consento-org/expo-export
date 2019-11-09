@@ -497,12 +497,18 @@ export class Polygon {
 export class Text {
   text: string
   style: TextStyle
+  styleAbsolute: TextStyle
   place: Placement
 
   constructor (text: string, style: TextStyle, frame: IFrameData) {
     this.text = text
     this.style = style
     this.place = new Placement(frame)
+    this.styleAbsolute = Object.freeze({
+      ... style,
+      ... this.place.style(),
+      position: 'absolute'
+    })
   }
 }
 `)
