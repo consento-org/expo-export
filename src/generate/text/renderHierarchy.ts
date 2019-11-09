@@ -9,8 +9,8 @@ function has<T = any> (entry: T | null | undefined): entry is T {
   return entry !== null && entry !== undefined
 }
 
-export function fontStyleName (stack: string[]): string {
-  return safeChildName(stack.map(entry => entry.replace(/[ \t\r]/ig, '_')).join('_'))
+export function fontStyleName (stack: StackEntry[]): string {
+  return safeChildName(stack.map(entry => entry.name.replace(/[ \t\r]/ig, '_')).join('_'))
 }
 
 export function adjustAlignment (alignment: TAlignment): 'left' | 'right' | 'center' | 'justify' {
@@ -20,37 +20,51 @@ export function adjustAlignment (alignment: TAlignment): 'left' | 'right' | 'cen
   return alignment
 }
 
-function renderFormat (getColor: FGetColor, style: ITextFormat, stack: string[]): string {
-  const props = []
-  const hierarchy = []
-  for (let i = 0; i < stack.length - 1; i++) {
-    hierarchy.push(stack[i])
+function reduceStack (stack: StackEntry[]): ITextFormat {
+  const result = {}
+  for (const { format } of stack) {
+    for (const key in format) {
+      result[key] = format[key]
+    }
   }
-  const inherits = hierarchy.length > 0 ? `\n  ...${fontStyleName(hierarchy)},` : ''
+  return result
+}
+
+function renderFormat (getColor: FGetColor, stack: StackEntry[], fullName: string): string {
+  const props = []
+  const style = reduceStack(stack)
   if (has(style.color)) props.push(`color: ${getColor(style.color)}`)
   if (has(style.fontFamily)) props.push(`fontFamily: Font.${style.fontFamily}`)
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
   if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${adjustAlignment(style.textAlign)}`)
   if (has(style.textTransform)) props.push(`textTransform: ETextTransform.${style.textTransform}`)
   if (props.length === 0) {
-    return `export const ${fontStyleName(stack)} = {${inherits}
-}`
+    return null
   }
-  return `export const ${fontStyleName(stack)}: ITextStyle = {${inherits}
+  return `export const ${fullName} = Object.freeze({
   ${props.join(',\n  ')}
 }`
 }
 
 export interface TIDLookup { [id: string]: string }
 
-function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, stack: string[], entries: string[], textStyles: TIDLookup): void {
+interface StackEntry {
+  name: string
+  format: TextFormat
+}
+
+function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, stack: StackEntry[], entries: string[], textStyles: TIDLookup): void {
   for (const name in styles) {
-    stack.push(name)
     const node = styles[name]
-    textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = fontStyleName(stack)
-    entries.push(
-      node.item !== undefined ? renderFormat(getColor, node.item, stack) : renderFormat(getColor, {}, stack)
-    )
+    stack.push({ name, format: node.item })
+    const fullName = fontStyleName(stack)
+    if (node.item) {
+      textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = fullName
+      const entry = renderFormat(getColor, stack, fullName)
+      if (entry !== null) {
+        entries.push(entry)
+      }
+    }
     _renderHierarchy(getColor, node.children, stack, entries, textStyles)
     stack.pop()
   }
