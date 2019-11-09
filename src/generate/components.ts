@@ -328,8 +328,8 @@ export class AssetPlacement {
     this.asset = asset
     this.place = new Placement(frame)
   }
-  img () {
-    this.asset().img()
+  img (style?: ImageStyle) {
+    return this.asset().img(style)
   }
 }
 
