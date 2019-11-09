@@ -36,14 +36,15 @@ function renderFormat (getColor: FGetColor, stack: StackEntry[], fullName: strin
   if (has(style.color)) props.push(`color: ${getColor(style.color)}`)
   if (has(style.fontFamily)) props.push(`fontFamily: Font.${style.fontFamily}`)
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
-  if (has(style.textAlign)) props.push(`textAlign: ETextAlign.${adjustAlignment(style.textAlign)}`)
-  if (has(style.textTransform)) props.push(`textTransform: ETextTransform.${style.textTransform}`)
+  if (has(style.textAlign)) props.push(`textAlign: '${adjustAlignment(style.textAlign)}'`)
+  if (has(style.textTransform)) props.push(`textTransform: '${style.textTransform}'`)
   if (props.length === 0) {
     return null
   }
   return `export const ${fullName} = Object.freeze({
   ${props.join(',\n  ')}
-}`
+} as TextStyle)
+`
 }
 
 export interface TIDLookup { [id: string]: string }

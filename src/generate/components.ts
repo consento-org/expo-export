@@ -49,8 +49,8 @@ class TextComponent extends Component {
 
   format (name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, 'src/styles/Component', 'Text')
-    addImport(imports, 'src/styles/TextStyle', 'TextStyle')
-    return `  ${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyle.${this.textStyle}, ${this.renderFrame()})`
+    addImport(imports, 'src/styles/TextStyles', 'TextStyles')
+    return `  ${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyles.${this.textStyle}, ${this.renderFrame()})`
   }
 }
 
@@ -261,8 +261,8 @@ export function writeComponents (document: Document, target: (path: string) => s
   }
   if (hasComponent) {
     write(target('src/styles/Component.ts'), `${disclaimer}
-import { ITextStyle } from './TextStyle'
 import { Asset } from '../Asset'
+import { ImageStyle, TextStyle } from 'react-native'
 
 export class Component {
   name: string
@@ -477,10 +477,10 @@ export class Polygon {
 
 export class Text {
   text: string
-  style: ITextStyle
+  style: TextStyle
   place: Placement
 
-  constructor (text: string, style: ITextStyle, frame: IFrameData) {
+  constructor (text: string, style: TextStyle, frame: IFrameData) {
     this.text = text
     this.style = style
     this.place = new Placement(frame)

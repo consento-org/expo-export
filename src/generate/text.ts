@@ -14,29 +14,10 @@ export function generateTextStyles (document: Document, fontName: (id: string) =
     textStyleData: `${disclaimer}
 import { Color } from './Color'
 import { Font } from './Font'
-
-export enum ETextAlign {
-  left = 'left',
-  right = 'right',
-  center = 'center',
-  justify = 'justify'
-}
-export enum ETextTransform {
-  uppercase = 'uppercase',
-  lowercase = 'lowercase',
-  none = 'none'
-}
-
-export interface ITextStyle {
-  color: string
-  fontFamily: Font
-  fontSize: number
-  textAlign: ETextAlign
-  textTransform: ETextTransform
-}
+import { TextStyle } from 'react-native'
 
 ${entries.join('\n')}
-export const TextStyle = {
+export const TextStyles = {
   ${Object.values(textStyles).join(',\n  ')}
 }
 `

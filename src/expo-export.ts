@@ -30,7 +30,7 @@ export function expoExport (opts: IExpoExportOpts, context: any): void {
   if (opts.color === true) write(target('src/styles/Color.ts'), generateColors(document))
   if (opts.font === true) write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
   const { textStyles, textStyleData } = generateTextStyles(document, fontNameLookup)
-  if (opts.textStyle === true) write(target('src/styles/TextStyle.ts'), textStyleData)
+  if (opts.textStyle === true) write(target('src/styles/TextStyles.ts'), textStyleData)
 
   if (opts.assets === true) writeAssets(document, target)
   if (opts.components === true) writeComponents(document, target, textStyles)
