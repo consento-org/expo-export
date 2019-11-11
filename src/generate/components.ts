@@ -119,8 +119,8 @@ class Polygon extends Component {
       props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
     }
     return `{ ${props.map(([prop, value]) => `
-  ${prop}: ${value}`).join(',')}
-}`
+    ${prop}: ${value}`).join(',')}
+  }`
   }
 
   renderFills (imports: Imports, getColor: FGetColor): string {
