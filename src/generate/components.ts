@@ -1,5 +1,5 @@
-import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions } from 'sketch/dom'
-import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShapePath, ShapeType, FillType } from '../util/dom'
+import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style } from 'sketch/dom'
+import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, ShapeType, FillType } from '../util/dom'
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
@@ -86,21 +86,42 @@ function isVisibleFill (fill: Fill): boolean {
   return true
 }
 
+interface ShapeStyle extends Style {
+  borderOptions: BorderOptions
+}
+
+function getBorderRadius (layer: ShapePath): number {
+  if (layer.shapeType !== 'Rectangle') {
+    return 0
+  }
+  const radius = layer.points[0].cornerRadius
+  for (let i = 1; i < layer.points.length; i++) {
+    if (layer.points[0].cornerRadius !== radius) {
+      return 0
+    }
+  }
+  return radius
+}
+
 class Polygon extends Component {
   fills: Fill[]
   borders: Border[]
   borderOptions: BorderOptions
+  shadows: Shadow[]
+  borderRadius: number
 
-  constructor (layer: ShapePath) {
+  constructor (layer: ShapePath, style: ShapeStyle) {
     super(layer, 'Polygon')
-    this.fills = layer.style.fills.filter(isVisibleFill)
-    this.borders = layer.style.borders.filter(border => border.enabled)
-    this.borderOptions = layer.style.borderOptions
+    this.borderRadius = getBorderRadius(layer)
+    this.fills = style.fills.filter(isVisibleFill)
+    this.borders = style.borders.filter(border => border.enabled)
+    this.borderOptions = style.borderOptions
+    this.shadows = style.shadows.filter(shadow => shadow.enabled && isVisibleColor(shadow.color))
   }
 
   format (name: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, 'src/styles/Component', 'Polygon')
-    return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)})`
+    return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.borderRadius}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
   }
 
   renderBorders (imports, getColor: FGetColor): string {
@@ -135,6 +156,19 @@ class Polygon extends Component {
     return `{ ${props.map(([prop, value]) => `
     ${prop}: ${value}`).join(',')}
   }`
+  }
+
+  renderShadows (imports: Imports, getColor: FGetColor): string {
+    if (this.shadows.length === 0) {
+      return '[]'
+    }
+    const shadows = []
+    for (const shadow of this.shadows) {
+      shadows.push(`{ x:${shadow.x}, y:${shadow.y}, blur:${shadow.blur}, spread:${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
+    }
+    return `[
+    ${shadows.join(',\n    ')}
+  ]`
   }
 
   renderFills (imports: Imports, getColor: FGetColor): string {
@@ -181,12 +215,10 @@ function classForTarget (target: string): string {
   return `${target}Class`
 }
 
-type TComponentItem = Image | TextComponent | Link | Polygon
-
 interface IComponent {
   name: string
   artboard: Artboard
-  items: { [name: string]: TComponentItem }
+  items: { [name: string]: Component }
 }
 
 function hasSlice9 (artboard: Artboard) {
@@ -249,9 +281,14 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       }
       return
     }
+    if (isShape(layer)) {
+      if (layer.layers.length === 1) {
+        component.items[name] = new Polygon(layer.layers[0], layer.style)
+      }
+    }
     if (isShapePath(layer)) {
       if (layer.shapeType === ShapeType.Custom) {
-        component.items[name] = new Polygon(layer)
+        component.items[name] = new Polygon(layer, layer.style)
       }
     }
     if (isTextLayer(layer)) {
@@ -591,15 +628,43 @@ export class Border {
   }
 }
 
+export type TShadowData = {
+  x: number,
+  y: number,
+  blur: number,
+  spread: number,
+  color: string
+}
+
+export class Shadow {
+  x: number
+  y: number
+  blur: number
+  spread: number
+  color: string
+
+  constructor (data: TShadowData) {
+    this.x = data.x
+    this.y = data.y
+    this.blur = data.blur
+    this.spread = data.spread
+    this.color = data.color
+  }
+}
+
 export class Polygon {
   place: Placement
   fill: Fill
+  borderRadius: number
   border: Border
+  shadows: Shadow[]
 
-  constructor (frame: IFrameData, fill: TFillData | null, border: TBorderData | null) {
+  constructor (frame: IFrameData, fill: TFillData | null, borderRadius: number, border: TBorderData | null, shadows: TShadowData[]) {
     this.place = new Placement(frame)
     this.fill = new Fill(fill)
+    this.borderRadius = borderRadius
     this.border = new Border(border)
+    this.shadows = shadows.map(data => new Shadow(data))
   }
 }
 
