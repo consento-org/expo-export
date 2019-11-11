@@ -260,9 +260,10 @@ export function writeComponents (document: Document, target: (path: string) => s
     write(target(`src/styles/component/${name}.ts`), renderComponent(components[name], getColor))
   }
   if (hasComponent) {
-    write(target('src/styles/Component.ts'), `${disclaimer}
+    write(target('src/styles/Component.tsx'), `${disclaimer}
+import React from 'react'
 import { Asset } from '../Asset'
-import { ImageStyle, TextStyle } from 'react-native'
+import { ImageStyle, TextStyle, Text as NativeText } from 'react-native'
 
 export class Component {
   name: string
@@ -509,6 +510,13 @@ export class Text {
       ... this.place.style(),
       position: 'absolute'
     })
+  }
+
+  render (value?: string, style?: TextStyle) {
+    return <NativeText style={{
+      ...this.style,
+      ...style
+    }}>{ value === undefined ? this.text : String(value) }</NativeText>
   }
 }
 `)
