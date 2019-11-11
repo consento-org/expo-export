@@ -216,7 +216,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       }
       return
     }
-    if (isShapePath(layer) && layer.name === 'borderTop') {
+    if (isShapePath(layer)) {
       if (layer.shapeType === ShapeType.Custom) {
         component.items[name] = new Polygon(layer)
       }
