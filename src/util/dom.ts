@@ -1,4 +1,4 @@
-import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath } from 'sketch/dom'
+import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath, Slice } from 'sketch/dom'
 import { LRUCache } from './string'
 
 interface IDocumentData {
@@ -104,6 +104,18 @@ export function isSymbolInstance (item: AnyLayer): item is SymbolInstance {
 export function isSymbolMaster (item: AnyLayer): item is SymbolMaster {
   if (isIgnored(item)) return false
   return item.type === Type.master
+}
+
+export function isSlice (item: AnyLayer): item is Slice {
+  if (isIgnored(item)) return false
+  return item.type === Type.slice
+}
+
+export function isSlice9 (item: AnyLayer): item is Slice {
+  if (!isSlice(item)) return false
+  if (item.name !== 'slice-9') return false
+  const artboard = item.getParentArtboard()
+  return artboard.id === item.parent.id
 }
 
 export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false

@@ -189,12 +189,31 @@ interface IComponent {
   items: { [name: string]: TComponentItem }
 }
 
+function hasSlice9 (artboard: Artboard) {
+  for (let i = 0; i < artboard.layers.length; i++) {
+    if (isSlice9(artboard.layers[0])) {
+      return true
+    }
+  }
+  return false
+}
+
+function isExportedArtboard (artboard): artboard is Artboard {
+  if (!isArtboard(artboard)) {
+    return false
+  }
+  if (artboard.exportFormats.length > 0) {
+    return true
+  }
+  return hasSlice9(artboard)
+}
+
 function collectComponents (document: Document, textStyles: { [id: string]: string }): { [path: string]: IComponent } {
   const components = {}
   let component: IComponent
   iterateDocument(document, (layer, parentNames): boolean => {
     if (parentNames.length === 0) {
-      if (isArtboard(layer) && layer.exportFormats.length === 0) {
+      if (isExportedArtboard(layer)) {
         component = {
           name: childName(layer.name),
           artboard: layer,
