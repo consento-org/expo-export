@@ -263,18 +263,85 @@ export function writeComponents (document: Document, target: (path: string) => s
     write(target('src/styles/Component.tsx'), `${disclaimer}
 import React from 'react'
 import { Asset } from '../Asset'
-import { ImageStyle, TextStyle, Text as NativeText } from 'react-native'
+import { ImageStyle, TextStyle, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity } from 'react-native'
+
+export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
+export interface IRenderOptions {
+  vert?: TRenderGravity,
+  horz?: TRenderGravity,
+  onPress?: () => {}
+}
+
+function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions = {}, place: Placement, style?: T): T {
+  if (style === null || style === undefined) {
+    style = {} as T
+  }
+  style.width = horz === 'stretch' ? '100%' : place.width
+  style.height = vert === 'stretch' ? '100%' : place.height
+  return style
+}
+
+// Todo: LRU?
+const renderCache: { [key: string]: ViewStyle } = {}
 
 export class Component {
   name: string
   backgroundColor: string | undefined
   width: number
   height: number
+
   constructor (name: string, width: number, height: number, backgroundColor?: string) {
     this.name = name
     this.backgroundColor = backgroundColor
     this.width = width
     this.height = height
+  }
+
+  renderText (text: Text, opts?: IRenderOptions, value?: string, style?: TextStyle) {
+    style = applyRenderOptions(opts, text.place, style)
+    return this._renderItem(text.render(value, style), text.place, opts)
+  }
+
+  renderImage (asset: AssetPlacement, opts?: IRenderOptions, style?: ImageStyle) {
+    style = applyRenderOptions(opts, asset.place, style)
+    return this._renderItem(asset.img(style), asset.place, opts)
+  }
+
+  _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress }: IRenderOptions = {}) {
+    const horzKey = \`horz:\${horz || 'start'}:\${this.width}:\${this.height}:\${place.top}:\${place.left}:\${place.right}:\${place.bottom}\`
+    let horzStyle = renderCache[horzKey]
+    if (horzStyle === undefined) {
+      horzStyle = {
+        display: 'flex',
+        position: 'absolute',
+        paddingRight: this.width - place.right,
+        paddingTop: place.top,
+        paddingBottom: this.height - place.bottom,
+        paddingLeft: place.left,
+        width: '100%',
+        height: '100%',
+        justifyContent: horz === 'end' ? 'flex-end' : horz === 'center' ? 'center': 'flex-start'
+      }
+      renderCache[horzKey] = horzStyle
+    }
+    const vertKey = \`vert:\${vert || 'start'}\`
+    let vertStyle = renderCache[vertKey]
+    if (vertStyle === undefined) {
+      vertStyle = {
+        display: 'flex',
+        width: '100%',
+        flexDirection: 'column',
+        height: '100%',
+        justifyContent: vert === 'end' ? 'flex-end' : vert === 'center' ? 'center': 'flex-start'
+      }
+      renderCache[vertKey] = vertStyle
+    }
+    if (onPress !== null && onPress !== undefined) {
+      item = <TouchableOpacity onPress={ onPress }>{ item }</TouchableOpacity>
+    }
+    return <View style={ horzStyle }>
+      <View style={ vertStyle }>{ item }</View>
+    </View>
   }
 }
 
@@ -283,6 +350,13 @@ export interface IFrameData {
   y: number
   w: number
   h: number
+}
+
+export interface IStylePlace {
+  left?: number | string
+  top?: number | string
+  width?: number | string
+  height?: number | string
 }
 
 export class Placement {
@@ -348,6 +422,7 @@ export class AssetPlacement {
     this.asset = asset
     this.place = new Placement(frame)
   }
+
   img (style?: ImageStyle) {
     return this.asset().img(style)
   }
