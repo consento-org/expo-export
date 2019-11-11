@@ -518,6 +518,18 @@ export class Text {
       ...style
     }}>{ value === undefined ? this.text : String(value) }</NativeText>
   }
+
+  renderAbsolute (value?: string, style?: TextStyle) {
+    if (style === undefined || style === null) {
+      style = this.styleAbsolute
+    } else {
+      style = {
+        ...style,
+        ...this.styleAbsolute
+      }
+    }
+    return this.render(value, style)
+  }
 }
 `)
   }
