@@ -33,8 +33,23 @@ class Image extends Component {
 
   format (name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, 'src/Asset', 'Asset')
-    addImport(imports, 'src/styles/Component', 'AssetPlacement')
-    return `  ${name} = new AssetPlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    addImport(imports, 'src/styles/Component', 'ImagePlacement')
+    return `  ${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+  }
+}
+
+class Slice9 extends Component {
+  asset: string
+
+  constructor (layer: AnyLayer, asset?: string) {
+    super(layer, 'image')
+    this.asset = asset
+  }
+
+  format (name: string, imports: Imports, _: FGetColor): string {
+    addImport(imports, 'src/Asset', 'Asset')
+    addImport(imports, 'src/styles/Component', 'Slice9Placement')
+    return `  ${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -230,10 +245,7 @@ function hasSlice9 (artboard: Artboard) {
   return false
 }
 
-function isExportedArtboard (artboard): artboard is Artboard {
-  if (!isArtboard(artboard)) {
-    return false
-  }
+function isExportedArtboard (artboard: Artboard) {
   if (artboard.exportFormats.length > 0) {
     return true
   }
@@ -245,7 +257,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
   let component: IComponent
   iterateDocument(document, (layer, parentNames): boolean => {
     if (parentNames.length === 0) {
-      if (isExportedArtboard(layer)) {
+      if (isArtboard(layer) && !isExportedArtboard(layer)) {
         component = {
           name: childName(layer.name),
           artboard: layer,
@@ -274,10 +286,13 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       if (isIgnored(master)) {
         return
       }
-      if (master.exportFormats.length > 0) {
-        component.items[name] = new Image(layer, childName(master.name))
+      const masterName = childName(master.name)
+      if (isArtboard(master) && hasSlice9(master)) {
+        component.items[name] = new Slice9(layer, masterName)
+      } else if (master.exportFormats.length > 0) {
+        component.items[name] = new Image(layer, masterName)
       } else {
-        component.items[name] = new Link(layer, childName(master.name))
+        component.items[name] = new Link(layer, masterName)
       }
       return
     }
@@ -332,7 +347,7 @@ export function writeComponents (document: Document, target: (path: string) => s
   if (hasComponent) {
     write(target('src/styles/Component.tsx'), `${disclaimer}
 import React from 'react'
-import { Asset } from '../Asset'
+import { ImageAsset, Slice9 } from '../Asset'
 import { ImageStyle, TextStyle, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity } from 'react-native'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
@@ -372,9 +387,14 @@ export class Component {
     return this._renderItem(text.render(value, style), text.place, opts)
   }
 
-  renderImage (asset: AssetPlacement, opts?: IRenderOptions, style?: ImageStyle) {
+  renderImage (asset: ImagePlacement, opts?: IRenderOptions, style?: ImageStyle) {
     style = applyRenderOptions(opts, asset.place, style)
     return this._renderItem(asset.img(style), asset.place, opts)
+  }
+
+  renderSlice9 (asset: Slice9Placement, opts?: IRenderOptions, style?: ViewStyle) {
+    style = applyRenderOptions(opts, asset.place, style)
+    return this._renderItem(asset.render(style), asset.place, opts)
   }
 
   _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress }: IRenderOptions = {}) {
@@ -484,17 +504,31 @@ export class Placement {
   }
 }
 
-export class AssetPlacement {
+export class ImagePlacement {
   place: Placement
-  asset: () => Asset
+  asset: () => ImageAsset
 
-  constructor (asset: () => Asset, frame: IFrameData) {
+  constructor (asset: () => ImageAsset, frame: IFrameData) {
     this.asset = asset
     this.place = new Placement(frame)
   }
 
   img (style?: ImageStyle) {
     return this.asset().img(style)
+  }
+}
+
+export class Slice9Placement {
+  place: Placement
+  asset: () => Slice9
+
+  constructor (asset: () => Slice9, frame: IFrameData) {
+    this.asset = asset
+    this.place = new Placement(frame)
+  }
+
+  render (style?: ViewStyle) {
+    return this.asset().render(style)
   }
 }
 
