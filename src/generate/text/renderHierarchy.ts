@@ -38,6 +38,7 @@ function renderFormat (getColor: FGetColor, stack: StackEntry[], fullName: strin
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
   if (has(style.textAlign)) props.push(`textAlign: '${adjustAlignment(style.textAlign)}'`)
   if (has(style.textTransform)) props.push(`textTransform: '${style.textTransform}'`)
+  if (has(style.textAlignVertical)) props.push(`textAlignVertical: '${style.textAlignVertical}'`)
   if (props.length === 0) {
     return null
   }

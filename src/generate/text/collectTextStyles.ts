@@ -13,7 +13,8 @@ function processShared (shared: SharedStyle<TextStyle>, fontName: TFontName): Te
     color: shared.style.textColor,
     lineHeight: shared.style.lineHeight,
     textTransform: shared.style.textTransform,
-    textAlign: shared.style.alignment
+    textAlign: shared.style.alignment,
+    textAlignVertical: shared.style.verticalAlignment
   })
 }
 
