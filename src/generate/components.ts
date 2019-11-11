@@ -72,6 +72,20 @@ const DEFAULT_ARROWHEAD = 'None'
 const DEFAULT_LINE_END = 'Projecting'
 const DEFAULT_LINE_JOIN = 'Miter'
 
+function isVisibleColor (color: string): boolean {
+  return !/^#[0-9a-f]{6}00$/ig.test(color)
+}
+
+function isVisibleFill (fill: Fill): boolean {
+  if (!fill.enabled) {
+    return false
+  }
+  if (fill.fillType === 'Color') {
+    return isVisibleColor(fill.color)
+  }
+  return true
+}
+
 class Polygon extends Component {
   fills: Fill[]
   borders: Border[]
@@ -79,7 +93,7 @@ class Polygon extends Component {
 
   constructor (layer: ShapePath) {
     super(layer, 'Polygon')
-    this.fills = layer.style.fills.filter(fill => fill.enabled)
+    this.fills = layer.style.fills.filter(isVisibleFill)
     this.borders = layer.style.borders.filter(border => border.enabled)
     this.borderOptions = layer.style.borderOptions
   }
