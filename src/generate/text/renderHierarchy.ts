@@ -60,7 +60,7 @@ function _renderHierarchy (getColor: FGetColor, styles: Hierarchy<TextFormat>, s
     const node = styles[name]
     stack.push({ name, format: node.item })
     const fullName = fontStyleName(stack)
-    if (node.item) {
+    if (node.item !== null && node.item !== undefined) {
       textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = fullName
       const entry = renderFormat(getColor, stack, fullName)
       if (entry !== null) {

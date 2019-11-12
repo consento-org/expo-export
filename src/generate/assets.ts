@@ -19,7 +19,7 @@ export function assetPathForLayer (item: AnyLayer, artboard: Artboard | null, su
   if (item.exportFormats.length === 0) {
     throw new Error(`Layer ${item.name} is not exported and cant be turned into an asset path.`)
   }
-  return assetPath((artboard || item).name + suffix, '1', item.exportFormats[0].fileFormat)
+  return assetPath((artboard === null || artboard === undefined ? item : artboard).name + suffix, '1', item.exportFormats[0].fileFormat)
 }
 
 export interface ISlice9 {
@@ -40,11 +40,11 @@ function slice9Export (item: Slice, target: (path: string) => string, slice9s: {
     return
   }
   const workSlice = item.duplicate()
-  for (let row = 0; row < 3; row ++) {
-    const y      = row === 0 ? 0            : row === 1 ? item.frame.y      : item.frame.y + item.frame.height
+  for (let row = 0; row < 3; row++) {
+    const y = row === 0 ? 0 : row === 1 ? item.frame.y : item.frame.y + item.frame.height
     const height = row === 0 ? item.frame.y : row === 1 ? item.frame.height : artboard.frame.height - item.frame.height - item.frame.y
-    for (let column = 0; column < 3; column ++) {
-      const x     = column === 0 ? 0            : column === 1 ? item.frame.x     : item.frame.x + item.frame.width
+    for (let column = 0; column < 3; column++) {
+      const x = column === 0 ? 0 : column === 1 ? item.frame.x : item.frame.x + item.frame.width
       const width = column === 0 ? item.frame.x : column === 1 ? item.frame.width : artboard.frame.width - item.frame.width - item.frame.x
       workSlice.name = `slice-9-${row}-${column}`
       workSlice.frame.x = x
@@ -82,7 +82,7 @@ export function writeAssets (document: Document, target: (path: string) => strin
   const slice9s: { [key: string]: ISlice9 } = {}
   let assetFound = false
   iterateDocument(document, item => {
-    if (/^slice\-9-[012]-[012]$/.exec(item.name)) {
+    if (/^slice-9-[012]-[012]$/.test(item.name)) {
       // remove slice-9 garbage
       item.remove()
       return
@@ -270,7 +270,7 @@ ${
       ]
     }))
   }`
-})).join(',\n')}
+  })).join(',\n')}
 }
 `)
   }

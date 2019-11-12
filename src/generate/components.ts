@@ -236,7 +236,7 @@ interface IComponent {
   items: { [name: string]: Component }
 }
 
-function hasSlice9 (artboard: Artboard) {
+function hasSlice9 (artboard: Artboard): boolean {
   for (let i = 0; i < artboard.layers.length; i++) {
     if (isSlice9(artboard.layers[0])) {
       return true
@@ -245,7 +245,7 @@ function hasSlice9 (artboard: Artboard) {
   return false
 }
 
-function isExportedArtboard (artboard: Artboard) {
+function isExportedArtboard (artboard: Artboard): boolean {
   if (artboard.exportFormats.length > 0) {
     return true
   }
