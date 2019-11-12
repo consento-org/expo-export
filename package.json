@@ -1,6 +1,6 @@
 {
   "name": "expoexport",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Text-Style and Asset export for sketch to be used in Expo",
   "author": "Consento <keepsafe@consento.org>",
