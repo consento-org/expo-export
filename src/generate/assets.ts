@@ -171,18 +171,19 @@ export class Slice9 {
   constructor ({ w, h, slice, slices }: Slice9Args) {
     this.width = w
     this.height = h
-    const right = w - slice.x - slice.w
-    const bottom = h - slice.y - slice.h
+    const x = (slice.x + 0.5) | 0
+    const y = (slice.y + 0.5) | 0
+    const right = (w - x - slice.w + 0.5) | 0
+    const bottom = (h - y - slice.h + 0.5) | 0
     this._columsStyle = {
       display: 'flex',
       width: w,
       height: h,
       flexDirection: 'column'
     }
-    this
     this._rows = [{
       ...rowsStyle,
-      height: slice.y
+      height: y
     }, {
       ...rowsStyle,
       flexGrow: 1
@@ -191,13 +192,13 @@ export class Slice9 {
       height: bottom
     }].map((rowStyle: ViewStyle) => Object.freeze(rowStyle))
     this._styles = [
-      { width: slice.x, height: slice.y },
-      { flexGrow: 1, height: slice.y },
-      { width: right, height: slice.y },
-      { width: slice.x, height: '100%' },
+      { width: x, height: y },
+      { flexGrow: 1, height: y },
+      { width: right, height: y },
+      { width: x, height: '100%' },
       { flexGrow: 1, height: '100%', borderWidth: 1 },
       { width: right, height: '100%' },
-      { width: slice.x, height: bottom },
+      { width: x, height: bottom },
       { flexGrow: 1, height: bottom },
       { width: right, height: bottom }
     ].map((style: ImageStyle) => {
