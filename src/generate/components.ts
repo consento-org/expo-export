@@ -65,7 +65,7 @@ class TextComponent extends Component {
   format (name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, 'src/styles/Component', 'Text')
     addImport(imports, 'src/styles/TextStyles', 'TextStyles')
-    return `  ${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/\n|\r/g, '\n')}', TextStyles.${this.textStyle}, ${this.renderFrame()})`
+    return `  ${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')}', TextStyles.${this.textStyle}, ${this.renderFrame()})`
   }
 }
 
