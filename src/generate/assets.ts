@@ -156,7 +156,6 @@ export interface Slice9Args {
 
 const rowsStyle: ViewStyle = {
   display: 'flex',
-  width: '100%',
   flexDirection: 'row'
 }
 
@@ -186,17 +185,18 @@ export class Slice9 {
       height: y
     }, {
       ...rowsStyle,
-      flexGrow: 1
+      flexGrow: 1,
+      marginTop: -0.05 // Fixing accidental appearing empty lines
     }, {
       ...rowsStyle,
       height: bottom
     }].map((rowStyle: ViewStyle) => Object.freeze(rowStyle))
     this._styles = [
-      { width: x, height: y },
-      { flexGrow: 1, height: y },
-      { width: right, height: y },
       { width: x, height: '100%' },
-      { flexGrow: 1, height: '100%', borderWidth: 1 },
+      { flexGrow: 1, height: '100%' },
+      { width: right, height: '100%' },
+      { width: x, height: '100%' },
+      { flexGrow: 1, height: '100%' },
       { width: right, height: '100%' },
       { width: x, height: bottom },
       { flexGrow: 1, height: bottom },
