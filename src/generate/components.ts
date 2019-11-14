@@ -352,7 +352,7 @@ export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
 export interface IRenderOptions {
   vert?: TRenderGravity,
   horz?: TRenderGravity,
-  onPress?: () => {}
+  onPress?: () => any
 }
 
 function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions = {}, place: Placement, style?: T): T {
