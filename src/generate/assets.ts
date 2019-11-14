@@ -145,7 +145,11 @@ export class ImageAsset {
   }
 
   img (style?: FlexStyle) {
-    return <Image source={ this.source } style={ style as ImageStyle } />
+    const imgStyle = style as ImageStyle
+    if (style && imgStyle.resizeMode === 'stretch') {
+      return <Image source={ this.source } style={ imgStyle } fadeDuration={ 0 } />
+    }
+    return <Image source={ this.source } style={ imgStyle } />
   }
 }
 
