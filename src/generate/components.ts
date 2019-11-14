@@ -1,5 +1,5 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style } from 'sketch/dom'
-import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, ShapeType, FillType } from '../util/dom'
+import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType } from '../util/dom'
 import { write } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
@@ -302,9 +302,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
       }
     }
     if (isShapePath(layer)) {
-      if (layer.shapeType === ShapeType.Custom) {
-        component.items[name] = new Polygon(layer, layer.style)
-      }
+      component.items[name] = new Polygon(layer, layer.style)
     }
     if (isTextLayer(layer)) {
       const style = textStyles[layer.sharedStyleId]
