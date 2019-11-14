@@ -372,12 +372,18 @@ export class Component {
   backgroundColor: string | undefined
   width: number
   height: number
+  Text: (props: ITextProps) => JSX.Element
 
   constructor (name: string, width: number, height: number, backgroundColor?: string) {
     this.name = name
     this.backgroundColor = backgroundColor
     this.width = width
     this.height = height
+    this.Text = (props: ITextProps) => this.renderText(props.prototype, {
+      vert: props.vert,
+      horz: props.horz,
+      onPress: props.onPress
+    }, props.value, props.style)
   }
 
   renderText (text: Text, opts?: IRenderOptions, value?: string, style?: TextStyle) {
