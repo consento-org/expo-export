@@ -110,7 +110,7 @@ export function writeAssets (document: Document, target: (path: string) => strin
   if (assetFound) {
     write(target('src/Asset.tsx'), `${disclaimer}
 import React from 'react'
-import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType } from 'react-native'
+import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType, TouchableOpacity, FlexStyle } from 'react-native'
 
 class Cache<Type, Args> {
   cache: { [key: string]: Type } = {}
@@ -132,13 +132,20 @@ class Cache<Type, Args> {
 
 export class ImageAsset {
   source: ImageSourcePropType
+  component: (props: { style?: FlexStyle, onPress?: () => void }) => JSX.Element
 
   constructor (source: ImageSourcePropType) {
     this.source = source
+    this.component = ({ style, onPress }) =>  {
+      if (onPress !== undefined) {
+        return <TouchableOpacity onPress={ onPress } style={ style }>{ this.img() }</TouchableOpacity>
+      }
+      return this.img(style)
+    }
   }
 
-  img (style?: ImageStyle) {
-    return <Image source={ this.source } style={ style } />
+  img (style?: FlexStyle) {
+    return <Image source={ this.source } style={ style as ImageStyle } />
   }
 }
 
