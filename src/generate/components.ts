@@ -369,13 +369,14 @@ export function writeComponents (document: Document, target: (path: string) => s
     write(target('src/styles/Component.tsx'), `${disclaimer}
 import React from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
-import { ImageStyle, TextStyle, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity } from 'react-native'
+import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity } from 'react-native'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
 export interface IRenderOptions {
   vert?: TRenderGravity,
   horz?: TRenderGravity,
-  onPress?: () => any
+  onPress?: () => any,
+  onLayout?: () => any
 }
 
 function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions = {}, place: Placement, style?: T): T {
@@ -390,36 +391,114 @@ function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions
 // Todo: LRU?
 const renderCache: { [key: string]: ViewStyle } = {}
 
+export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle> {
+  targetRef?: React.RefObject<T>
+  vert?: TRenderGravity
+  horz?: TRenderGravity
+  style?: TStyle
+  onPress?: () => any
+  onLayout?: () => any
+}
+
+interface ITextBaseProps extends IBaseProps<NativeText | TextInput, TextStyle> {
+  value?: string
+  onEdit?: (text: string) => any
+  onBlur?: () => any
+}
+
+export interface ITextProps extends ITextBaseProps {
+  value: string
+  prototype: Text
+}
+
+export interface IImageProps extends IBaseProps<Image, ImageStyle> {
+  prototype: ImagePlacement
+}
+
+export interface ISlice9Props extends IBaseProps<View, ViewStyle> {
+  prototype: Slice9Placement
+}
+
+export interface IRenderProps<T extends React.Component, TStyle extends FlexStyle> extends IBaseProps<T, TStyle> {
+  place: Placement
+  item: (opts: {
+    ref?: React.RefObject<T>,
+    style?: TStyle
+  }) => JSX.Element
+}
+
 export class Component {
   name: string
   backgroundColor: string | undefined
   width: number
   height: number
-  Text: (props: ITextProps) => JSX.Element
 
   constructor (name: string, width: number, height: number, backgroundColor?: string) {
     this.name = name
     this.backgroundColor = backgroundColor
     this.width = width
     this.height = height
-    this.Text = (props: ITextProps) => this.renderText(props.prototype, {
-      vert: props.vert,
+    this.Render = this.Render.bind(this)
+    this.Text = this.Text.bind(this)
+    this.Image = this.Image.bind(this)
+    this.Slice9 = this.Slice9.bind(this)
+  }
+
+  Text (props: ITextProps) {
+    return this.Render({
+      ...props,
+      place: props.prototype.place,
+      item: ({ ref, style }) => props.prototype.render({
+        value: props.value,
+        style: applyRenderOptions(props, props.prototype.place, style),
+        onEdit: props.onEdit,
+        ref,
+        onBlur: props.onBlur
+      })
+    } as IRenderProps<NativeText, TextStyle>)
+  }
+
+  Image (props: IImageProps) {
+    const { prototype } = props
+    return this.Render({
+      ...props,
+      place: prototype.place,
+      item: ({ ref, style }) => prototype.img(applyRenderOptions(props, prototype.place, style), ref)
+    } as IRenderProps<Image, ImageStyle>)
+  }
+
+  Slice9 (props: ISlice9Props) {
+    const { prototype } = props
+    return this.Render({
+      ...props,
+      place: prototype.place,
+      item: ({ ref, style }) => prototype.render(applyRenderOptions(props, prototype.place, style), ref)
+    } as IRenderProps<View, ViewStyle>)
+  }
+
+  Render <T extends React.Component, S extends FlexStyle>(props: IRenderProps<T, S>) {
+    return this._renderItem(props.item({
+      ref: props.targetRef,
+      style: props.style
+    }), props.place, {
       horz: props.horz,
-      onPress: props.onPress
-    }, props.value, props.style)
+      vert: props.vert,
+      onPress: props.onPress,
+      onLayout: props.onLayout
+    })
   }
 
-  renderText (text: Text, opts?: IRenderOptions, value?: string, style?: TextStyle) {
+  renderText ({ text, opts, value, style, onEdit, ref, onLayout, onBlur }: { text: Text, opts?: IRenderOptions, value?: string, style?: TextStyle, onEdit?: (text: string) => any, ref?: React.RefObject<TextInput>, onLayout?: () => any, onBlur?: () => any }) {
     style = applyRenderOptions(opts, text.place, style)
-    return this._renderItem(text.render(value, style), text.place, opts)
+    return this._renderItem(text.render({ value, style, onEdit, ref, onLayout, onBlur }), text.place, opts)
   }
 
-  renderImage (asset: ImagePlacement, opts?: IRenderOptions, style?: ImageStyle) {
+  renderImage (asset: ImagePlacement, opts?: IRenderOptions, style?: ImageStyle, ref?: React.RefObject<Image>, onLayout?: () => any) {
     style = applyRenderOptions(opts, asset.place, style)
     if (opts.horz === 'stretch' || opts.vert === 'stretch') {
       style.resizeMode = 'stretch'
     }
-    return this._renderItem(asset.img(style), asset.place, opts)
+    return this._renderItem(asset.img(style, ref, onLayout), asset.place, opts)
   }
 
   renderSlice9 (asset: Slice9Placement, opts?: IRenderOptions, style?: ViewStyle) {
@@ -466,9 +545,9 @@ export class Component {
       renderCache[vertKey] = vertStyle
     }
     if (onPress !== null && onPress !== undefined) {
-      item = <TouchableOpacity onPress={ onPress }>{ item }</TouchableOpacity>
+      item = <TouchableOpacity onLayout={ onLayout } onPress={ onPress }>{ item }</TouchableOpacity>
     }
-    return <View style={ horzStyle }><View style={ vertStyle }>{ item }</View></View>
+    return <View onLayout={ onLayout } style={ horzStyle }><View style={ vertStyle }>{ item }</View></View>
   }
 }
 
@@ -550,10 +629,18 @@ export class ImagePlacement {
     this.asset = asset
     this.place = new Placement(frame)
     this.parent = parent
+    this.Render = this.Render.bind(this)
   }
 
-  img (style?: ImageStyle) {
-    return this.asset().img(style)
+  Render (props: IBaseProps<Image, ImageStyle>) {
+    return this.parent.Image({
+      ...props,
+      prototype: this
+    })
+  }
+
+  img (style?: ImageStyle, ref?: React.RefObject<Image>, onLayout?: () => any) {
+    return this.asset().img(style, ref, onLayout)
   }
 }
 
@@ -568,8 +655,8 @@ export class Slice9Placement {
     this.parent = parent
   }
 
-  render (style?: ViewStyle) {
-    return this.asset().render(style)
+  render (style?: ViewStyle, ref?: React.RefObject<View>, onLayout?: () => any) {
+    return this.asset().render(style, ref, onLayout)
   }
 }
 
@@ -751,6 +838,15 @@ export class Polygon {
   }
 }
 
+export interface ITextRenderOptions {
+  value?: string
+  style?: TextStyle
+  ref?: React.RefObject<NativeText | TextInput>
+  onLayout?: () => any
+  onBlur?: () => any
+  onEdit?: (text: string) => any
+}
+
 export class Text {
   text: string
   style: TextStyle
@@ -768,25 +864,45 @@ export class Text {
       ... this.place.style(),
       position: 'absolute'
     })
+    this.Render = this.Render.bind(this)
   }
 
-  render (value?: string, style?: TextStyle) {
-    return <NativeText style={{
+  Render (props: ITextBaseProps) {
+    return this.parent.Text({
+      ...props,
+      value: props.value === undefined ? this.text : props.value,
+      prototype: this
+    })
+  }
+
+  render ({ value, style, onEdit, ref, onLayout, onBlur }: ITextRenderOptions) {
+    if (value !== undefined) {
+      value = String(value)
+    } else {
+      value = this.text
+    }
+    if (onEdit !== undefined) {
+      return <TextInput onChangeText={ text => value = text} onSubmitEditing={ () => onEdit(value) } onLayout={ onLayout } onBlur={ onBlur } ref={ ref as React.RefObject<TextInput> } style={{
+        ...this.style,
+        ...style
+      }}>{ value }</TextInput>
+    }
+    return <NativeText onLayout={ onLayout } ref={ ref } style={{
       ...this.style,
       ...style
-    }}>{ value === undefined ? this.text : String(value) }</NativeText>
+    }}>{ value }</NativeText>
   }
 
-  renderAbsolute (value?: string, style?: TextStyle) {
-    if (style === undefined || style === null) {
-      style = this.styleAbsolute
+  renderAbsolute (opts: ITextRenderOptions) {
+    if (opts.style === undefined || opts.style === null) {
+      opts.style = this.styleAbsolute
     } else {
-      style = {
-        ...style,
+      opts.style = {
+        ...opts.style,
         ...this.styleAbsolute
       }
     }
-    return this.render(value, style)
+    return this.render(opts)
   }
 }
 `)
