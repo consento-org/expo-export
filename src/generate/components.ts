@@ -16,11 +16,16 @@ abstract class Component {
     this.type = type
   }
 
-  abstract format (name: string, imports: Imports, getColor: FGetColor): string
+  abstract format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat
 
   renderFrame (): string {
     return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
   }
+}
+
+interface IComponentPropertyFormat {
+  property: string
+  init?: string
 }
 
 class Image extends Component {
@@ -31,10 +36,14 @@ class Image extends Component {
     this.asset = asset
   }
 
-  format (name: string, imports: Imports, _: FGetColor): string {
+  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/Asset', 'Asset')
     addImport(imports, 'src/styles/Component', 'ImagePlacement')
-    return `  ${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return {
+      property: `  ${name}: ImagePlacement`,
+      init: `
+    this.${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()}, this)`
+    }
   }
 }
 
@@ -46,10 +55,14 @@ class Slice9 extends Component {
     this.asset = asset
   }
 
-  format (name: string, imports: Imports, _: FGetColor): string {
+  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/Asset', 'Asset')
     addImport(imports, 'src/styles/Component', 'Slice9Placement')
-    return `  ${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return {
+      property: `  ${name}: Text`,
+      init: `
+    this.${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()}, this)`
+    }
   }
 }
 
@@ -62,10 +75,14 @@ class TextComponent extends Component {
     this.textStyle = textStyle
   }
 
-  format (name: string, imports: Imports, _: FGetColor): string {
+  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/styles/Component', 'Text')
     addImport(imports, 'src/styles/TextStyles', 'TextStyles')
-    return `  ${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')}', TextStyles.${this.textStyle}, ${this.renderFrame()})`
+    return {
+      property: `  ${name}: Text`,
+      init: `
+    this.${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')}', TextStyles.${this.textStyle}, ${this.renderFrame()}, this)`
+    }
   }
 }
 
@@ -76,10 +93,12 @@ class Link extends Component {
     this.target = target
   }
 
-  format (name: string, imports: Imports): string {
+  format (name: string, imports: Imports): IComponentPropertyFormat {
     addImport(imports, `src/styles/component/${this.target}`, this.target)
     addImport(imports, 'src/styles/Component', 'Link')
-    return `  ${name} = new Link(${this.target}, ${this.renderFrame()})`
+    return {
+      property: `  ${name} = new Link(${this.target}, ${this.renderFrame()})`
+    }
   }
 }
 
@@ -134,9 +153,11 @@ class Polygon extends Component {
     this.shadows = style.shadows.filter(shadow => shadow.enabled && isVisibleColor(shadow.color))
   }
 
-  format (name: string, imports: Imports, getColor: FGetColor): string {
+  format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/styles/Component', 'Polygon')
-    return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.borderRadius}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
+    return {
+      property: `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.borderRadius}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
+    }
   }
 
   renderBorders (imports, getColor: FGetColor): string {
@@ -317,16 +338,18 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
 function renderComponent (component: IComponent, getColor: FGetColor): string {
   const imports: Imports = {}
   addImport(imports, 'src/styles/Component', 'Component')
-  const body = Object.keys(component.items).map(name => component.items[name].format(name, imports, getColor)).join('\n')
-  const constructorBody = `super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})`
+  const properties = Object.keys(component.items).map(name => component.items[name].format(name, imports, getColor))
+  const body = properties.map(property => property.property).join('\n')
+  const propertyInit = properties.map(property => property.init).filter(init => init !== undefined).join('')
+  const constructorBody = `
+    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})${propertyInit}`
 
   return `${disclaimer}
 ${renderImports(imports, 'src/styles/component')}
 
 export class ${classForTarget(component.name)} extends Component {
 ${body}
-  constructor () {
-    ${constructorBody}
+  constructor () {${constructorBody}
   }
 }
 
@@ -521,10 +544,12 @@ export class Placement {
 export class ImagePlacement {
   place: Placement
   asset: () => ImageAsset
+  parent: Component
 
-  constructor (asset: () => ImageAsset, frame: IFrameData) {
+  constructor (asset: () => ImageAsset, frame: IFrameData, parent: Component) {
     this.asset = asset
     this.place = new Placement(frame)
+    this.parent = parent
   }
 
   img (style?: ImageStyle) {
@@ -535,10 +560,12 @@ export class ImagePlacement {
 export class Slice9Placement {
   place: Placement
   asset: () => Slice9
+  parent: Component
 
-  constructor (asset: () => Slice9, frame: IFrameData) {
+  constructor (asset: () => Slice9, frame: IFrameData, parent: Component) {
     this.asset = asset
     this.place = new Placement(frame)
+    this.parent = parent
   }
 
   render (style?: ViewStyle) {
@@ -729,10 +756,12 @@ export class Text {
   style: TextStyle
   styleAbsolute: TextStyle
   place: Placement
+  parent: Component
 
-  constructor (text: string, style: TextStyle, frame: IFrameData) {
+  constructor (text: string, style: TextStyle, frame: IFrameData, parent: Component) {
     this.text = text
     this.style = style
+    this.parent = parent
     this.place = new Placement(frame)
     this.styleAbsolute = Object.freeze({
       ... style,
