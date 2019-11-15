@@ -144,12 +144,12 @@ export class ImageAsset {
     }
   }
 
-  img (style?: FlexStyle) {
+  img (style?: FlexStyle, ref?: React.RefObject<Image>, onLayout?: () => any) {
     const imgStyle = style as ImageStyle
     if (style && imgStyle.resizeMode === 'stretch') {
-      return <Image source={ this.source } style={ imgStyle } fadeDuration={ 0 } />
+      return <Image ref={ ref } onLayout={ onLayout } source={ this.source } style={ imgStyle } fadeDuration={ 0 } />
     }
-    return <Image source={ this.source } style={ imgStyle } />
+    return <Image ref={ ref } onLayout={ onLayout } source={ this.source } style={ imgStyle } />
   }
 }
 
