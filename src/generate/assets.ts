@@ -252,10 +252,10 @@ export class Slice9 {
     </View>
   }
 }
-
-const images = new Cache<ImageAsset, ImageSourcePropType> (ImageAsset)
-const slice9s = new Cache<Slice9, Slice9Args> (Slice9)
-
+${[
+    Object.keys(assets).length > 0 ? `const images = new Cache<ImageAsset, ImageSourcePropType> (ImageAsset)` : '',
+    Object.keys(slice9s).length > 0 ? `const slice9s = new Cache<Slice9, Slice9Args> (Slice9)` : ''
+].join('\n') }
 export const Asset = {
 ${
   Object.keys(assets).map(name => {
