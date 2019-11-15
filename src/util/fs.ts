@@ -29,6 +29,10 @@ export function targetFolder (path: string): (sub: string) => string {
   return (sub: string) => sub === '' ? base : `${base}/${sub}`
 }
 
+export function readPluginAsset (file: string): Buffer {
+  return readFileSync(`${(global as any).context.plugin.url().absoluteString()}/Contents/Resources/${file}`.replace(/^file:\/\//, ''))
+}
+
 export function write (pth: string, data: any): boolean {
   if (data === undefined) {
     console.log(`Skipping ${pth}.`)
