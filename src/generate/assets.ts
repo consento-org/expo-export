@@ -258,12 +258,12 @@ ${[
 ].join('\n') }
 export const Asset = {
 ${
-  Object.keys(assets).map(name => {
+  Object.keys(assets).sort().map(name => {
     const asset = assets[name]
     return `  ${name} () {
     return images.fetch('${name}', () => require('../${asset}'))
   }`
-  }).concat(Object.keys(slice9s).map(name => {
+  }).concat(Object.keys(slice9s).sort().map(name => {
     const slice9 = slice9s[name]
     return `  ${name} () {
     return slice9s.fetch('buttonBackgroundEnabled', () => ({
