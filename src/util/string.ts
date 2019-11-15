@@ -69,3 +69,7 @@ export function slugify (str: string, separator: string = '-'): string {
   }
   return bySeparator(str)
 }
+
+export function stringSort (a: string, b: string): number {
+  return a.localeCompare(b)
+}

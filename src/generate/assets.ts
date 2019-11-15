@@ -1,7 +1,8 @@
 import sketch, { Document, AnyLayer, Slice, Artboard } from 'sketch/dom'
-import { write } from '../util/fs'
+import { write, readPluginAsset } from '../util/fs'
 import { iterateDocument, isIgnored, isSlice9 } from '../util/dom'
-import { slugifyName, childName } from '../util/string'
+import { slugifyName, childName, stringSort } from '../util/string'
+import { template, replace } from '../util/template'
 import { disclaimer } from './disclaimer'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
@@ -109,180 +110,60 @@ export function writeAssets (document: Document, target: (path: string) => strin
   })
   if (assetFound) {
     write(target('src/Asset.tsx'), `${disclaimer}
-import React from 'react'
-import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType, TouchableOpacity, FlexStyle } from 'react-native'
-
-class Cache<Type, Args> {
-  cache: { [key: string]: Type } = {}
-  clazz: { new (Args): Type }
-
-  constructor (clazz: { new (Args: Args): Type }) {
-    this.clazz = clazz
-  }
-
-  fetch (key: string, load: () => Args): Type {
-    let result = this.cache[key]
-    if (result === undefined) {
-      result = new this.clazz(load())
-      this.cache[key] = result
-    }
-    return result
-  }
-}
-
-export class ImageAsset {
-  source: ImageSourcePropType
-  component: (props: { style?: FlexStyle, onPress?: () => void }) => JSX.Element
-
-  constructor (source: ImageSourcePropType) {
-    this.source = source
-    this.component = ({ style, onPress }) =>  {
-      if (onPress !== undefined) {
-        return <TouchableOpacity onPress={ onPress } style={ style }>{ this.img() }</TouchableOpacity>
-      }
-      return this.img(style)
-    }
-  }
-
-  img (style?: FlexStyle, ref?: React.RefObject<Image>, onLayout?: () => any) {
-    const imgStyle = style as ImageStyle
-    if (style && imgStyle.resizeMode === 'stretch') {
-      return <Image ref={ ref } onLayout={ onLayout } source={ this.source } style={ imgStyle } fadeDuration={ 0 } />
-    }
-    return <Image ref={ ref } onLayout={ onLayout } source={ this.source } style={ imgStyle } />
-  }
-}
-
-export interface Slice9Args {
-  w: number
-  h: number
-  slice: {
-    x: number
-    y: number
-    w: number
-    h: number
-  }
-  slices: ImageSourcePropType[]
-}
-
-const rowsStyle: ViewStyle = {
-  display: 'flex',
-  flexDirection: 'row'
-}
-
-export class Slice9 {
-  width: number
-  height: number
-  _rows: ViewStyle[]
-  _columsStyle: ViewStyle
-  _styles: ImageStyle[]
-  _slices: ImageSourcePropType[]
-
-  constructor ({ w, h, slice, slices }: Slice9Args) {
-    this.width = w
-    this.height = h
-    const x = (slice.x + 0.5) | 0
-    const y = (slice.y + 0.5) | 0
-    const right = (w - x - slice.w + 0.5) | 0
-    const bottom = (h - y - slice.h + 0.5) | 0
-    this._columsStyle = {
-      display: 'flex',
-      width: w,
-      height: h,
-      flexDirection: 'column'
-    }
-    this._rows = [{
-      ...rowsStyle,
-      height: y
-    }, {
-      ...rowsStyle,
-      flexGrow: 1,
-      marginTop: -0.05 // Fixing accidental appearing empty lines
-    }, {
-      ...rowsStyle,
-      height: bottom
-    }].map((rowStyle: ViewStyle) => Object.freeze(rowStyle))
-    this._styles = [
-      { width: x, height: '100%' },
-      { flexGrow: 1, height: '100%' },
-      { width: right, height: '100%' },
-      { width: x, height: '100%' },
-      { flexGrow: 1, height: '100%' },
-      { width: right, height: '100%' },
-      { width: x, height: bottom },
-      { flexGrow: 1, height: bottom },
-      { width: right, height: bottom }
-    ].map((style: ImageStyle) => {
-      // Causes images to flicker on first render
-      // It looks weird if only the streched images flicker.
-      style.resizeMode = 'stretch'
-      return Object.freeze(style)
-    })
-    if (slices.length !== 9) {
-      throw new Error('For a slice-9 we need 9 resources!')
-    }
-    this._slices = slices
-  }
-
-  render (style?: ViewStyle) {
-    if (style === null || style === undefined) {
-      style = this._columsStyle
-    } else {
-      style = {
-        ...this._columsStyle,
-        ...style
+${template(readPluginAsset('Asset.tsx').toString(), {
+    lines: {
+      skip: () => '',
+      images: input => Object.keys(assets).length > 0 ? input : '',
+      slice9: input => Object.keys(slice9s).length > 0 ? input : ''
+    },
+    blocks: {
+      properties: parts => {
+        let result = []
+        template(parts, {
+          blocks: {
+            image: template => {
+              result = result.concat(
+                Object.keys(assets).sort(stringSort).map(name => {
+                  const asset = assets[name]
+                  return replace(template, {
+                    name, asset
+                  })
+                })
+              )
+              return ''
+            },
+            slice9: template => {
+              result = result.concat(
+                Object.keys(slice9s).sort(stringSort).map(name => {
+                  const slice9 = slice9s[name]
+                  return replace(template, {
+                    slice9: name,
+                    width: slice9.width,
+                    height: slice9.height,
+                    sliceX: slice9.slice.x,
+                    sliceY: slice9.slice.y,
+                    sliceW: slice9.slice.width,
+                    sliceH: slice9.slice.height,
+                    path0: slice9.path(0, 0),
+                    path1: slice9.path(0, 1),
+                    path2: slice9.path(0, 2),
+                    path3: slice9.path(1, 0),
+                    path4: slice9.path(1, 1),
+                    path5: slice9.path(1, 2),
+                    path6: slice9.path(2, 0),
+                    path7: slice9.path(2, 1),
+                    path8: slice9.path(2, 2)
+                  })
+                })
+              )
+              return ''
+            }
+          }
+        })
+        return result.map(entry => entry.replace(/\n$/ig, '')).join(',\n') + '\n'
       }
     }
-    return <View style={ style }>
-      <View style={ this._rows[0] }>
-        <Image source={ this._slices[0] } style={ this._styles[0] } fadeDuration={ 0 } />
-        <Image source={ this._slices[1] } style={ this._styles[1] } fadeDuration={ 0 } />
-        <Image source={ this._slices[2] } style={ this._styles[2] } fadeDuration={ 0 } />
-      </View>
-      <View style={ this._rows[1] }>
-        <Image source={ this._slices[3] } style={ this._styles[3] } fadeDuration={ 0 } />
-        <Image source={ this._slices[4] } style={ this._styles[4] } fadeDuration={ 0 } />
-        <Image source={ this._slices[5] } style={ this._styles[5] } fadeDuration={ 0 } />
-      </View>
-      <View style={ this._rows[2] }>
-        <Image source={ this._slices[6] } style={ this._styles[6] } fadeDuration={ 0 } />
-        <Image source={ this._slices[7] } style={ this._styles[7] } fadeDuration={ 0 } />
-        <Image source={ this._slices[8] } style={ this._styles[8] } fadeDuration={ 0 } />
-      </View>
-    </View>
-  }
-}
-${[
-    Object.keys(assets).length > 0 ? `const images = new Cache<ImageAsset, ImageSourcePropType> (ImageAsset)` : '',
-    Object.keys(slice9s).length > 0 ? `const slice9s = new Cache<Slice9, Slice9Args> (Slice9)` : ''
-].join('\n') }
-export const Asset = {
-${
-  Object.keys(assets).sort().map(name => {
-    const asset = assets[name]
-    return `  ${name} () {
-    return images.fetch('${name}', () => require('../${asset}'))
-  }`
-  }).concat(Object.keys(slice9s).sort().map(name => {
-    const slice9 = slice9s[name]
-    return `  ${name} () {
-    return slice9s.fetch('buttonBackgroundEnabled', () => ({
-      w: ${slice9.width}, h: ${slice9.height}, slice: { x: ${slice9.slice.x}, y: ${slice9.slice.y}, w: ${slice9.slice.width}, h: ${slice9.slice.height} },
-      slices: [
-        require('../${slice9.path(0, 0)}'),
-        require('../${slice9.path(0, 1)}'),
-        require('../${slice9.path(0, 2)}'),
-        require('../${slice9.path(1, 0)}'),
-        require('../${slice9.path(1, 1)}'),
-        require('../${slice9.path(1, 2)}'),
-        require('../${slice9.path(2, 0)}'),
-        require('../${slice9.path(2, 1)}'),
-        require('../${slice9.path(2, 2)}')
-      ]
-    }))
-  }`
-  })).join(',\n')}
-}
+  })}
 `)
   }
   return idNameMap
