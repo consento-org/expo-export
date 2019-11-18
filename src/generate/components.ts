@@ -248,7 +248,7 @@ class Polygon extends Component {
 }
 
 function classForTarget (target: string): string {
-  return `${target}Class`
+  return `${target.charAt(0).toUpperCase()}${target.substr(1)}Class`
 }
 
 interface IComponent {
@@ -353,7 +353,7 @@ ${body}
   }
 }
 
-export const ${component.name} = new ${component.name}Class()
+export const ${component.name} = new ${classForTarget(component.name)}()
 `
 }
 
