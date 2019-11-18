@@ -347,6 +347,7 @@ function renderComponent (component: IComponent, getColor: FGetColor): string {
   return `${disclaimer}
 ${renderImports(imports, 'src/styles/component')}
 
+/* eslint-disable lines-between-class-members */
 export class ${classForTarget(component.name)} extends Component {
 ${body}
   constructor () {${constructorBody}
