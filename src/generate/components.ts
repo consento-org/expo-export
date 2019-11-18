@@ -189,7 +189,7 @@ class Polygon extends Component {
     if (options.dashPattern.length > 0) {
       props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
     }
-    return `{ ${props.map(([prop, value]) => `
+    return `{${props.map(([prop, value]) => `
     ${prop}: ${value}`).join(',')}
   }`
   }
@@ -200,7 +200,7 @@ class Polygon extends Component {
     }
     const shadows = []
     for (const shadow of this.shadows) {
-      shadows.push(`{ x:${shadow.x}, y:${shadow.y}, blur:${shadow.blur}, spread:${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
+      shadows.push(`{ x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
     }
     return `[
     ${shadows.join(',\n    ')}
