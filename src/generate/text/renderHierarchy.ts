@@ -42,9 +42,9 @@ function renderFormat (getColor: FGetColor, stack: StackEntry[], fullName: strin
   if (props.length === 0) {
     return null
   }
-  return `export const ${fullName} = Object.freeze({
+  return `export const ${fullName}: TextStyle = Object.freeze({
   ${props.join(',\n  ')}
-} as TextStyle)
+})
 `
 }
 
