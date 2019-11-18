@@ -512,8 +512,9 @@ export class Text {
     } else {
       value = this.text
     }
+    const originalValue = value
     if (onEdit !== undefined) {
-      return <TextInput onChangeText={ text => value = text} onSubmitEditing={ () => onEdit(value) } onLayout={ onLayout } onBlur={ onBlur } ref={ ref as React.RefObject<TextInput> } style={{
+      return <TextInput onChangeText={ text => value = text} onSubmitEditing={ () => originalValue !== value ? onEdit(value) : null } onLayout={ onLayout } onBlur={ onBlur } ref={ ref as React.RefObject<TextInput> } style={{
         ...this.style,
         ...style
       }}>{ value }</TextInput>
