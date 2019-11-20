@@ -6,6 +6,9 @@ import { Imports, addImport, renderImports } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
 import { disclaimer } from './disclaimer'
+import { TIDLookup, TIDData, getTextFormatRenderProps, formatFontProps } from './text/renderHierarchy'
+import { ITextFormat } from './text/TextFormat'
+import { processStyle } from './text/collectTextStyles'
 
 abstract class Component {
   layer: AnyLayer
@@ -66,23 +69,58 @@ class Slice9 extends Component {
   }
 }
 
+const compareTextProps = formatFontProps.filter(prop => prop !== 'fontFamily')
+
+function compareTextFormat (base: ITextFormat, target: ITextFormat): ITextFormat {
+  let difference: ITextFormat = null
+  compareTextProps.forEach(key => {
+    if (target[key] !== base[key]) {
+      if (difference === null) {
+        difference = {}
+      }
+      difference[key] = target[key]
+    }
+  })
+  return difference
+}
+
 class TextComponent extends Component {
+  _layer: Text
   text: string
-  textStyle: string
-  constructor (layer: Text, textStyle: string) {
+  textStyle: TIDData
+
+  constructor (layer: Text, textStyle: TIDData) {
     super(layer, 'text')
+    this._layer = layer
     this.text = layer.text
     this.textStyle = textStyle
   }
 
-  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
+  format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/styles/Component', 'Text')
-    addImport(imports, 'src/styles/TextStyles', 'TextStyles')
     return {
       property: `  ${name}: Text`,
       init: `
-    this.${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')}', TextStyles.${this.textStyle}, ${this.renderFrame()}, this)`
+    this.${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')}', ${this.renderTextStyle(imports, getColor)}, ${this.renderFrame()}, this)`
     }
+  }
+
+  renderTextStyle (imports: Imports, getColor: FGetColor) {
+    const layerStyle = processStyle(this._layer.style)
+    if (this.textStyle === undefined) {
+      return `{
+        ${getTextFormatRenderProps(layerStyle, getColor, imports).join(',\n      ')}
+      }`
+    }
+    addImport(imports, 'src/styles/TextStyles', 'TextStyles')
+    const difference = compareTextFormat(this.textStyle.style, layerStyle)
+    if (difference === null) {
+      return `TextStyles.${this.textStyle.name}`
+    }
+    return `{
+      ... TextStyles.${this.textStyle.name},
+      ${getTextFormatRenderProps(difference, getColor, imports).join(',\n      ')}
+    }`
   }
 }
 
@@ -273,7 +311,7 @@ function isExportedArtboard (artboard: Artboard): boolean {
   return hasSlice9(artboard)
 }
 
-function collectComponents (document: Document, textStyles: { [id: string]: string }): { [path: string]: IComponent } {
+function collectComponents (document: Document, textStyles: TIDLookup): { [path: string]: IComponent } {
   const components = {}
   let component: IComponent
   iterateDocument(document, (layer, parentNames): boolean => {
@@ -327,9 +365,7 @@ function collectComponents (document: Document, textStyles: { [id: string]: stri
     }
     if (isTextLayer(layer)) {
       const style = textStyles[layer.sharedStyleId]
-      if (style !== undefined) {
-        component.items[name] = new TextComponent(layer, style)
-      }
+      component.items[name] = new TextComponent(layer, style)
     }
   })
   return components
@@ -358,7 +394,7 @@ export const ${component.name} = new ${classForTarget(component.name)}()
 `
 }
 
-export function writeComponents (document: Document, target: (path: string) => string, textStyles: { [id: string]: string }): void {
+export function writeComponents (document: Document, target: (path: string) => string, textStyles: TIDLookup): void {
   const components = collectComponents(document, textStyles)
   const getColor = getColorFactory(document)
   let hasComponent = false
