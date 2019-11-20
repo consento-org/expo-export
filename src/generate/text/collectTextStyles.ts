@@ -3,22 +3,28 @@ import { Hierarchy } from '../../util/hierarchy'
 import { TextFormat } from './TextFormat'
 import { fontShortID } from '../font'
 
-export type TFontName = (id: string) => string
+export type TGetFontName = (id: string) => string
 
-function processShared (shared: SharedStyle<TextStyle>, fontName: TFontName): TextFormat {
+export function processStyle (style: TextStyle) {
+  return {
+    fontSize: style.fontSize,
+    color: style.textColor,
+    lineHeight: style.lineHeight,
+    textTransform: style.textTransform,
+    textAlign: style.alignment,
+    textAlignVertical: style.verticalAlignment
+  }
+}
+
+function processShared (shared: SharedStyle<TextStyle>, fontName: TGetFontName): TextFormat {
   return new TextFormat({
     id: shared.id,
     fontFamily: fontShortID(fontName(shared.id)),
-    fontSize: shared.style.fontSize,
-    color: shared.style.textColor,
-    lineHeight: shared.style.lineHeight,
-    textTransform: shared.style.textTransform,
-    textAlign: shared.style.alignment,
-    textAlignVertical: shared.style.verticalAlignment
+    ... processStyle(shared.style)
   })
 }
 
-export function collectTextStyles (document: Document, fontName: TFontName): Hierarchy<TextFormat> {
+export function collectTextStyles (document: Document, fontName: TGetFontName): Hierarchy<TextFormat> {
   const styles: Hierarchy<TextFormat> = {}
   document.sharedTextStyles.forEach(shared => {
     const parts = shared.name.split('/').map(part => part.replace(/^\s+|\s+$/ig, ''))
