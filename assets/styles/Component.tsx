@@ -490,11 +490,11 @@ export class Text {
     this.style = style
     this.parent = parent
     this.place = new Placement(frame)
-    this.styleAbsolute = Object.freeze({
+    this.styleAbsolute = {
       ... style,
       ... this.place.style(),
       position: 'absolute'
-    })
+    }
     this.Render = this.Render.bind(this)
   }
 
