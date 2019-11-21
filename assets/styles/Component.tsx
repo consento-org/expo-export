@@ -307,9 +307,15 @@ export interface IStop {
   position: number
 }
 
+export enum GradientType {
+  linear = 'linear',
+  radial = 'radial',
+  angular = 'angular'
+}
+
 export interface IGradient {
   gradient: {
-    type: 'linear',
+    type: GradientType,
     stops: IStop[],
     from: {
       x: number,

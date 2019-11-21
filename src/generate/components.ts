@@ -1,4 +1,4 @@
-import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style } from 'sketch/dom'
+import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType } from '../util/dom'
 import { write, readPluginAsset } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
@@ -175,6 +175,12 @@ function getBorderRadius (layer: ShapePath): number {
   return radius
 }
 
+function mapGradientType (input: GradientType) {
+  if (input === 'Linear') return 'linear'
+  if (input === 'Radial') return 'radial'
+  return 'angular'
+}
+
 class Polygon extends Component {
   fills: Fill[]
   borders: Border[]
@@ -258,13 +264,12 @@ class Polygon extends Component {
       return getColor(fill.color, imports)
     }
     if (fill.fillType === FillType.Gradient) {
+      addImport(imports, 'src/styles/Component', 'GradientType')
       return `{ gradient: {
-  type: '${fill.gradient.gradientType}',
-  stops: [${fill.gradient.stops.map(stop => `
-    color: ${getColor(stop.color)},
-    position: ${stop.position},
-    lineHeight: ${stop.lineHeight},
-    textColor: ${getColor(stop.textColor)}
+  type: GradientType.${mapGradientType(fill.gradient.gradientType)},
+  stops: [${fill.gradient.stops.map(stop => `{
+    color: ${getColor(stop.color, imports)},
+    position: ${stop.position}
   }`)}],
   from: {
     x: ${fill.gradient.from.x},
@@ -274,7 +279,7 @@ class Polygon extends Component {
     x: ${fill.gradient.to.x},
     y: ${fill.gradient.to.y}
   }
-}}`
+} }`
     }
     if (fill.fillType === FillType.Pattern) {
       // This requires for the image of all gradient patterns to be

@@ -27,24 +27,23 @@ declare module "sketch/dom" {
     name: string
     gradient: Gradient
   }
+  export interface Point {
+    x: number
+    y: number
+  }
   export class GradientStop {
     color: string
     position: number
     textColor: string
     lineHeight?: number
   }
+  export type GradientType = 'Linear' | 'Radial' | 'Angular'
   export class Gradient {
     stops: GradientStop[]
-    gradientType: 'linear'
-    to: {
-      x: number,
-      y: number
-    }
+    gradientType: GradientType
+    to: Point
     aspectRatio: number
-    from: {
-      x: number,
-      y: number
-    }
+    from: Point
   }
 
   export interface Pattern {
