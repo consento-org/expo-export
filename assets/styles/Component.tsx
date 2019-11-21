@@ -1,6 +1,7 @@
 import React from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
 import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
 export interface IRenderOptions {
@@ -466,6 +467,33 @@ export class Polygon {
     this.borderRadius = borderRadius
     this.border = new Border(border)
     this.shadows = shadows.map(data => new Shadow(data))
+    this.RenderRect = this.RenderRect.bind(this)
+  }
+
+  RenderRect ({ style, ref, onLayout }: { style?: ViewStyle, ref?: React.RefObject<any>, onLayout?: () => any } = {}): JSX.Element {
+    const data = this.fill.data
+    if (typeof data === 'string') {
+      return <View style={{
+        ...style,
+        ...this.borderStyle(),
+        backgroundColor: data
+      }} />
+    }
+    if (isError(data)) {
+      throw new Error(data.error)
+    }
+    return <LinearGradient
+      colors={ data.gradient.stops.map(stop => stop.color) }
+      locations={ data.gradient.stops.map(stop => stop.position) }
+      start={ [ data.gradient.from.x, data.gradient.from.y ] }
+      end={ [ data.gradient.to.x, data.gradient.to.y ] }
+      ref={ ref }
+      onLayout={ onLayout }
+      style={{
+        ...this.borderStyle(),
+        ...style
+      }}
+    />
   }
 
   borderStyle (): ViewStyle {
