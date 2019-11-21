@@ -39,6 +39,12 @@ export function write (pth: string, data: any): boolean {
     return
   }
   mkdirp(dirname(pth))
+  if (existsSync(pth)) {
+    if (readFileSync(pth).toString() === data.toString()) {
+      console.log(`No change ${pth}`)
+      return
+    }
+  }
   const res = writeFileSync(pth, data)
   console.log(`Wrote ${pth}.`)
   return res
