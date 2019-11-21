@@ -294,10 +294,12 @@ export class Slice9Placement {
 export class Link <T> {
   place: Placement
   component: T
+  text: { [prop: string]: string }
 
-  constructor (component: T, frame: IFrameData) {
+  constructor (component: T, frame: IFrameData, text: { [prop: string]: string }) {
     this.component = component
     this.place = new Placement(frame)
+    this.text = text
   }
 }
 

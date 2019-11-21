@@ -218,14 +218,14 @@ declare module "sketch/dom" {
     height: number
   }
 
-  export class Override {
+  export class Override<Layer = Text | Image | Symbol, Value = string | ImageData> {
     path: string
     property: 'stringValue' | 'symbolID' | 'layerStyle' | 'textStyle' | 'flowDestination' | 'image'
     // The unique ID of the override (${path}_${property}).
     id: string
-    value: string | ImageData
+    value: Value
     isDefault: boolean
-    affectedLayer: Text | Image | Symbol
+    affectedLayer: Layer
     editable: boolean
     getFrame (): Rectangle
   }
@@ -283,11 +283,11 @@ declare module "sketch/dom" {
 
   export class SymbolInstance extends Layer<Type.instance> {
     symbolId: string
+    overrides: Override[]
   }
 
   export class SymbolMaster extends Layer<Type.master> {
     symbolId: string
-    overrides: Override[]
   }
 
   export class Group<Type extends string = Type.group, Parent = LayerParent>  extends Layer<Type, Parent> {

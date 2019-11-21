@@ -1,5 +1,5 @@
-import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType } from 'sketch/dom'
-import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType } from '../util/dom'
+import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance } from 'sketch/dom'
+import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType, isTextOverride } from '../util/dom'
 import { write, readPluginAsset } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
@@ -84,6 +84,10 @@ function compareTextFormat (base: ITextFormat, target: ITextFormat): ITextFormat
   return difference
 }
 
+function safeText (input: string): string {
+  return input.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')
+}
+
 class TextComponent extends Component {
   _layer: Text
   text: string
@@ -101,7 +105,7 @@ class TextComponent extends Component {
     return {
       property: `  ${name}: Text`,
       init: `
-    this.${name} = new Text('${this.text.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')}', ${this.renderTextStyle(imports, getColor)}, ${this.renderFrame()}, this)`
+    this.${name} = new Text('${safeText(this.text)}', ${this.renderTextStyle(imports, getColor)}, ${this.renderFrame()}, this)`
     }
   }
 
@@ -124,19 +128,44 @@ class TextComponent extends Component {
   }
 }
 
+interface ITextOverride {
+  path: string,
+  value: string
+}
+
 class Link extends Component {
   target: string
-  constructor (layer: AnyLayer, target: string) {
+  textOverrides: ITextOverride[]
+
+  constructor (layer: SymbolInstance, target: string) {
     super(layer, 'link')
     this.target = target
+    this.textOverrides = layer.overrides
+      .map(override => isTextOverride(override) ? override : null)
+      .filter(override => override !== null && !override.isDefault)
+      .map(override => {
+        return {
+          path: childName(override.affectedLayer.name),
+          value: override.value
+        }
+      })
   }
 
   format (name: string, imports: Imports): IComponentPropertyFormat {
     addImport(imports, `src/styles/component/${this.target}`, this.target)
     addImport(imports, 'src/styles/Component', 'Link')
     return {
-      property: `  ${name} = new Link(${this.target}, ${this.renderFrame()})`
+      property: `  ${name} = new Link(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
     }
+  }
+
+  renderTextOverrides (): string {
+    if (this.textOverrides.length === 0) {
+      return '{}'
+    }
+    return `{
+    ${this.textOverrides.map(override => `${override.path}: '${safeText(override.value)}'`).join(',\n    ')}
+  }`
   }
 }
 
