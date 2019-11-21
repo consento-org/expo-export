@@ -295,20 +295,20 @@ class Polygon extends Component {
     if (fill.fillType === FillType.Gradient) {
       addImport(imports, 'src/styles/Component', 'GradientType')
       return `{ gradient: {
-  type: GradientType.${mapGradientType(fill.gradient.gradientType)},
-  stops: [${fill.gradient.stops.map(stop => `{
-    color: ${getColor(stop.color, imports)},
-    position: ${stop.position}
-  }`)}],
-  from: {
-    x: ${fill.gradient.from.x},
-    y: ${fill.gradient.from.y}
-  },
-  to: {
-    x: ${fill.gradient.to.x},
-    y: ${fill.gradient.to.y}
-  }
-} }`
+    type: GradientType.${mapGradientType(fill.gradient.gradientType)},
+    stops: [${fill.gradient.stops.map(stop => `{
+      color: ${getColor(stop.color, imports)},
+      position: ${stop.position}
+    }`)}],
+    from: {
+      x: ${fill.gradient.from.x},
+      y: ${fill.gradient.from.y}
+    },
+    to: {
+      x: ${fill.gradient.to.x},
+      y: ${fill.gradient.to.y}
+    }
+  } }`
     }
     if (fill.fillType === FillType.Pattern) {
       // This requires for the image of all gradient patterns to be
