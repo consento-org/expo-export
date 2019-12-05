@@ -236,6 +236,8 @@ class Polygon extends Component {
   renderBorders (imports, getColor: FGetColor): string {
     if (this.borders.length === 1) {
       return this.renderBorder(this.borders[0], imports, getColor)
+    } else if (this.borders.length === 0 && this.borderRadius > 0) {
+      return `{ radius: ${this.borderRadius} }`
     }
     // TODO: multiple borders.
     return 'null'
@@ -262,7 +264,9 @@ class Polygon extends Component {
     if (options.dashPattern.length > 0) {
       props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
     }
-    props.push(['radius', `${this.borderRadius}`])
+    if (this.borderRadius > 0) {
+      props.push(['radius', `${this.borderRadius}`])
+    }
     return `{${props.map(([prop, value]) => `
     ${prop}: ${value}`).join(',')}
   }`

@@ -351,14 +351,14 @@ export type TLineEnd = 'Butt' | 'Round' | 'Projecting'
 export type TLineJoin = 'Miter' | 'Round' | 'Bevel'
 
 export interface TBorderData {
-  fill: TFillData,
-  thickness: number
+  fill?: TFillData,
+  thickness?: number
   endArrowhead?: TArrowHead
   startArrowhead?: TArrowHead
   lineEnd?: TLineEnd
   lineJoin?: TLineJoin
   dashPattern?: number[]
-  radius: number
+  radius?: number
 }
 
 const reg = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?/ig
@@ -445,8 +445,8 @@ export class Border {
   borderStyle: TBorderStyle
 
   constructor (options: TBorderData | null) {
-    this.fill = new Fill(options === null ? null : options.fill)
-    this.thickness = options === null ? 0 : options.thickness
+    this.fill = new Fill(options === null || options.fill === undefined ? null : options.fill)
+    this.thickness = options === null || options.thickness === undefined ? 0 : options.thickness
     this.endArrowhead = options === null || options.endArrowhead === undefined ? 'None' : options.endArrowhead
     this.startArrowhead = options === null || options.startArrowhead === undefined ? 'None' : options.startArrowhead
     this.lineEnd = options === null || options.lineEnd === undefined ? 'Projecting' : options.lineEnd
