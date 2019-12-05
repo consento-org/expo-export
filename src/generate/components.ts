@@ -262,7 +262,7 @@ class Polygon extends Component {
     if (options.dashPattern.length > 0) {
       props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
     }
-    props.push(['borderRadius', `${this.borderRadius}`])
+    props.push(['radius', `${this.borderRadius}`])
     return `{${props.map(([prop, value]) => `
     ${prop}: ${value}`).join(',')}
   }`
