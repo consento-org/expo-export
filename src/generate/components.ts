@@ -229,7 +229,7 @@ class Polygon extends Component {
   format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/styles/Component', 'Polygon')
     return {
-      property: `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.borderRadius}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
+      property: `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
     }
   }
 
@@ -262,6 +262,7 @@ class Polygon extends Component {
     if (options.dashPattern.length > 0) {
       props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
     }
+    props.push(['borderRadius', `${this.borderRadius}`])
     return `{${props.map(([prop, value]) => `
     ${prop}: ${value}`).join(',')}
   }`
