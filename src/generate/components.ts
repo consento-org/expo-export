@@ -142,7 +142,7 @@ class Link extends Component {
     this.target = target
     this.textOverrides = layer.overrides
       .map(override => isTextOverride(override) ? override : null)
-      .filter(override => override !== null && !override.isDefault)
+      .filter(override => override !== null && !override.isDefault && override.path.indexOf('/') === -1)
       .map(override => {
         return {
           path: childName(override.affectedLayer.name),
