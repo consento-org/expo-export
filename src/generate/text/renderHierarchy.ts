@@ -25,7 +25,7 @@ export const formatFontProps = ['color', 'fontFamily', 'fontSize', 'textAlign', 
 function reduceStack (stack: StackEntry[]): ITextFormat {
   const result = {}
   for (const { format } of stack) {
-    if (format) {
+    if (typeof format === 'object') {
       formatFontProps.forEach(prop => {
         result[prop] = format[prop]
       })
@@ -34,7 +34,7 @@ function reduceStack (stack: StackEntry[]): ITextFormat {
   return result
 }
 
-export function getTextFormatRenderProps (style: ITextFormat, getColor: FGetColor, imports: Imports) {
+export function getTextFormatRenderProps (style: ITextFormat, getColor: FGetColor, imports: Imports): string[] {
   const props = []
   if (has(style.color)) props.push(`color: ${getColor(style.color, imports)}`)
   if (has(style.fontFamily)) {

@@ -14,7 +14,7 @@ export function generateTextStyles (document: Document, fontName: (id: string) =
   return {
     textStyles,
     textStyleData: `${disclaimer}
-${ renderImports(imports, 'src/styles') }
+${renderImports(imports, 'src/styles')}
 import { TextStyle } from 'react-native'
 
 ${Object.values(textStyles).map(entry => entry.output).join('\n')}

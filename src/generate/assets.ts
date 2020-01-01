@@ -163,8 +163,7 @@ ${template(readPluginAsset('Asset.tsx').toString(), {
         return result.map(entry => entry.replace(/\n$/ig, '')).join(',\n') + '\n'
       }
     }
-  })}
-`)
+  })}`)
   }
   return idNameMap
 }

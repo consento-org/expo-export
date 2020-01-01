@@ -1,11 +1,11 @@
 import { Document, SharedStyle, TextStyle } from 'sketch/dom'
 import { Hierarchy } from '../../util/hierarchy'
-import { TextFormat } from './TextFormat'
+import { TextFormat, ITextFormat } from './TextFormat'
 import { fontShortID } from '../font'
 
 export type TGetFontName = (id: string) => string
 
-export function processStyle (style: TextStyle) {
+export function processStyle (style: TextStyle): ITextFormat {
   return {
     fontSize: style.fontSize,
     color: style.textColor,
@@ -20,7 +20,7 @@ function processShared (shared: SharedStyle<TextStyle>, fontName: TGetFontName):
   return new TextFormat({
     id: shared.id,
     fontFamily: fontShortID(fontName(shared.id)),
-    ... processStyle(shared.style)
+    ...processStyle(shared.style)
   })
 }
 

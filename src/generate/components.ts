@@ -109,7 +109,7 @@ class TextComponent extends Component {
     }
   }
 
-  renderTextStyle (imports: Imports, getColor: FGetColor) {
+  renderTextStyle (imports: Imports, getColor: FGetColor): string {
     const layerStyle = processStyle(this._layer.style)
     if (this.textStyle === undefined) {
       return `{
@@ -129,7 +129,7 @@ class TextComponent extends Component {
 }
 
 interface ITextOverride {
-  path: string,
+  path: string
   value: string
 }
 
@@ -204,7 +204,7 @@ function getBorderRadius (layer: ShapePath): number {
   return radius
 }
 
-function mapGradientType (input: GradientType) {
+function mapGradientType (input: GradientType): 'linear' | 'radial' | 'angular' {
   if (input === 'Linear') return 'linear'
   if (input === 'Radial') return 'radial'
   return 'angular'
