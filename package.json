@@ -28,16 +28,16 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@skpm/builder": "^0.7.4",
+    "@skpm/builder": "^0.7.5",
     "@skpm/fs": "^0.2.5",
-    "@types/jest": "^24.0.23",
-    "@types/react": "^16.9.11",
-    "@types/react-native": "^0.60.22",
-    "@typescript-eslint/eslint-plugin": "^2.10.0",
-    "eslint": "^6.7.2",
+    "@types/jest": "^24.0.25",
+    "@types/react": "^16.9.17",
+    "@types/react-native": "^0.60.27",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "eslint": "^6.8.0",
     "eslint-config-standard-with-typescript": "^11.0.1",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "expo-linear-gradient": "^7.0.1",
@@ -52,7 +52,7 @@
     "ts-jest": "^24.2.0",
     "ts-loader": "^6.2.1",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.3"
+    "typescript": "^3.7.4"
   },
   "jest": {
     "roots": [
