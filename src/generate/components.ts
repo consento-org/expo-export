@@ -229,7 +229,9 @@ class Polygon extends Component {
   format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
     addImport(imports, 'src/styles/Component', 'Polygon')
     return {
-      property: `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
+      property: `  ${name}: Polygon`,
+      init: `
+    this.${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)}, this)`
     }
   }
 
@@ -268,8 +270,8 @@ class Polygon extends Component {
       props.push(['radius', `${this.borderRadius}`])
     }
     return `{${props.map(([prop, value]) => `
-    ${prop}: ${value}`).join(',')}
-  }`
+      ${prop}: ${value}`).join(',')}
+    }`
   }
 
   renderShadows (imports: Imports, getColor: FGetColor): string {
@@ -281,8 +283,8 @@ class Polygon extends Component {
       shadows.push(`{ x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
     }
     return `[
-    ${shadows.join(',\n    ')}
-  ]`
+      ${shadows.join(',\n      ')}
+    ]`
   }
 
   renderFills (imports: Imports, getColor: FGetColor): string {
@@ -299,21 +301,23 @@ class Polygon extends Component {
     }
     if (fill.fillType === FillType.Gradient) {
       addImport(imports, 'src/styles/Component', 'GradientType')
-      return `{ gradient: {
-    type: GradientType.${mapGradientType(fill.gradient.gradientType)},
-    stops: [${fill.gradient.stops.map(stop => `{
-      color: ${getColor(stop.color, imports)},
-      position: ${stop.position}
-    }`)}],
-    from: {
-      x: ${fill.gradient.from.x},
-      y: ${fill.gradient.from.y}
-    },
-    to: {
-      x: ${fill.gradient.to.x},
-      y: ${fill.gradient.to.y}
-    }
-  } }`
+      return `{
+        gradient: {
+        type: GradientType.${mapGradientType(fill.gradient.gradientType)},
+        stops: [${fill.gradient.stops.map(stop => `{
+          color: ${getColor(stop.color, imports)},
+          position: ${stop.position}
+        }`).join(', ')}],
+        from: {
+          x: ${fill.gradient.from.x},
+          y: ${fill.gradient.from.y}
+        },
+        to: {
+          x: ${fill.gradient.to.x},
+          y: ${fill.gradient.to.y}
+        }
+      }
+    }`
     }
     if (fill.fillType === FillType.Pattern) {
       // This requires for the image of all gradient patterns to be
