@@ -1,4 +1,4 @@
-import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance } from 'sketch/dom'
+import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType, isTextOverride } from '../util/dom'
 import { write, readPluginAsset } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
@@ -133,19 +133,32 @@ interface ITextOverride {
   value: string
 }
 
+function collectName (document: Document, override: Override<Text>): string {
+  var paths = override.path.split('/')
+  var prefix = ''
+  while (paths.length > 1) {
+    var parent = paths.shift()
+    var parentLayer = document.getLayerWithID(parent)
+    prefix += String(parentLayer.name) + '-'
+  }
+  return childName(prefix + override.affectedLayer.name)
+}
+
 class Link extends Component {
   target: string
   textOverrides: ITextOverride[]
+  document: Document
 
-  constructor (layer: SymbolInstance, target: string) {
+  constructor (document: Document, layer: SymbolInstance, target: string) {
     super(layer, 'link')
     this.target = target
+    this.document = document
     this.textOverrides = layer.overrides
       .map(override => isTextOverride(override) ? override : null)
-      .filter(override => override !== null && !override.isDefault && override.path.indexOf('/') === -1)
+      .filter(override => override !== null && !override.isDefault)
       .map(override => {
         return {
-          path: childName(override.affectedLayer.name),
+          path: collectName(document, override),
           value: override.value
         }
       })
@@ -394,7 +407,7 @@ function collectComponents (document: Document, textStyles: TIDLookup): { [path:
       } else if (master.exportFormats.length > 0) {
         component.items[name] = new Image(layer, masterName)
       } else {
-        component.items[name] = new Link(layer, masterName)
+        component.items[name] = new Link(document, layer, masterName)
       }
       return
     }
