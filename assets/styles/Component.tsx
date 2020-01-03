@@ -218,7 +218,7 @@ export class Component {
       renderCache[vertKey] = vertStyle
     }
     if (onPress !== null && onPress !== undefined) {
-      item = <TouchableOpacity onLayout={onLayout} onPress={onPress}>{item}</TouchableOpacity>
+      item = <TouchableOpacity onLayout={onLayout} onPress={onPress} style={{ width: horz === 'stretch' ? '100%' : place.width, height: vert === 'stretch' ? '100%' : place.height }}>{item}</TouchableOpacity>
     }
     return <View onLayout={onLayout} style={horzStyle}><View style={vertStyle}>{item}</View></View>
   }
