@@ -531,6 +531,12 @@ export class Polygon {
 
   RenderRect ({ style, ref, onLayout }: { style?: ViewStyle, ref?: React.RefObject<any>, onLayout?: () => any } = {}): JSX.Element {
     const data = this.fill.data
+    if (data === null) {
+      return <View style={{
+        ...style,
+        ...this.borderStyle()
+      }} />
+    }
     if (typeof data === 'string') {
       return <View style={{
         ...style,
