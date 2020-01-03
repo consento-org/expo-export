@@ -122,7 +122,7 @@ class TextComponent extends Component {
       return `TextStyles.${this.textStyle.name}`
     }
     return `{
-      ... TextStyles.${this.textStyle.name},
+      ...TextStyles.${this.textStyle.name},
       ${getTextFormatRenderProps(difference, getColor, imports).join(',\n      ')}
     }`
   }
