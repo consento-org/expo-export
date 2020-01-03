@@ -315,7 +315,7 @@ class Polygon extends Component {
     if (fill.fillType === FillType.Gradient) {
       addImport(imports, 'src/styles/Component', 'GradientType')
       return `{
-        gradient: {
+      gradient: {
         type: GradientType.${mapGradientType(fill.gradient.gradientType)},
         stops: [${fill.gradient.stops.map(stop => `{
           color: ${getColor(stop.color, imports)},
