@@ -352,6 +352,10 @@ declare module "sketch/dom" {
     sharedTextStyles: SharedStyle<TextStyle>[]
     getSymbolMasterWithID(symbolId: string): SymbolMaster
     getSymbols(): SymbolMaster[]
+    getLayerWithID(layerId: string): Layer<any, any>
+    getLayersNamed(name: string): Layer<any, any>[]
+    getSharedTextStyleWithID(sharedStyleId: string): SharedStyle<TextStyle>
+    centerOnLayer(layer:Layer<any, any>):void
   }
 
   export interface IExportOptions {
