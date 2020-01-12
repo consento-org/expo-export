@@ -45,6 +45,7 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
 
 interface ITextBaseProps extends IBaseProps<NativeText | TextInput, TextStyle> {
   value?: string
+  selectable?: boolean
   onEdit?: (text: string) => any
   onInstantEdit?: (text: string) => any
   onBlur?: () => any
@@ -102,6 +103,7 @@ export class Component {
         style: applyRenderOptions(props, props.prototype.place, style),
         onEdit: props.onEdit,
         onInstantEdit: props.onInstantEdit,
+        selectable: props.selectable,
         ref,
         onBlur: props.onBlur
       })
@@ -604,6 +606,7 @@ export interface ITextRenderOptions {
   value?: string
   style?: TextStyle
   ref?: React.Ref<NativeText | TextInput>
+  selectable?: boolean
   onLayout?: () => any
   onBlur?: () => any
   onEdit?: (text: string) => any
@@ -641,7 +644,7 @@ export class Text {
     })
   }
 
-  render ({ value, style, onEdit, onInstantEdit, ref, onLayout, onBlur }: ITextRenderOptions): JSX.Element {
+  render ({ value, style, onEdit, onInstantEdit, ref, onLayout, onBlur, selectable }: ITextRenderOptions): JSX.Element {
     value = String(useDefault(value, this.text))
     const originalValue = value
     if (exists(onEdit) || exists(onInstantEdit)) {
@@ -665,7 +668,7 @@ export class Text {
       onLayout={onLayout} ref={ref} style={{
         ...this.style,
         ...style
-      }}>{value}</NativeText>
+      }} selectable={selectable}>{value}</NativeText>
   }
 
   renderAbsolute (opts: ITextRenderOptions): JSX.Element {
