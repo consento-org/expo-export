@@ -7,6 +7,7 @@ export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
 export interface IRenderOptions {
   vert?: TRenderGravity
   horz?: TRenderGravity
+  debug?: boolean
   onPress?: (event: GestureResponderEvent) => any
   onLayout?: () => any
 }
@@ -118,6 +119,7 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
   vert?: TRenderGravity
   horz?: TRenderGravity
   style?: TStyle
+  debug?: boolean
   onPress?: (event: GestureResponderEvent) => any
   onLayout?: () => any
 }
@@ -125,6 +127,7 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
 interface ITextBaseProps extends IBaseProps<NativeText | TextInput, TextStyle> {
   value?: string
   selectable?: boolean
+  debug?: boolean
   onEdit?: (text: string) => any
   onInstantEdit?: (text: string) => any
   onBlur?: () => any
@@ -149,6 +152,7 @@ export interface ISlice9Props extends IBaseProps<View, ViewStyle> {
 
 export interface IRenderProps<T extends React.Component, TStyle extends FlexStyle> extends IBaseProps<T, TStyle> {
   place: Placement
+  debug?: boolean
   item: (opts: {
     ref?: React.Ref<T>
     style?: TStyle
@@ -232,6 +236,7 @@ export class Component {
     }), props.place, {
       horz: props.horz,
       vert: props.vert,
+      debug: props.debug,
       onPress: props.onPress,
       onLayout: props.onLayout
     })
@@ -260,7 +265,7 @@ export class Component {
     return this._renderItem(asset.render(style), asset.place, opts)
   }
 
-  _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout }: IRenderOptions = {}): JSX.Element {
+  _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug }: IRenderOptions = {}): JSX.Element {
     const { vw, vh } = useVUnits()
     const style: ViewStyle = {
       position: 'absolute',
@@ -292,6 +297,12 @@ export class Component {
       } else {
         style.top = vh(100) - bottom - place.height
       }
+    }
+    if (debug) {
+      style.borderColor = '#04a'
+      style.backgroundColor = '#ac8888888'
+      style.borderWidth = 1
+      console.log({ style, horz, vert, place, width: this.width, height: this.height, vw100: vw(100), vh100: vh(100) })
     }
     if (exists(onPress)) {
       return <TouchableOpacity onLayout={onLayout} onPress={onPress} style={style}>{item}</TouchableOpacity>
