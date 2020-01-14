@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
-import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions } from 'react-native'
+import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions, Insets } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
@@ -8,6 +8,7 @@ export interface IRenderOptions {
   vert?: TRenderGravity
   horz?: TRenderGravity
   debug?: boolean
+  hitSlop?: Insets
   onPress?: (event: GestureResponderEvent) => any
   onLayout?: () => any
 }
@@ -153,6 +154,7 @@ export interface ISlice9Props extends IBaseProps<View, ViewStyle> {
 export interface IRenderProps<T extends React.Component, TStyle extends FlexStyle> extends IBaseProps<T, TStyle> {
   place: Placement
   debug?: boolean
+  hitSlop?: Insets
   item: (opts: {
     ref?: React.Ref<T>
     style?: TStyle
@@ -237,6 +239,7 @@ export class Component {
       horz: props.horz,
       vert: props.vert,
       debug: props.debug,
+      hitSlop: props.hitSlop,
       onPress: props.onPress,
       onLayout: props.onLayout
     })
@@ -265,7 +268,7 @@ export class Component {
     return this._renderItem(asset.render(style), asset.place, opts)
   }
 
-  _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug }: IRenderOptions = {}): JSX.Element {
+  _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug, hitSlop }: IRenderOptions = {}): JSX.Element {
     const { vw, vh } = useVUnits()
     const style: ViewStyle = {
       position: 'absolute',
@@ -305,7 +308,7 @@ export class Component {
       console.log({ style, horz, vert, place, width: this.width, height: this.height, vw100: vw(100), vh100: vh(100) })
     }
     if (exists(onPress)) {
-      return <TouchableOpacity onLayout={onLayout} onPress={onPress} style={style}>{item}</TouchableOpacity>
+      return <TouchableOpacity onLayout={onLayout} onPress={onPress} style={style} hitSlop={hitSlop}>{item}</TouchableOpacity>
     }
     return <View style={style}>{item}</View>
   }
