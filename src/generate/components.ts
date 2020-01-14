@@ -113,8 +113,8 @@ class TextComponent extends Component {
     const layerStyle = processStyle(this._layer.style)
     if (this.textStyle === undefined) {
       return `{
-        ${getTextFormatRenderProps(layerStyle, getColor, imports).join(',\n      ')}
-      }`
+      ${getTextFormatRenderProps(layerStyle, getColor, imports).join(',\n      ')}
+    }`
     }
     addImport(imports, 'src/styles/TextStyles', 'TextStyles')
     const difference = compareTextFormat(this.textStyle.style, layerStyle)
