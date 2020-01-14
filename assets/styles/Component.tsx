@@ -113,9 +113,6 @@ function useDefault <T> (value: T | null | undefined, defaultValue: T): T {
   return defaultValue
 }
 
-// Todo: LRU?
-const renderCache: { [key: string]: ViewStyle } = {}
-
 export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle> {
   targetRef?: React.Ref<T>
   vert?: TRenderGravity
@@ -264,47 +261,42 @@ export class Component {
   }
 
   _renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout }: IRenderOptions = {}): JSX.Element {
-    const horzKey = `horz:${useDefault(horz, 'start')}:${useDefault(vert, 'start')}:${this.width}:${this.height}:${place.top}:${place.left}:${place.right}:${place.bottom}`
-    let horzStyle = renderCache[horzKey]
-    if (horzStyle === undefined) {
-      horzStyle = {
-        display: 'flex',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        flexDirection: 'row',
-        justifyContent: horz === 'end' ? 'flex-end' : horz === 'center' ? 'center' : 'flex-start'
-      }
-      if (horz !== 'start') {
-        horzStyle.paddingRight = this.width - place.right
-      }
-      if (horz !== 'end') {
-        horzStyle.paddingLeft = place.left
-      }
-      if (vert !== 'start') {
-        horzStyle.paddingBottom = this.height - place.bottom
-      }
-      if (vert !== 'end') {
-        horzStyle.paddingTop = place.top
-      }
-      renderCache[horzKey] = horzStyle
+    const { vw, vh } = useVUnits()
+    const style: ViewStyle = {
+      position: 'absolute',
+      width: place.width,
+      height: place.height
     }
-    const vertKey = `vert:${useDefault(vert, 'start')}:${useDefault(horz, 'start')}`
-    let vertStyle = renderCache[vertKey]
-    if (vertStyle === undefined) {
-      vertStyle = {
-        display: 'flex',
-        width: horz === 'stretch' ? '100%' : 'auto',
-        flexDirection: 'column',
-        height: '100%',
-        justifyContent: vert === 'end' ? 'flex-end' : vert === 'center' ? 'center' : 'flex-start'
+    if (!exists(horz) || horz === 'start') {
+      style.left = place.left
+    } else {
+      const right = (this.width - place.right)
+      if (horz === 'center') {
+        style.left = vw(50) + (place.centerX - (this.width / 2)) - (place.width / 2)
+      } else if (horz === 'stretch') {
+        style.left = place.left
+        style.width = vw(100) - right - place.left
+      } else {
+        style.left = vw(100) - right - place.width
       }
-      renderCache[vertKey] = vertStyle
     }
-    if (onPress !== null && onPress !== undefined) {
-      item = <TouchableOpacity onLayout={onLayout} onPress={onPress} style={{ width: horz === 'stretch' ? '100%' : place.width, height: vert === 'stretch' ? '100%' : place.height }}>{item}</TouchableOpacity>
+    if (!exists(vert) || vert === 'start') {
+      style.top = place.top
+    } else {
+      const bottom = (this.width - place.right)
+      if (vert === 'center') {
+        style.top = vh(50) + (place.centerY - (this.height / 2)) - (place.height / 2)
+      } else if (vert === 'stretch') {
+        style.top = place.top
+        style.height = vh(100) - bottom - place.top
+      } else {
+        style.top = vh(100) - bottom - place.height
+      }
     }
-    return <View onLayout={onLayout} style={horzStyle}><View style={vertStyle}>{item}</View></View>
+    if (exists(onPress)) {
+      return <TouchableOpacity onLayout={onLayout} onPress={onPress} style={style}>{item}</TouchableOpacity>
+    }
+    return <View style={style}>{item}</View>
   }
 }
 
