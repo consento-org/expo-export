@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
-import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent } from 'react-native'
+import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
@@ -10,6 +10,88 @@ export interface IRenderOptions {
   onPress?: (event: GestureResponderEvent) => any
   onLayout?: () => any
 }
+
+export function createGlobalEffect <T> ({ update, init, exit }: {
+  update (): T | undefined
+  init (handler: () => any): void
+  exit (handler: () => any): void
+}): () => T {
+  const listeners = new Set<(lastUpdate: number) => any>()
+  let output: T = update()
+  let globalLastUpdate: number
+  function updateOutput (): void {
+    const newOutput = update()
+    if (newOutput === undefined) {
+      return
+    }
+    output = newOutput
+    globalLastUpdate = Date.now()
+    for (const update of listeners) {
+      update(globalLastUpdate)
+    }
+  }
+  return () => {
+    const setLastUpdate = useState<number>(globalLastUpdate)[1]
+    useEffect(() => {
+      listeners.add(setLastUpdate)
+      if (listeners.size === 1) {
+        init(updateOutput)
+      }
+      return () => {
+        listeners.delete(setLastUpdate)
+        if (listeners.size === 0) {
+          exit(updateOutput)
+        }
+      }
+    }, [false]) // Only update the effect once
+    return output
+  }
+}
+
+export enum TOrientation {
+  horizontal = 'horizontal',
+  vertical = 'vertical'
+}
+
+export interface IVUnits {
+  vw (number: number): number
+  vh (number: number): number
+  vmin (number: number): number
+  vmax (number: number): number
+  orientation: TOrientation
+  isHorz: boolean
+  isVert: boolean
+}
+
+const mem = {
+  vw: null,
+  vh: null
+}
+
+export const useVUnits = createGlobalEffect({
+  update () {
+    const { width, height } = Dimensions.get('window')
+    const vw = width / 100
+    const vh = height / 100
+    if (vw === mem.vw && vh === mem.vh) {
+      return
+    }
+    mem.vw = vw
+    mem.vh = vh
+    const orientation = vw > vh ? TOrientation.horizontal : TOrientation.vertical
+    return Object.freeze({
+      vw: (number: number = 1) => vw * number,
+      vh: (number: number = 1) => vh * number,
+      vmin: (number: number = 1) => Math.min(vw * number, vh * number),
+      vmax: (number: number = 1) => Math.max(vw * number, vh * number),
+      orientation: orientation,
+      isHorz: orientation === TOrientation.horizontal,
+      isVert: orientation === TOrientation.vertical
+    })
+  },
+  init: handler => Dimensions.addEventListener('change', handler),
+  exit: handler => Dimensions.removeEventListener('change', handler)
+})
 
 function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions = {}, place: Placement, style?: T): T {
   if (style === null || style === undefined) {
