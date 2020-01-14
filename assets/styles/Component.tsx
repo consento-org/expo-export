@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
-import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions, Insets } from 'react-native'
+import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions, Insets, ReturnKeyTypeOptions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
@@ -125,10 +125,51 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
   onLayout?: () => any
 }
 
+export type TTextContentType = 'none'
+| 'URL'
+| 'addressCity'
+| 'addressCityAndState'
+| 'addressState'
+| 'countryName'
+| 'creditCardNumber'
+| 'emailAddress'
+| 'familyName'
+| 'fullStreetAddress'
+| 'givenName'
+| 'jobTitle'
+| 'location'
+| 'middleName'
+| 'name'
+| 'namePrefix'
+| 'nameSuffix'
+| 'nickname'
+| 'organizationName'
+| 'postalCode'
+| 'streetAddressLine1'
+| 'streetAddressLine2'
+| 'sublocality'
+| 'telephoneNumber'
+| 'username'
+| 'password'
+| 'newPassword'
+| 'oneTimeCode'
+
 interface ITextBaseProps extends IBaseProps<NativeText | TextInput, TextStyle> {
   value?: string
   selectable?: boolean
   debug?: boolean
+  selectTextOnFocus?: boolean
+  textContentType?: TTextContentType
+  selection?: {
+    start: number
+    end?: number
+  }
+  placeholder?: string
+  placeholderTextColor?: string
+  scrollEnabled?: boolean
+  selectionColor?: string
+  secureTextEntry?: boolean
+  returnKeyType?: ReturnKeyTypeOptions
   onEdit?: (text: string) => any
   onInstantEdit?: (text: string) => any
   onBlur?: () => any
@@ -695,6 +736,18 @@ export interface ITextRenderOptions {
   style?: TextStyle
   ref?: React.Ref<NativeText | TextInput>
   selectable?: boolean
+  selectTextOnFocus?: boolean
+  textContentType?: TTextContentType
+  selection?: {
+    start: number
+    end: number
+  }
+  placeholder?: string
+  placeholderTextColor?: string
+  scrollEnabled?: boolean
+  selectionColor?: string
+  secureTextEntry?: boolean
+  returnKeyType?: ReturnKeyTypeOptions
   onLayout?: () => any
   onBlur?: () => any
   onEdit?: (text: string) => any
@@ -732,12 +785,13 @@ export class Text {
     })
   }
 
-  render ({ value, style, onEdit, onInstantEdit, ref, onLayout, onBlur, selectable }: ITextRenderOptions): JSX.Element {
-    value = String(useDefault(value, this.text))
+  render (props: ITextRenderOptions): JSX.Element {
+    let value = String(useDefault(props.value, this.text))
     const originalValue = value
-    if (exists(onEdit) || exists(onInstantEdit)) {
-      onInstantEdit = useDefault(onInstantEdit, noop)
-      onEdit = useDefault(onEdit, noop)
+    const isEditable = exists(props.onEdit) || exists(props.onInstantEdit)
+    const onInstantEdit = useDefault(props.onInstantEdit, noop)
+    const onEdit = useDefault(props.onEdit, noop)
+    if (isEditable) {
       return <TextInput
         onChangeText={text => {
           onInstantEdit(value = text)
@@ -747,16 +801,32 @@ export class Text {
             onEdit(value)
           }
         }}
-        onLayout={onLayout} onBlur={onBlur} ref={ref as React.Ref<TextInput>} style={{
+        onLayout={props.onLayout}
+        ref={props.ref as React.Ref<TextInput>}
+        style={{
           ...this.style,
-          ...style
-        }}>{value}</TextInput>
+          ...props.style
+        }}
+        selectTextOnFocus={props.selectTextOnFocus}
+        textContentType={props.textContentType}
+        selection={props.selection}
+        placeholder={props.placeholder}
+        placeholderTextColor={props.placeholderTextColor}
+        scrollEnabled={props.scrollEnabled}
+        selectionColor={props.selectionColor}
+        secureTextEntry={props.secureTextEntry}
+        returnKeyType={props.returnKeyType}
+      >{value}</TextInput>
     }
     return <NativeText
-      onLayout={onLayout} ref={ref} style={{
+      onLayout={props.onLayout}
+      ref={props.ref}
+      style={{
         ...this.style,
-        ...style
-      }} selectable={selectable}>{value}</NativeText>
+        ...props.style
+      }}
+      selectable={props.selectable}
+    >{value}</NativeText>
   }
 
   renderAbsolute (opts: ITextRenderOptions): JSX.Element {
