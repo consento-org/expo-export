@@ -230,6 +230,15 @@ export class Component {
         onEdit: props.onEdit,
         onInstantEdit: props.onInstantEdit,
         selectable: props.selectable,
+        selection: props.selection,
+        selectTextOnFocus: props.selectTextOnFocus,
+        placeholder: props.placeholder,
+        placeholderTextColor: props.placeholderTextColor,
+        returnKeyType: props.returnKeyType,
+        scrollEnabled: props.scrollEnabled,
+        secureTextEntry: props.secureTextEntry,
+        selectionColor: props.selectionColor,
+        textContentType: props.textContentType,
         ref,
         onBlur: props.onBlur
       })
@@ -740,7 +749,7 @@ export interface ITextRenderOptions {
   textContentType?: TTextContentType
   selection?: {
     start: number
-    end: number
+    end?: number
   }
   placeholder?: string
   placeholderTextColor?: string
@@ -801,6 +810,7 @@ export class Text {
             onEdit(value)
           }
         }}
+        onBlur={props.onBlur}
         onLayout={props.onLayout}
         ref={props.ref as React.Ref<TextInput>}
         style={{
