@@ -1,0 +1,95 @@
+{
+  "name": "@consento/expo-export",
+  "description": "A black template to be used with the expo-export plugin.",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "jetify",
+    "android": "expo android",
+    "ios": "expo ios",
+    "web": "expo start --web",
+    "start": "expo start",
+    "test": "jest",
+    "lint": "eslint --ext .js,.ts,.jsx,.tsx .",
+    "android:reload": "adb shell input text \"RR\"",
+    "android:menu": "adb shell input keyevent 82"
+  },
+  "dependencies": {
+    "@react-native-community/masked-view": "^0.1.5",
+    "expo": "^36.0.0",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-36.0.1.tar.gz",
+    "react-native-gesture-handler": "~1.5.0",
+    "react-native-reanimated": "~1.4.0",
+    "react-native-safe-area-context": "0.6.0",
+    "react-native-screens": "2.0.0-alpha.12",
+    "react-native-web": "^0.11.7",
+    "react-navigation": "^4.3.3",
+    "react-navigation-stack": "^2.3.6",
+    "react-navigation-tabs": "^2.8.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@types/enzyme": "^3.10.4",
+    "@types/fbemitter": "^2.0.32",
+    "@types/jest": "^25.1.1",
+    "@types/react": "^16.9.0",
+    "@types/react-native": "^0.60.15",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "babel-preset-expo": "^8.0.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "eslint": "^6.8.0",
+    "eslint-config-standard-react": "^9.2.0",
+    "eslint-config-standard-with-typescript": "^12.0.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.18.3",
+    "eslint-plugin-standard": "^4.0.1",
+    "expo-cli": "^3.11.9",
+    "jest": "^25.1.0",
+    "jest-environment-enzyme": "^7.1.2",
+    "jest-enzyme": "^7.1.2",
+    "jest-expo": "^36.0.0",
+    "jetifier": "^1.6.5",
+    "json": "^9.0.6",
+    "nicer": "^1.0.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.2",
+    "unimodules-permissions-interface": "~5.0.0"
+  },
+  "jest": {
+    "preset": "react-native",
+    "setupFilesAfterEnv": [
+      "jest-enzyme"
+    ],
+    "testEnvironment": "enzyme",
+    "testEnvironmentOptions": {
+      "enzymeAdapter": "react16"
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "standard-with-typescript",
+      "standard-react"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "react/jsx-closing-bracket-location": "off",
+      "react/jsx-closing-tag-location": "off"
+    }
+  },
+  "eslintIgnore": [
+    "node_modules/*",
+    "dist/*",
+    "coverage/*",
+    "**/*.d.ts",
+    "/src/public/",
+    "/src/types/"
+  ]
+}
