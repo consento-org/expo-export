@@ -2,7 +2,6 @@
   "name": "@consento/expo-export",
   "description": "A black template to be used with the expo-export plugin.",
   "version": "1.0.0",
-  "private": true,
   "main": "index.js",
   "scripts": {
     "postinstall": "jetify",
