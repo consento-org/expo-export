@@ -6,11 +6,11 @@ const { targetFolder, getConfigPaths, getConfig, resolve } = require('../fs')
 
 describe('looking up config path', () => {
   it('finds the right config paths', () => {
-    expect(getConfigPaths('abc')).toEqual(['abc@expo'])
-    expect(getConfigPaths('')).toEqual(['@expo'])
-    expect(getConfigPaths('abc.sketch')).toEqual(['abc@expo'])
-    expect(getConfigPaths(`${__dirname}/fs`)).toEqual([`${__dirname}/fs@expo`])
-    expect(getConfigPaths(`${__dirname}/fsbroken`)).toEqual([`${__dirname}/fsbroken@expo`])
+    expect(getConfigPaths('abc')).toEqual(['abc@expo', 'abc@expo.json'])
+    expect(getConfigPaths('')).toEqual(['@expo', '@expo.json'])
+    expect(getConfigPaths('abc.sketch')).toEqual(['abc@expo', 'abc@expo.json'])
+    expect(getConfigPaths(`${__dirname}/fs`)).toEqual([`${__dirname}/fs@expo`, `${__dirname}/fs@expo.json`])
+    expect(getConfigPaths(`${__dirname}/fsbroken`)).toEqual([`${__dirname}/fsbroken@expo`, `${__dirname}/fsbroken@expo.json`])
   })
 })
 
@@ -27,6 +27,9 @@ describe('loading config', () => {
     expect(getConfig(`${__dirname}/fs_json_str`)).toEqual({ lookupPath: `${__dirname}/fs_json_str@expo`, targetFolder: `${__dirname}/abcd` })
     expect(() => getConfig(`${__dirname}/fsbroken_json`)).toThrow()
     expect(() => getConfig(`${__dirname}/fsbroken_multiline`)).toThrow()
+    expect(getConfig(`${__dirname}/fs_jsonext_str`)).toEqual({ lookupPath: `${__dirname}/fs_jsonext_str@expo.json`, targetFolder: `${__dirname}/abcd` })
+    expect(getConfig(`${__dirname}/fs_obj`)).toEqual({ lookupPath: `${__dirname}/fs_obj@expo.json`, targetFolder: `${__dirname}/abcd` })
+    expect(() => getConfig(`${__dirname}/fsbroken_nojson`)).toThrow()
   })
 })
 

@@ -37,7 +37,7 @@ export function getConfigPaths (path: string): string[] {
   const reg = /^(.*)(\.sketch)$/ig
   const parts = reg.exec(path)
   const base = parts !== null ? parts[1] : path
-  return [`${base}@expo`]
+  return [`${base}@expo`, `${base}@expo.json`]
 }
 
 export interface IConfig {
@@ -53,7 +53,7 @@ export function getConfig (path: string): IConfig {
     }
     if (existsSync(configPath) && statSync(configPath).isFile()) {
       const raw = readFileSync(configPath, 'utf-8').trim()
-      if (/(^["{])|\n/m.test(raw)) {
+      if (/(^["{])|\n/m.test(raw) || /\.json$/.test(configPath)) {
         try {
           config = JSON.parse(raw)
         } catch (err) {
