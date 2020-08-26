@@ -52,10 +52,28 @@ export function getConfig (path: string): IConfig {
       config = { lookupPath: path, targetFolder: configPath }
     }
     if (existsSync(configPath) && statSync(configPath).isFile()) {
-      config = {
-        lookupPath: configPath,
-        targetFolder: `${dirname(configPath)}/${readFileSync(configPath, 'utf-8').trim()}`
+      const raw = readFileSync(configPath, 'utf-8').trim()
+      if (/(^["{])|\n/m.test(raw)) {
+        try {
+          config = JSON.parse(raw)
+        } catch (err) {
+          throw new Error(`Configuration at ${config.lookupPath} is not a valid json file`)
+        }
+        if (typeof config === 'string') {
+          config = {
+            lookupPath: configPath,
+            targetFolder: config
+          }
+        } else {
+          config.lookupPath = configPath
+        }
+      } else {
+        config = {
+          lookupPath: configPath,
+          targetFolder: raw
+        }
       }
+      config.targetFolder = resolve(dirname(configPath), config.targetFolder)
       break
     }
   }

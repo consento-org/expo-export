@@ -22,6 +22,14 @@ describe('loading config', () => {
     expect(getConfig(`${__dirname}/fs_multiline`)).toEqual({ lookupPath: `${__dirname}/fs_multiline@expo`, targetFolder: `${__dirname}/abcd` })
     expect(() => getConfig(`${__dirname}/fsbroken`)).toThrowError()
   })
+  it('json support', () => {
+    expect(getConfig(`${__dirname}/fs_json_obj`)).toEqual({ lookupPath: `${__dirname}/fs_json_obj@expo`, targetFolder: `${__dirname}/higherImportance` })
+    expect(getConfig(`${__dirname}/fs_json_str`)).toEqual({ lookupPath: `${__dirname}/fs_json_str@expo`, targetFolder: `${__dirname}/abcd` })
+    expect(() => getConfig(`${__dirname}/fsbroken_json`)).toThrow()
+    expect(() => getConfig(`${__dirname}/fsbroken_multiline`)).toThrow()
+  })
+})
+
 describe('resolve', () => {
   it('resolving paths', () => {
     expect(resolve('a', '/abcd')).toBe('/abcd')
