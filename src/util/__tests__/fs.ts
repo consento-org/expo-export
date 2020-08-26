@@ -9,6 +9,8 @@ describe('looking up config path', () => {
     expect(getConfigPaths('abc')).toEqual(['abc@expo'])
     expect(getConfigPaths('')).toEqual(['@expo'])
     expect(getConfigPaths('abc.sketch')).toEqual(['abc@expo'])
+    expect(getConfigPaths(`${__dirname}/fs`)).toEqual([`${__dirname}/fs@expo`])
+    expect(getConfigPaths(`${__dirname}/fsbroken`)).toEqual([`${__dirname}/fsbroken@expo`])
   })
 })
 
