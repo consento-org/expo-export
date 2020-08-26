@@ -3,7 +3,7 @@ import { ImageAsset, Slice9 } from '../Asset'
 import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions, Insets, ReturnKeyTypeOptions, Keyboard, KeyboardEvent } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
-export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch'
+export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch' | 'none'
 export interface IRenderOptions {
   vert?: TRenderGravity
   horz?: TRenderGravity
@@ -342,7 +342,7 @@ export class Component {
     }
     if (!exists(horz) || horz === 'start') {
       style.left = place.left
-    } else {
+    } else if (horz !== 'none') {
       const right = (this.width - place.right)
       if (horz === 'center') {
         style.left = vw(50) + (place.centerX - (this.width / 2)) - (place.width / 2)
@@ -355,7 +355,7 @@ export class Component {
     }
     if (!exists(vert) || vert === 'start') {
       style.top = place.top
-    } else {
+    } else if (vert !== 'none') {
       const bottom = (this.width - place.right)
       if (vert === 'center') {
         style.top = vh(50) + (place.centerY - (this.height / 2)) - (place.height / 2)
