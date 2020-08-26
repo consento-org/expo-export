@@ -68,6 +68,8 @@ export function getConfig (path: string): IConfig {
           config = {
             targetFolder: config
           }
+        } else if (typeof config.targetFolder !== 'string') {
+          throw new Error(`Configuration at ${config.lookupPath} is missing the targetFolder property`)
         }
       } else {
         config = {

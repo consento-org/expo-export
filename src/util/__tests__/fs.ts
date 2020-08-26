@@ -30,6 +30,7 @@ describe('loading config', () => {
     expect(getConfig(`${__dirname}/fs_jsonext_str`)).toEqual({ lookupPath: `${__dirname}/fs_jsonext_str@expo.json`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
     expect(getConfig(`${__dirname}/fs_obj`)).toEqual({ lookupPath: `${__dirname}/fs_obj@expo.json`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
     expect(() => getConfig(`${__dirname}/fsbroken_nojson`)).toThrow()
+    expect(() => getConfig(`${__dirname}/fsbroken_json_noFolder`)).toThrow()
   })
 })
 
