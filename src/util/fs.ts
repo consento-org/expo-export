@@ -33,7 +33,7 @@ export function targetFolder (path: string): (sub: string) => string {
     if (existsSync(configPath) && statSync(configPath).isFile()) {
       config = {
         lookupPath: configPath,
-        targetFolder: `${dirname(configPath)}/${readFileSync(configPath, 'utf-8')}`
+        targetFolder: `${dirname(configPath)}/${readFileSync(configPath, 'utf-8').trim()}`
       }
       break
     }

@@ -27,4 +27,7 @@ describe('target folder lookup', () => {
   it('broken base', () => {
     expect(() => targetFolder(`${__dirname}/fsbroken`)('')).toThrowError()
   })
+  it('multiline trimming', () => {
+    expect(targetFolder(`${__dirname}/fs_multiline`)('')).toBe(`${__dirname}/abcd`)
+  })
 })
