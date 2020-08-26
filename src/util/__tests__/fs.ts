@@ -2,7 +2,15 @@
 jest.mock('@skpm/fs')
 
 // eslint-disable-next-line
-const { targetFolder } = require('../fs')
+const { targetFolder, getConfigPaths } = require('../fs')
+
+describe('looking up config path', () => {
+  it('finds the right config paths', () => {
+    expect(getConfigPaths('abc')).toEqual(['abc@expo'])
+    expect(getConfigPaths('')).toEqual(['@expo'])
+    expect(getConfigPaths('abc.sketch')).toEqual(['abc@expo'])
+  })
+})
 
 describe('target folder lookup', () => {
   it('base', () => {

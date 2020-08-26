@@ -11,22 +11,37 @@ export function dirname (name: string): string {
   return name.substr(0, pos)
 }
 
-export function targetFolder (path: string): (sub: string) => string {
+export function getConfigPaths (path: string): string[] {
   path = decodeURI(path)
   const reg = /^(.*)(\.sketch)$/ig
   const parts = reg.exec(path)
-  let base = parts !== null ? `${parts[1]}@expo` : `${path}@expo`
-  if (existsSync(base)) {
-    const stat = statSync(base)
-    if (stat.isFile()) {
-      const lookupPath = base
-      base = `${dirname(base)}/${readFileSync(base, 'utf-8')}`
-      if (existsSync(base) && statSync(base).isFile()) {
-        throw new Error(`Target, read from ${lookupPath}, is a file: ${base}`)
+  const base = parts !== null ? parts[1] : path
+  return [`${base}@expo`]
+}
+
+export interface IConfig {
+  lookupPath: string
+  targetFolder: string
+}
+
+export function targetFolder (path: string): (sub: string) => string {
+  let config: IConfig
+  for (const configPath of getConfigPaths(path)) {
+    if (config === undefined) {
+      config = { lookupPath: path, targetFolder: configPath }
+    }
+    if (existsSync(configPath) && statSync(configPath).isFile()) {
+      config = {
+        lookupPath: configPath,
+        targetFolder: `${dirname(configPath)}/${readFileSync(configPath, 'utf-8')}`
       }
+      break
     }
   }
-  return (sub: string) => sub === '' ? base : `${base}/${sub}`
+  if (existsSync(config.targetFolder) && statSync(config.targetFolder).isFile()) {
+    throw new Error(`Target, derived from ${config.lookupPath}, is a file: ${config.targetFolder}`)
+  }
+  return (sub: string) => sub === '' ? config.targetFolder : `${config.targetFolder}/${sub}`
 }
 
 export function readPluginAsset (file: string): Buffer {
