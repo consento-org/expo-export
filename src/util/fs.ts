@@ -24,7 +24,7 @@ export interface IConfig {
   targetFolder: string
 }
 
-export function targetFolder (path: string): (sub: string) => string {
+export function getConfig (path: string): IConfig {
   let config: IConfig
   for (const configPath of getConfigPaths(path)) {
     if (config === undefined) {
@@ -41,6 +41,11 @@ export function targetFolder (path: string): (sub: string) => string {
   if (existsSync(config.targetFolder) && statSync(config.targetFolder).isFile()) {
     throw new Error(`Target, derived from ${config.lookupPath}, is a file: ${config.targetFolder}`)
   }
+  return config
+}
+
+export function targetFolder (path: string): (sub: string) => string {
+  const config = getConfig(path)
   return (sub: string) => sub === '' ? config.targetFolder : `${config.targetFolder}/${sub}`
 }
 

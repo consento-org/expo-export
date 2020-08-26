@@ -2,7 +2,7 @@
 jest.mock('@skpm/fs')
 
 // eslint-disable-next-line
-const { targetFolder, getConfigPaths } = require('../fs')
+const { targetFolder, getConfigPaths, getConfig } = require('../fs')
 
 describe('looking up config path', () => {
   it('finds the right config paths', () => {
@@ -11,6 +11,16 @@ describe('looking up config path', () => {
     expect(getConfigPaths('abc.sketch')).toEqual(['abc@expo'])
     expect(getConfigPaths(`${__dirname}/fs`)).toEqual([`${__dirname}/fs@expo`])
     expect(getConfigPaths(`${__dirname}/fsbroken`)).toEqual([`${__dirname}/fsbroken@expo`])
+  })
+})
+
+describe('loading config', () => {
+  it('loading test config', () => {
+    expect(getConfig('abc')).toEqual({ lookupPath: 'abc', targetFolder: 'abc@expo' })
+    expect(getConfig('')).toEqual({ lookupPath: '', targetFolder: '@expo' })
+    expect(getConfig(`${__dirname}/fs`)).toEqual({ lookupPath: `${__dirname}/fs@expo`, targetFolder: `${__dirname}/abcd` })
+    expect(getConfig(`${__dirname}/fs_multiline`)).toEqual({ lookupPath: `${__dirname}/fs_multiline@expo`, targetFolder: `${__dirname}/abcd` })
+    expect(() => getConfig(`${__dirname}/fsbroken`)).toThrowError()
   })
 })
 
