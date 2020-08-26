@@ -30,7 +30,7 @@ export function targetFolder (path: string): (sub: string) => string {
 }
 
 export function readPluginAsset (file: string): Buffer {
-  return readFileSync(`${(global as any).context.plugin.url().absoluteString()}/Contents/Resources/${file}`.replace(/^file:\/\//, ''))
+  return readFileSync(`${(global as any).context.plugin.url().absoluteString() as string}/Contents/Resources/${file}`.replace(/^file:\/\//, ''))
 }
 
 export function write (pth: string, data: any): boolean {
@@ -51,7 +51,7 @@ export function write (pth: string, data: any): boolean {
 }
 
 export function mkdirp (pth: string): boolean {
-  let elements
+  let elements: string[]
   let created = false
   while (!existsSync(pth)) {
     const i = pth.lastIndexOf('/')

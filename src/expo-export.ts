@@ -27,11 +27,11 @@ export function expoExport (opts: IExpoExportOpts, context: any): void {
   }
   const target = targetFolder(url)
   const fontNameLookup = createFontNameLookup(document, context.document)
-  if (opts.color === true) write(target('src/styles/Color.ts'), generateColors(document))
-  if (opts.font === true) write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
+  if (opts.color) write(target('src/styles/Color.ts'), generateColors(document))
+  if (opts.font) write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
   const { textStyles, textStyleData } = generateTextStyles(document, fontNameLookup)
-  if (opts.textStyle === true) write(target('src/styles/TextStyles.ts'), textStyleData)
+  if (opts.textStyle) write(target('src/styles/TextStyles.ts'), textStyleData)
 
-  if (opts.assets === true) writeAssets(document, target)
-  if (opts.components === true) writeComponents(document, target, textStyles)
+  if (opts.assets) writeAssets(document, target)
+  if (opts.components) writeComponents(document, target, textStyles)
 }

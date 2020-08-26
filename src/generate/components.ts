@@ -337,7 +337,7 @@ class Polygon extends Component {
       // somehow packed into the app.
       return JSON.stringify({ error: 'pattern is still todo' })
     }
-    return JSON.stringify({ error: `fill type ${fill.fillType} is unknown` })
+    return JSON.stringify({ error: `fill type ${String(fill.fillType)} is unknown` })
   }
 }
 
@@ -460,6 +460,6 @@ export function writeComponents (document: Document, target: (path: string) => s
   }
   if (hasComponent) {
     write(target('src/styles/Component.tsx'), `${disclaimer}
-${readPluginAsset('styles/Component.tsx')}`)
+${readPluginAsset('styles/Component.tsx').toString()}`)
   }
 }

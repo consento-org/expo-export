@@ -35,6 +35,7 @@ export function LRUCache<T, X = any> (handler: (key: string, arg?: X) => T, max:
       result = handler(key, arg)
       if (count === max) {
         for (const key in items) {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete items[key]
           break
         }
@@ -42,6 +43,7 @@ export function LRUCache<T, X = any> (handler: (key: string, arg?: X) => T, max:
         count += 1
       }
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete items[key]
     }
     items[key] = result

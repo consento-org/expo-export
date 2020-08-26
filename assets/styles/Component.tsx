@@ -14,8 +14,8 @@ export interface IRenderOptions {
 }
 
 export function createGlobalEffect <T> ({ update, init }: {
-  update (): T | undefined
-  init (handler: () => any): () => any
+  update: () => T | undefined
+  init: (handler: () => any) => () => any
 }): () => T {
   const listeners = new Set<(lastUpdate: number) => any>()
   let output: T = update()
@@ -56,10 +56,10 @@ export enum TOrientation {
 }
 
 export interface IVUnits {
-  vw (number: number): number
-  vh (number: number): number
-  vmin (number: number): number
-  vmax (number: number): number
+  vw: (number: number) => number
+  vh: (number: number) => number
+  vmin: (number: number) => number
+  vmax: (number: number) => number
   orientation: TOrientation
   isHorz: boolean
   isVert: boolean

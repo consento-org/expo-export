@@ -4,9 +4,17 @@ const TerserPlugin = require('terser-webpack-plugin')
 module.exports = function (config, isPluginCommand) {
   const isProduction = process.env.NODE_ENV === 'production'
 
+  for (const rule of config.module.rules) {
+    if (rule.use.loader === '@skpm/file-loader') {
+      if (!rule.exclude) {
+        rule.exclude = /node_modules|template\//
+      }
+    }
+  }
+
   config.module.rules.push({
     test: /\.tsx?$/,
-    exclude: /node_modules/,
+    exclude: /node_modules|template\//,
     loader: 'ts-loader'
   })
 
@@ -34,4 +42,5 @@ module.exports = function (config, isPluginCommand) {
       ]
     }
   }
+  return config
 }

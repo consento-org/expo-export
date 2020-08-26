@@ -6,7 +6,7 @@ export function addImport (target: Imports, from: string, symbol: string): Impor
     byFrom = []
     target[from] = byFrom
   }
-  if (byFrom.indexOf(symbol) === -1) {
+  if (!byFrom.includes(symbol)) {
     byFrom.push(symbol)
   }
   return target

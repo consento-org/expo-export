@@ -2,12 +2,12 @@ import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance
 import { LRUCache } from './string'
 
 interface IDocumentData {
-  textStyleWithID(id: string): undefined | {
-    style(): {
-      primitiveTextStyle(): undefined | {
-        attributes(): {
+  textStyleWithID: (id: string) => undefined | {
+    style: () => {
+      primitiveTextStyle: () => undefined | {
+        attributes: () => {
           'NSFont': {
-            fontName(): string
+            fontName: () => string
           }
         }
       }
@@ -122,6 +122,7 @@ export function isTextOverride (item: Override): item is Override<Text, string> 
   return item.property === 'stringValue'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false
 
 const _isIgnored = LRUCache<boolean, AnyLayer | Page>((_: string, item: AnyLayer | Page) => {
