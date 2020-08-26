@@ -11,6 +11,27 @@ export function dirname (name: string): string {
   return name.substr(0, pos)
 }
 
+export function resolve (base: string, path: string): string {
+  if (path.charAt(0) !== '/') {
+    path = `${base}/${path}`
+  }
+  const parts = path.split('/').filter(entry => entry !== '.')
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i + 1] === '..') {
+      parts.splice(i, 2)
+      i -= 1
+    }
+  }
+  const result = parts.join('/')
+  if (result === '/') {
+    return result
+  }
+  if (/\/$/.test(result)) {
+    return result.substr(0, result.length - 1)
+  }
+  return result
+}
+
 export function getConfigPaths (path: string): string[] {
   path = decodeURI(path)
   const reg = /^(.*)(\.sketch)$/ig
