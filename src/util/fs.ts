@@ -57,7 +57,7 @@ export function getConfig (path: string): IConfig {
         try {
           config = JSON.parse(raw)
         } catch (err) {
-          throw new Error(`Configuration at ${config.lookupPath} is not a valid json file`)
+          throw new Error(`Configuration at ${config.lookupPath} is not a valid json file:\n${String(err)}`)
         }
         if (typeof config === 'string') {
           config = {
