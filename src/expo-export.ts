@@ -1,6 +1,6 @@
 import { alert } from 'sketch/ui'
 import { Document } from 'sketch/dom'
-import { write, targetFolder } from './util/fs'
+import { write, targetFolder, getConfig } from './util/fs'
 import { generateColors } from './generate/color'
 import { generateFonts } from './generate/font'
 import { generateTextStyles } from './generate/text'
@@ -25,6 +25,7 @@ export function expoExport (opts: IExpoExportOpts, context: any): void {
   if (url === null) {
     return alert('URL missing', 'Please save the document first!')
   }
+  const config = getConfig(url)
   const target = targetFolder(url)
   const fontNameLookup = createFontNameLookup(document, context.document)
   if (opts.color) write(target('src/styles/Color.ts'), generateColors(document))
@@ -33,5 +34,5 @@ export function expoExport (opts: IExpoExportOpts, context: any): void {
   if (opts.textStyle) write(target('src/styles/TextStyles.ts'), textStyleData)
 
   if (opts.assets) writeAssets(document, target)
-  if (opts.components) writeComponents(document, target, textStyles)
+  if (opts.components) writeComponents(document, target, textStyles, config)
 }

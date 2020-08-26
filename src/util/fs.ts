@@ -43,10 +43,15 @@ export function getConfigPaths (path: string): string[] {
 export interface IConfig {
   lookupPath: string
   targetFolder: string
+  exportHidden: boolean
 }
 
 export function getConfig (path: string): IConfig {
-  let config: IConfig
+  let config: {
+    lookupPath?: string
+    targetFolder: string
+    exportHidden?: any
+  }
   for (const configPath of getConfigPaths(path)) {
     if (config === undefined) {
       config = { lookupPath: path, targetFolder: configPath }
@@ -61,18 +66,15 @@ export function getConfig (path: string): IConfig {
         }
         if (typeof config === 'string') {
           config = {
-            lookupPath: configPath,
             targetFolder: config
           }
-        } else {
-          config.lookupPath = configPath
         }
       } else {
         config = {
-          lookupPath: configPath,
           targetFolder: raw
         }
       }
+      config.lookupPath = configPath
       config.targetFolder = resolve(dirname(configPath), config.targetFolder)
       break
     }
@@ -80,7 +82,8 @@ export function getConfig (path: string): IConfig {
   if (existsSync(config.targetFolder) && statSync(config.targetFolder).isFile()) {
     throw new Error(`Target, derived from ${config.lookupPath}, is a file: ${config.targetFolder}`)
   }
-  return config
+  config.exportHidden = !!(config.exportHidden as boolean)
+  return config as IConfig
 }
 
 export function targetFolder (path: string): (sub: string) => string {

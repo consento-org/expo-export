@@ -1,6 +1,6 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
 import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType, isTextOverride } from '../util/dom'
-import { write, readPluginAsset } from '../util/fs'
+import { write, readPluginAsset, IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, renderImports } from '../util/render'
 import { toMaxDecimals } from '../util/number'
@@ -367,7 +367,7 @@ function isExportedArtboard (artboard: Artboard): boolean {
   return hasSlice9(artboard)
 }
 
-function collectComponents (document: Document, textStyles: TIDLookup): { [path: string]: IComponent } {
+function collectComponents (document: Document, textStyles: TIDLookup, config: IConfig): { [path: string]: IComponent } {
   const components = {}
   let component: IComponent
   iterateDocument(document, (layer, parentNames): boolean => {
@@ -385,7 +385,7 @@ function collectComponents (document: Document, textStyles: TIDLookup): { [path:
         return true
       }
     }
-    if (layer.hidden) {
+    if (layer.hidden && !config.exportHidden) {
       return true
     }
     if (component === undefined) {
@@ -450,8 +450,8 @@ export const ${component.name} = new ${classForTarget(component.name)}()
 `
 }
 
-export function writeComponents (document: Document, target: (path: string) => string, textStyles: TIDLookup): void {
-  const components = collectComponents(document, textStyles)
+export function writeComponents (document: Document, target: (path: string) => string, textStyles: TIDLookup, config: IConfig): void {
+  const components = collectComponents(document, textStyles, config)
   const getColor = getColorFactory(document)
   let hasComponent = false
   for (const name in components) {

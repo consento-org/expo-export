@@ -16,19 +16,19 @@ describe('looking up config path', () => {
 
 describe('loading config', () => {
   it('loading test config', () => {
-    expect(getConfig('abc')).toEqual({ lookupPath: 'abc', targetFolder: 'abc@expo' })
-    expect(getConfig('')).toEqual({ lookupPath: '', targetFolder: '@expo' })
-    expect(getConfig(`${__dirname}/fs`)).toEqual({ lookupPath: `${__dirname}/fs@expo`, targetFolder: `${__dirname}/abcd` })
-    expect(getConfig(`${__dirname}/fs_multiline`)).toEqual({ lookupPath: `${__dirname}/fs_multiline@expo`, targetFolder: `${__dirname}/abcd` })
+    expect(getConfig('abc')).toEqual({ lookupPath: 'abc', targetFolder: 'abc@expo', exportHidden: false })
+    expect(getConfig('')).toEqual({ lookupPath: '', targetFolder: '@expo', exportHidden: false })
+    expect(getConfig(`${__dirname}/fs`)).toEqual({ lookupPath: `${__dirname}/fs@expo`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
+    expect(getConfig(`${__dirname}/fs_multiline`)).toEqual({ lookupPath: `${__dirname}/fs_multiline@expo`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
     expect(() => getConfig(`${__dirname}/fsbroken`)).toThrowError()
   })
   it('json support', () => {
-    expect(getConfig(`${__dirname}/fs_json_obj`)).toEqual({ lookupPath: `${__dirname}/fs_json_obj@expo`, targetFolder: `${__dirname}/higherImportance` })
-    expect(getConfig(`${__dirname}/fs_json_str`)).toEqual({ lookupPath: `${__dirname}/fs_json_str@expo`, targetFolder: `${__dirname}/abcd` })
+    expect(getConfig(`${__dirname}/fs_json_obj`)).toEqual({ lookupPath: `${__dirname}/fs_json_obj@expo`, targetFolder: `${__dirname}/higherImportance`, exportHidden: false })
+    expect(getConfig(`${__dirname}/fs_json_str`)).toEqual({ lookupPath: `${__dirname}/fs_json_str@expo`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
     expect(() => getConfig(`${__dirname}/fsbroken_json`)).toThrow()
     expect(() => getConfig(`${__dirname}/fsbroken_multiline`)).toThrow()
-    expect(getConfig(`${__dirname}/fs_jsonext_str`)).toEqual({ lookupPath: `${__dirname}/fs_jsonext_str@expo.json`, targetFolder: `${__dirname}/abcd` })
-    expect(getConfig(`${__dirname}/fs_obj`)).toEqual({ lookupPath: `${__dirname}/fs_obj@expo.json`, targetFolder: `${__dirname}/abcd` })
+    expect(getConfig(`${__dirname}/fs_jsonext_str`)).toEqual({ lookupPath: `${__dirname}/fs_jsonext_str@expo.json`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
+    expect(getConfig(`${__dirname}/fs_obj`)).toEqual({ lookupPath: `${__dirname}/fs_obj@expo.json`, targetFolder: `${__dirname}/abcd`, exportHidden: false })
     expect(() => getConfig(`${__dirname}/fsbroken_nojson`)).toThrow()
   })
 })
