@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Blank Template (expo-export)",
+    "name": "Example (expo-export)",
     "slug": "consento-expo-export",
     "entryPoint": "./index.js",
     "privacy": "public",
