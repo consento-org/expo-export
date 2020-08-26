@@ -42,5 +42,4 @@ module.exports = function (config, isPluginCommand) {
       ]
     }
   }
-  return config
 }
