@@ -49,5 +49,8 @@
     <item>
       <enclosure url="https://github.com/consento-org/expo-export/releases/download/v3.6.2/expoexport.sketchplugin.zip" sparkle:version="3.6.2"/>
     </item>
+    <item>
+      <enclosure url="https://github.com/consento-org/expo-export/releases/download/v3.7.0/expoexport.sketchplugin.zip" sparkle:version="3.7.0"/>
+    </item>
   </channel>
 </rss>
