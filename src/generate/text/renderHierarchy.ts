@@ -21,7 +21,7 @@ export function adjustAlignment (alignment: TAlignment): 'left' | 'right' | 'cen
   return alignment
 }
 
-export const formatFontProps = ['color', 'fontFamily', 'fontSize', 'textAlign', 'textTransform', 'textAlignVertical']
+export const formatFontProps = ['color', 'fontFamily', 'lineHeight', 'fontSize', 'textAlign', 'textTransform', 'textAlignVertical']
 function reduceStack (stack: StackEntry[]): ITextFormat {
   const result = {}
   for (const { format } of stack) {
@@ -42,6 +42,7 @@ export function getTextFormatRenderProps (style: ITextFormat, getColor: FGetColo
     props.push(`fontFamily: Font.${style.fontFamily}`)
   }
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
+  if (has(style.lineHeight)) props.push(`lineHeight: ${toMaxDecimals(style.lineHeight, 2)}`)
   if (has(style.textAlign)) props.push(`textAlign: '${adjustAlignment(style.textAlign)}'`)
   if (has(style.textTransform)) props.push(`textTransform: '${style.textTransform}'`)
   if (has(style.textAlignVertical)) props.push(`textAlignVertical: '${style.textAlignVertical}'`)
