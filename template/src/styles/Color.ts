@@ -1,5 +1,12 @@
-// This file has been generated with expo-export@3.6.2, a Sketch plugin.
+// This file has been generated with expo-export@3.7.0, a Sketch plugin.
 export enum Color {
-  navBg = '#c3c3c3ff',
-  navSelected = '#d8d8d8ff'
+  pink = '#df20ccff',
+  blue = '#20ccdfff',
+  green = '#ccdf20ff',
+  text = '#851476ff',
+  middle = '#4f1447ff',
+  dark = '#240520ff',
+  flatBg = '#c8c8c8ff',
+  white = '#ffffffff',
+  bg = '#e0e0e0ff'
 }

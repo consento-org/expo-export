@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import 'react-native-gesture-handler' // Imported to fix gesture error in tab navigation
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { Text } from 'react-native'
+import { SafeAreaProvider, useSafeArea } from 'react-native-safe-area-context'
+import { Text, StatusBar, View, StatusBarStyle } from 'react-native'
 import { Loading } from './src/screens/Loading'
 import { loadFonts } from './src/styles/Font'
+import { NavigationContainer, navigationRef } from './src/screens/util/navigate'
+import { elementHeader } from './src/styles/component/elementHeader'
+
+function TopBar ({ backgroundColor, barStyle }: { backgroundColor: string, barStyle: StatusBarStyle }) {
+  const safeArea = useSafeArea()
+  return <>
+    <StatusBar
+      barStyle={ barStyle }
+      translucent={ true /* Setting translucent to ture prevents awkward resize jumps on android */ }
+      backgroundColor={ backgroundColor } />
+    <View style={{ height: safeArea.top, backgroundColor }}/>{ /* iOS needs the header to be shown, else it will draw just the default grey */}
+  </>
+}
 
 /**
  * This definition runs before the app. It load the actual App and fonts.
@@ -12,29 +25,36 @@ import { loadFonts } from './src/styles/Font'
 export default function App (): JSX.Element {
   const [error, setError] = useState<Error>()
   const [loaded, setLoaded] = useState<{ App(): JSX.Element }>()
-  useEffect(() => {
+  useEffect(() => { // Make sure that re-renderings don't cause to reload the App
     Promise.all([
-      import('./src/App'),
-      loadFonts()
+      import('./src/App'), // Load the app asynchronously
+      loadFonts() // Load the fonts
     ])
       .then(([{ App }]) => {
         if (App === null || App === undefined) {
-          setLoaded({ App: (): JSX.Element => <Text>'No Screen returned by ./src/App.tsx'</Text> })
+          throw new Error('No Screen returned by ./src/App.tsx')
         }
         setLoaded({ App })
       })
-      .catch(setError)
+      .catch(error => {
+        console.error(error)
+        setError(error)
+      })
   }, [])
-  if (error !== undefined) {
-    return <Text>{`Error while initing:\n${String(error)}`}</Text>
-  }
-  if (loaded !== undefined) {
-    try {
-      return <SafeAreaProvider><loaded.App /></SafeAreaProvider>
-    // eslint-disable-next-line no-unreachable
-    } catch (err) {
-      return <Text>{`Error: ${String(err)}`}</Text>
-    }
-  }
-  return <SafeAreaProvider><Loading /></SafeAreaProvider>
+  return <SafeAreaProvider>
+    <NavigationContainer ref={navigationRef}>
+      <View style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <TopBar barStyle='light-content' backgroundColor={ elementHeader.topBar.fill.color }/>
+        <View style={{ flexGrow: 1 }}>
+        {
+          (error !== undefined)
+            ? <Text>{`Error while initing:\n${String(error)}`}</Text>
+            : (loaded !== undefined)
+              ? <loaded.App />
+              : <Loading />
+        }
+        </View>
+      </View>
+    </NavigationContainer>
+  </SafeAreaProvider>
 }

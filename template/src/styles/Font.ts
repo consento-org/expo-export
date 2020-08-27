@@ -1,12 +1,16 @@
-// This file has been generated with expo-export@3.6.2, a Sketch plugin.
+// This file has been generated with expo-export@3.7.0, a Sketch plugin.
 import * as ExpoFont from 'expo-font'
 
 export enum Font {
-  RalewayMediumItalic = 'Raleway-MediumItalic'
+  KellySlabRegular = 'KellySlab-Regular',
+  RobotoRegular = 'Roboto-Regular',
+  NotoSansJPRegular = 'NotoSansJP-Regular'
 }
 
 export async function loadFonts (): Promise<void> {
   await ExpoFont.loadAsync({
-    [Font.RalewayMediumItalic]: require('../../assets/fonts/Raleway-MediumItalic.ttf')
+    [Font.KellySlabRegular]: require('../../assets/fonts/KellySlab-Regular.ttf'),
+    [Font.RobotoRegular]: require('../../assets/fonts/Roboto-Regular.ttf'),
+    [Font.NotoSansJPRegular]: require('../../assets/fonts/NotoSansJP-Regular.ttf')
   })
 }
