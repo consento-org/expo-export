@@ -74,7 +74,7 @@ const compareTextProps = formatFontProps.filter(prop => prop !== 'fontFamily')
 function compareTextFormat (base: ITextFormat, target: ITextFormat): ITextFormat {
   let difference: ITextFormat = null
   compareTextProps.forEach(key => {
-    if (target[key] !== base[key]) {
+    if (target[key] !== base[key] && target[key] !== null && target[key] !== undefined) {
       if (difference === null) {
         difference = {}
       }
