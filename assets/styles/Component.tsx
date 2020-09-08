@@ -110,7 +110,7 @@ export const useVUnits = createGlobalEffect({
   }
 })
 
-function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions = {}, place: Placement, style?: T): T {
+function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions, place: Placement, style?: T): T {
   if (style === null || style === undefined) {
     style = {} as any
   }
