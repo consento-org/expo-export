@@ -9,8 +9,8 @@ export type LocaleLookup<TElement> = {
   [locale in Locale]: TElement
 }
 
-export function containsJapanese (text: string) {
-  for (let i = 0; i < text.length; i++ ) {
+export function containsJapanese (text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
     if (text.charCodeAt(i) >= 0x3000) {
       return true
     }

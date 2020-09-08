@@ -7,14 +7,14 @@ export interface ITimeInSeconds {
 }
 
 export function useSeconds (): ITimeInSeconds {
-  const [ time, setTime ] = useState(new Date())
+  const [time, setTime] = useState(new Date())
   useEffect(() => {
     const inte = setInterval(() => {
       const newTime = new Date()
       if (
-        newTime.getSeconds() !== time.getSeconds()
-        || newTime.getMinutes() !== time.getMinutes()
-        || newTime.getHours() !== time.getHours()
+        newTime.getSeconds() !== time.getSeconds() ||
+        newTime.getMinutes() !== time.getMinutes() ||
+        newTime.getHours() !== time.getHours()
       ) {
         setTime(newTime)
       }

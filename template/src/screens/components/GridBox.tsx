@@ -13,9 +13,9 @@ const style: ViewStyle = {
 
 const labels = { [Locale.ja]: elementBox.labelJa, [Locale.en]: elementBox.labelEn }
 
-export const GridBox = ({ label }: { label: string }) => {
+export const GridBox = ({ label }: { label: string }): JSX.Element => {
   const labelItem = localeContent(labels, label)
-  return <View style={ style }>
-    <labelItem.Render value={ label }/>
+  return <View style={style}>
+    <labelItem.Render value={label} />
   </View>
 }

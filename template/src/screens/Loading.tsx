@@ -13,7 +13,7 @@ const style: ViewStyle = {
 export const Loading = forwardRef((_, ref: Ref<View>): JSX.Element => {
   return <TouchableWithoutFeedback>
     <View style={style} ref={ref}>
-      <screenLoading.splash.Render vert="none" horz="none" style={{ flexGrow: 1 }} />
+      <screenLoading.splash.Render vert='none' horz='none' style={{ flexGrow: 1 }} />
     </View>
   </TouchableWithoutFeedback>
 })

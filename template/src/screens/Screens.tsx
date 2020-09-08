@@ -16,10 +16,10 @@ import { ElementHeaderClass } from '../styles/component/elementHeader'
 
 const root = createStackNavigator()
 
-const mainScreenData: { name: string, design: IMainScreen, Content: () => JSX.Element }[] = [
-  { name: 'space', design: screenSpace, Content: () => <SpaceContent/> },
-  { name: 'mind', design: screenMind, Content: () => <MindContent/> },
-  { name: 'time', design: screenTime, Content: () => <TimeContent/> }
+const mainScreenData: Array<{ name: string, design: IMainScreen, Content: () => JSX.Element }> = [
+  { name: 'space', design: screenSpace, Content: () => <SpaceContent /> },
+  { name: 'mind', design: screenMind, Content: () => <MindContent /> },
+  { name: 'time', design: screenTime, Content: () => <TimeContent /> }
 ]
 
 /**
@@ -36,7 +36,7 @@ export interface IMainScreen extends Component {
   titleJa: Text
 }
 
-const mainScreens = mainScreenData.map(({name, design, Content}) => {
+const mainScreens = mainScreenData.map(({ name, design, Content }) => {
   const mainStyle: ViewStyle = {
     backfaceVisibility: 'visible',
     backgroundColor: design.backgroundColor,
@@ -49,46 +49,43 @@ const mainScreens = mainScreenData.map(({name, design, Content}) => {
   const sub = createStackNavigator()
   const title = localized({ [Locale.ja]: design.titleJa, [Locale.en]: design.titleEn })
   return () => {
-    return <root.Screen key={name} name={name} options={{ headerShown: false }}>{() =>
-      <View style={ mainStyle }>
-        <Header design={design} screenName={name} />{ /* The "header" property of "Screen" is not used due to a bug on iOS where the animation only affects the content */ }
+    return <root.Screen key={name} name={name} options={{ headerShown: false }}>{
+      () => <View style={mainStyle}>
+        <Header design={design} screenName={name} /* The "header" property of "Screen" is not used due to a bug on iOS where the animation only affects the content */ />
         <sub.Navigator>
           <sub.Screen name='main' options={{ headerShown: false }}>{() => {
-            return <View style={ mainStyle }>
+            return <View style={mainStyle}>
               <View style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <TouchableOpacity style={{ width: '100%', height: title.place.bottom - design.illustration.place.top }}
-                  onPress={ () => navigate([name, 'content']) }>
-                  <design.illustration.Render horz="center" vert="none" />
+                <TouchableOpacity
+                  style={{ width: '100%', height: title.place.bottom - design.illustration.place.top }}
+                  onPress={() => navigate([name, 'content'])}
+                >
+                  <design.illustration.Render horz='center' vert='none' />
                   <title.Render
-                    horz="center" vert="none"
+                    horz='center' vert='none'
                     style={{ top: title.place.top - design.illustration.place.top }}
                   />
                 </TouchableOpacity>
               </View>
               <View style={{ height: design.height - design.left.place.top }}>
-                <design.left.Render horz="start" vert="none"
-                  onPress={ () => navigate([prev.name, 'main']) }
-                />
-                <design.right.Render horz="end" vert="none"
-                  onPress={ () => navigate([next.name, 'main']) }
-                />
+                <design.left.Render horz='start' vert='none' onPress={() => navigate([prev.name, 'main'])} />
+                <design.right.Render horz='end' vert='none' onPress={() => navigate([next.name, 'main'])} />
               </View>
             </View>
           }}</sub.Screen>
-          <sub.Screen name='content' options={{ headerShown: false }} component={ Content } />
+          <sub.Screen name='content' options={{ headerShown: false }} component={Content} />
         </sub.Navigator>
       </View>
     }</root.Screen>
   }
 })
 
-
-function multiply (progress: Animated.AnimatedInterpolation, outputRange: [number, number]) {
+function multiply (progress: Animated.AnimatedInterpolation, outputRange: [number, number]): any {
   return {
     translateX: progress.interpolate({
       inputRange: [0, 1],
       outputRange,
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
   }
 }
@@ -100,7 +97,7 @@ const screenOptions: StackNavigationOptions = {
       cardStyle: {
         transform: [
           multiply(current.progress, [screen.width, 0]),
-          next?.progress ? multiply(next.progress, [0, -screen.width]) : { translateX: 0 }
+          next?.progress === undefined ? multiply(next.progress, [0, -screen.width]) : { translateX: 0 }
         ]
       }
     }

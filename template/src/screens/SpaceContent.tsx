@@ -35,17 +35,16 @@ const tabBarOptions: BottomTabBarOptions = {
   showLabel: false
 }
 
-function List () {
-  return <ScrollView style={{backgroundColor: screenSpaceList.backgroundColor, height: '100%' }}>
+const List = (): JSX.Element =>
+  <ScrollView style={{ backgroundColor: screenSpaceList.backgroundColor, height: '100%' }}>
     {
       ['hi', '今日！', 'di', 'ho', 'fix', 'me', 'up', 'break', 'you', 'down'].map((name, index) => <ListItem key={`list-${index}`} label={name} />)
     }
   </ScrollView>
-}
 
-function Grid () {
-  return <ScrollView style={{backgroundColor: screenSpaceGrid.backgroundColor, height: '100%' }}>
-    <View style={{ 
+const Grid = (): JSX.Element =>
+  <ScrollView style={{ backgroundColor: screenSpaceGrid.backgroundColor, height: '100%' }}>
+    <View style={{
       display: 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -58,22 +57,20 @@ function Grid () {
       }
     </View>
   </ScrollView>
-}
 
-const longText = localized({ [Locale.ja]: screenSpaceLongText.textJa , [Locale.en]: screenSpaceLongText.textEn })
+const longText = localized({ [Locale.ja]: screenSpaceLongText.textJa, [Locale.en]: screenSpaceLongText.textEn })
 
-function LongText () {
-  return <ScrollView style={{backgroundColor: screenSpaceGrid.backgroundColor, height: '100%', width: '100%' }}>
+const LongText = (): JSX.Element =>
+  <ScrollView style={{ backgroundColor: screenSpaceGrid.backgroundColor, height: '100%', width: '100%' }}>
     <View style={{ width: '100%', padding: 25 }}>
       <longText.render />
     </View>
   </ScrollView>
-}
 
-export const SpaceContent = () => {
+export const SpaceContent = (): JSX.Element => {
   // return // Render vert="none" horz="none" style={{ borderWidth: 1, width: 100, height: null }}/>
   return <Tab.Navigator screenOptions={screenOptions} tabBarOptions={tabBarOptions}>
-    <Tab.Screen name='list' component={List}  />
+    <Tab.Screen name='list' component={List} />
     <Tab.Screen name='grid' component={Grid} />
     <Tab.Screen name='longText' component={LongText} />
   </Tab.Navigator>

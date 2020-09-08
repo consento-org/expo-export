@@ -32,13 +32,13 @@ function lineCap (end: TLineEnd): Linecap {
   return 'square'
 }
 
-function DesignLine ({ line, start, end }: { line: Polygon, start: IPoint, end: IPoint }) {
+const DesignLine = ({ line, start, end }: { line: Polygon, start: IPoint, end: IPoint }): JSX.Element => {
   const join = line.border.lineJoin.toLowerCase() as Linejoin // Svg joins match to the lowercase version of the lineJoins
   const cap = lineCap(line.border.lineEnd)
   return <Line x1={start.x} y1={start.y} x2={end.x} y2={end.y} strokeWidth={line.border.thickness} stroke={line.border.fill.color} strokeLinecap={cap} strokeLinejoin={join} />
 }
 
-function pos (perc: number, start: IPoint, length) {
+const pos = (perc: number, start: IPoint, length): IPoint => {
   const rad = (-perc + 0.5) * 2 * Math.PI
   return {
     x: start.x + Math.sin(rad) * length,
@@ -46,13 +46,13 @@ function pos (perc: number, start: IPoint, length) {
   }
 }
 
-export const Clock = ({ width, height, time, style }: { width: number, height: number, time: ITimeInSeconds, style?: ViewStyle }) => {
+export const Clock = ({ width, height, time, style }: { width: number, height: number, time: ITimeInSeconds, style?: ViewStyle }): JSX.Element => {
   const { minutes, hours, seconds } = time
   const secondPerc = seconds / 60
   const minutePerc = (minutes + secondPerc) / 60
   const minuteEnd = pos(minutePerc, center, minuteLength)
   const hourEnd = pos(
-    (hours + minutePerc) / 12, 
+    (hours + minutePerc) / 12,
     center,
     hourLength
   )

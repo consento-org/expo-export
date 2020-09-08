@@ -3,7 +3,7 @@ import { NavigationContainerRef } from '@react-navigation/native'
 
 export { NavigationContainer } from '@react-navigation/native'
 
-export function createNavRef () {
+export function createNavRef (): React.RefObject<NavigationContainerRef> {
   return React.createRef<NavigationContainerRef>()
 }
 
@@ -14,7 +14,7 @@ export interface IRoute <TParams = any> {
   params?: IRoute<TParams> | TParams
 }
 
-function routeFromArray <TParams = any>(route: string[], params: TParams): IRoute<TParams> {
+function routeFromArray <TParams = any> (route: string[], params: TParams): IRoute<TParams> {
   if (route.length === 0) {
     throw new Error('Empty route array received')
   }
@@ -36,7 +36,7 @@ function routeFromArray <TParams = any>(route: string[], params: TParams): IRout
 export interface INavigate <TParams = any> {
   /**
    * Navigate to route as described in the react-navigation documentation
-   * 
+   *
    * @see https://reactnavigation.org/docs/navigating-without-navigation-prop
    */
   (route: string, params?: TParams): void
@@ -54,10 +54,10 @@ export interface INavigate <TParams = any> {
 
 /**
  * Navigation with support for deep links
- * 
+ *
  * This expands upon the documented use of `navigate` that adds support for deep routes with objects and
  * with an array of routes.
- * 
+ *
  * @see https://reactnavigation.org/docs/navigating-without-navigation-prop
  * @see https://reactnavigation.org/docs/nesting-navigators/#navigating-to-a-screen-in-a-nested-navigator
  */

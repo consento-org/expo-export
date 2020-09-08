@@ -5,20 +5,20 @@ import { localized, Locale } from '../util/locale'
 
 const label = localized({ [Locale.ja]: elementButton.labelJa, [Locale.en]: elementButton.labelEn })
 
-const styles = {
+const styles: { container: ViewStyle, touch: ViewStyle } = {
   container: {
     width: elementButton.width,
     height: elementButton.height
-  } as ViewStyle,
+  },
   touch: {
     top: 0,
     left: 0,
     width: elementButton.width,
     height: elementButton.height
-  } as ViewStyle
+  }
 }
 
-export const Button = ({ onPress, value }: { value?: string, onPress?: () => any }) => {
+export const Button = ({ onPress, value }: { value?: string, onPress?: () => any }): JSX.Element => {
   return <View style={styles.container}>
     <TouchableOpacity onPress={onPress}>
       <View style={styles.touch}>

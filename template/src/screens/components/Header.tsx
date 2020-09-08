@@ -10,26 +10,26 @@ export interface IHeaderOptions {
   screenName: string
 }
 
-const styles = {
+const styles: { topBase: ViewStyle, logoContainer: ViewStyle, backButton: ImageStyle } = {
   topBase: {
     height: elementHeader.height - elementHeader.topBar.place.height,
     position: 'relative',
     width: '100%'
-  } as ViewStyle,
+  },
   logoContainer: {
     display: 'flex',
     width: '100%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center'
-  } as ViewStyle,
+  },
   backButton: {
     position: 'absolute',
     top: elementHeader.back.place.top - elementHeader.topBar.place.height
-  } as ImageStyle
+  }
 }
 
-export function Header ({ design, screenName }: IHeaderOptions): JSX.Element {
+export const Header = ({ design, screenName }: IHeaderOptions): JSX.Element => {
   const showBackButton = useNavigationState((state) => {
     // The navigator of the header a sibling of the wanted navigator, so we first need to look into the
     // state object to see if we find the right navigator (which might be undefined) and then pick th
@@ -44,17 +44,18 @@ export function Header ({ design, screenName }: IHeaderOptions): JSX.Element {
     topStyle.borderBottomWidth = elementHeader.line.border.thickness
     topStyle.borderColor = elementHeader.line.fill.color
   }
-  return <View style={topStyle} >
+  return <View style={topStyle}>
     <View style={styles.logoContainer}>
       {elementHeader.logo.img()}
     </View>
     {
       showBackButton
         ? <elementHeader.back.Render
-            vert="none" horz="start"
-            style={styles.backButton}
-            onPress={ () => navigate([screenName, 'main']) }
-          />
+          vert='none'
+          horz='start'
+          style={styles.backButton}
+          onPress={() => navigate([screenName, 'main'])}
+        />
         : null
     }
   </View>

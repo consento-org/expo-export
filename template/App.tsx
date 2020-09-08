@@ -7,14 +7,17 @@ import { loadFonts } from './src/styles/Font'
 import { NavigationContainer, navigationRef } from './src/screens/util/navigate'
 import { elementHeader } from './src/styles/component/elementHeader'
 
-function TopBar ({ backgroundColor, barStyle }: { backgroundColor: string, barStyle: StatusBarStyle }) {
+function TopBar ({ backgroundColor, barStyle }: { backgroundColor: string, barStyle: StatusBarStyle }): JSX.Element {
   const safeArea = useSafeArea()
   return <>
     <StatusBar
-      barStyle={ barStyle }
-      translucent={ true /* Setting translucent to ture prevents awkward resize jumps on android */ }
-      backgroundColor={ backgroundColor } />
-    <View style={{ height: safeArea.top, backgroundColor }}/>{ /* iOS needs the header to be shown, else it will draw just the default grey */}
+      barStyle={barStyle}
+      backgroundColor={backgroundColor}
+      translucent /* Setting translucent to ture prevents awkward resize jumps on android */
+    />
+    <View
+      style={{ height: safeArea.top, backgroundColor }} /* iOS needs the header to be shown, else it will draw just the default grey */
+    />
   </>
 }
 
@@ -24,7 +27,7 @@ function TopBar ({ backgroundColor, barStyle }: { backgroundColor: string, barSt
  */
 export default function App (): JSX.Element {
   const [error, setError] = useState<Error>()
-  const [loaded, setLoaded] = useState<{ App(): JSX.Element }>()
+  const [loaded, setLoaded] = useState<{ App: () => JSX.Element }>()
   useEffect(() => { // Make sure that re-renderings don't cause to reload the App
     Promise.all([
       import('./src/App'), // Load the app asynchronously
@@ -44,15 +47,15 @@ export default function App (): JSX.Element {
   return <SafeAreaProvider>
     <NavigationContainer ref={navigationRef}>
       <View style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <TopBar barStyle='light-content' backgroundColor={ elementHeader.topBar.fill.color }/>
+        <TopBar barStyle='light-content' backgroundColor={elementHeader.topBar.fill.color} />
         <View style={{ flexGrow: 1 }}>
-        {
-          (error !== undefined)
-            ? <Text>{`Error while initing:\n${String(error)}`}</Text>
-            : (loaded !== undefined)
-              ? <loaded.App />
-              : <Loading />
-        }
+          {
+            (error !== undefined)
+              ? <Text>{`Error while initing:\n${String(error)}`}</Text>
+              : (loaded !== undefined)
+                ? <loaded.App />
+                : <Loading />
+          }
         </View>
       </View>
     </NavigationContainer>
