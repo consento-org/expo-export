@@ -1,4 +1,4 @@
-// This file has been generated with expo-export@3.7.0, a Sketch plugin.
+// This file has been generated with expo-export@3.8.0, a Sketch plugin.
 import { Component, Link } from '../Component'
 import { elementBox } from './elementBox'
 import { elementHeader } from './elementHeader'

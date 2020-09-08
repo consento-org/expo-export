@@ -1,4 +1,4 @@
-// This file has been generated with expo-export@3.7.0, a Sketch plugin.
+// This file has been generated with expo-export@3.8.0, a Sketch plugin.
 import React, { useState, useEffect } from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
 import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions, Insets, ReturnKeyTypeOptions, Keyboard, KeyboardEvent } from 'react-native'
