@@ -73,7 +73,8 @@
     },
     "rules": {
       "react/jsx-closing-bracket-location": "off",
-      "react/jsx-closing-tag-location": "off"
+      "react/jsx-closing-tag-location": "off",
+      "@typescript-eslint/strict-boolean-expressions": "off"
     }
   },
   "eslintIgnore": [
