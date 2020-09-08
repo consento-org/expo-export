@@ -108,7 +108,8 @@ declare module "sketch/dom" {
     PLUS_DARKER=16,
     PLUS_LIGHTER=17
   }
-  export class Style {
+  export class Style<TSharedStyle extends Style<TSharedStyle>> {
+    syncWithSharedStyle (shared: SharedStyle<TSharedStyle>): void
     id: string
     fills: Fill[]
     borders: Border[]
@@ -117,7 +118,7 @@ declare module "sketch/dom" {
     innerShadows: Shadow[]
     blur: Blur
   }
-  export class TextStyle extends Style {
+  export class TextStyle extends Style<TextStyle> {
     verticalAlignment: 'center' | 'top' | 'bottom'
     textColor: string
     lineHeight: number | null
@@ -134,13 +135,13 @@ declare module "sketch/dom" {
     textStrikethrough?: 'single'
     fontStyle?: 'italic' | 'bold'
   }
-  export class SharedStyle<T extends Style> {
+  export class SharedStyle<T extends Style<T>> {
     id: string
     name: string
     styleType: 'Style'
     style: T
   }
-  class ShapeStyle extends Style {
+  class ShapeStyle extends Style<ShapeStyle> {
     borderOptions: BorderOptions
   }
 

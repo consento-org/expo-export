@@ -200,7 +200,7 @@ function isVisibleFill (fill: Fill): boolean {
   return true
 }
 
-interface ShapeStyle extends Style {
+interface ShapeStyle extends Style<ShapeStyle> {
   borderOptions: BorderOptions
 }
 
