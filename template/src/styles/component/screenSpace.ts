@@ -18,14 +18,8 @@ export class ScreenSpaceClass extends Component {
     this.right = new ImagePlacement(Asset.iconArrowRight, { x: 248, y: 685, w: 127, h: 127 }, this)
     this.left = new ImagePlacement(Asset.iconArrowLeft, { x: 0, y: 685, w: 127, h: 127 }, this)
     this.illustration = new ImagePlacement(Asset.illustrationSpace, { x: 46.5, y: 218, w: 282, h: 278 }, this)
-    this.titleEn = new Text('Space', {
-      ...TextStyles.EnMain,
-      
-    }, { x: 35.5, y: 456, w: 304, h: 114 }, this)
-    this.titleJa = new Text('宇宙', {
-      ...TextStyles.JaMain,
-      
-    }, { x: 35.5, y: 456, w: 304, h: 114 }, this)
+    this.titleEn = new Text('Space', TextStyles.EnMain, { x: 35.5, y: 456, w: 304, h: 114 }, this)
+    this.titleJa = new Text('宇宙', TextStyles.JaMain, { x: 35.5, y: 456, w: 304, h: 114 }, this)
   }
 }
 

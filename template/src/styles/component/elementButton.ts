@@ -30,14 +30,8 @@ export class ElementButtonClass extends Component {
         }
       }
     }, { radius: 12 }, [], this)
-    this.labelEn = new Text('OK', {
-      ...TextStyles.EnButton,
-      
-    }, { x: 11.5, y: 20, w: 147, h: 40 }, this)
-    this.labelJa = new Text('了解', {
-      ...TextStyles.JaButton,
-      
-    }, { x: 11.5, y: 13, w: 147, h: 40 }, this)
+    this.labelEn = new Text('OK', TextStyles.EnButton, { x: 11.5, y: 20, w: 147, h: 40 }, this)
+    this.labelJa = new Text('了解', TextStyles.JaButton, { x: 11.5, y: 13, w: 147, h: 40 }, this)
   }
 }
 

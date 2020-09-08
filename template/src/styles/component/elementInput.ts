@@ -13,14 +13,8 @@ export class ElementInputClass extends Component {
     super('elementInput', 375, 62)
     this.bg = new Polygon({ x: 0, y: 0, w: 375, h: 62 }, Color.flatBg, null, [], this)
     this.bright = new Polygon({ x: 9.75, y: 0, w: 355.5, h: 62 }, Color.white, null, [], this)
-    this.inputEn = new Text('Input here', {
-      ...TextStyles.EnInput,
-      
-    }, { x: 10, y: 9, w: 355, h: 53 }, this)
-    this.inputJa = new Text('入力して下さい', {
-      ...TextStyles.JaInput,
-      
-    }, { x: 10.25, y: 4, w: 355, h: 53 }, this)
+    this.inputEn = new Text('Input here', TextStyles.EnInput, { x: 10, y: 9, w: 355, h: 53 }, this)
+    this.inputJa = new Text('入力して下さい', TextStyles.JaInput, { x: 10.25, y: 4, w: 355, h: 53 }, this)
   }
 }
 

@@ -8,14 +8,8 @@ export class ElementLabelClass extends Component {
   labelJa: Text
   constructor () {
     super('elementLabel', 375, 65)
-    this.labelEn = new Text('Label', {
-      ...TextStyles.EnLabel,
-      
-    }, { x: 9.5, y: 17.25, w: 324, h: 30.5 }, this)
-    this.labelJa = new Text('ラベル', {
-      ...TextStyles.JaLabel,
-      
-    }, { x: 9.5, y: 18.25, w: 324, h: 30.5 }, this)
+    this.labelEn = new Text('Label', TextStyles.EnLabel, { x: 9.5, y: 17.25, w: 324, h: 30.5 }, this)
+    this.labelJa = new Text('ラベル', TextStyles.JaLabel, { x: 9.5, y: 18.25, w: 324, h: 30.5 }, this)
   }
 }
 

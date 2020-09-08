@@ -11,14 +11,8 @@ export class ElementItemClass extends Component {
   constructor () {
     super('elementItem', 375, 73)
     this.bg = new Polygon({ x: 0, y: 6, w: 375, h: 67 }, Color.flatBg, null, [], this)
-    this.labelEn = new Text('Item', {
-      ...TextStyles.EnItem,
-      
-    }, { x: 10, y: 6, w: 355, h: 67 }, this)
-    this.labelJa = new Text('アイテム', {
-      ...TextStyles.JaItem,
-      
-    }, { x: 10, y: 8.5, w: 355, h: 56 }, this)
+    this.labelEn = new Text('Item', TextStyles.EnItem, { x: 10, y: 6, w: 355, h: 67 }, this)
+    this.labelJa = new Text('アイテム', TextStyles.JaItem, { x: 10, y: 8.5, w: 355, h: 56 }, this)
   }
 }
 

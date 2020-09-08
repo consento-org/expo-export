@@ -13,7 +13,6 @@ export interface ITextFormat {
 }
 
 const DEFAULT_FONTSIZE = 12
-const DEFAULT_LINEHEIGHT_FACTOR = 1.2
 const DEFAULT_TEXT_COLOR = '#000'
 const DEFAULT_FONTFAMILY = ''
 const DEFAULT_TEXT_ALIGN = 'left'
@@ -35,7 +34,7 @@ export class TextFormat implements ITextFormat {
     this.fontFamily = fontFamily !== undefined ? fontFamily : DEFAULT_FONTFAMILY
     this.fontSize = fontSize !== undefined ? fontSize : DEFAULT_FONTSIZE
     this.color = color !== undefined ? color : DEFAULT_TEXT_COLOR
-    this.lineHeight = lineHeight !== undefined && lineHeight !== null && !isNaN(lineHeight) ? lineHeight : this.fontSize * DEFAULT_LINEHEIGHT_FACTOR
+    this.lineHeight = lineHeight !== undefined && lineHeight !== null && !isNaN(lineHeight) ? lineHeight : undefined
     this.textTransform = textTransform !== undefined ? textTransform : DEFAULT_TEXT_TRANSFORM
     this.textAlign = textAlign !== undefined ? textAlign : DEFAULT_TEXT_ALIGN
     this.textAlignVertical = textAlignVertical !== undefined ? textAlignVertical : DEFAULT_VERTICAL_TEXT_ALIGN

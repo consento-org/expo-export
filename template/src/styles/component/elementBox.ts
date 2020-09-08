@@ -15,10 +15,7 @@ export class ElementBoxClass extends Component {
       ...TextStyles.EnBox,
       textAlignVertical: 'center'
     }, { x: 6, y: 41.5, w: 103, h: 28 }, this)
-    this.labelJa = new Text('アイテム', {
-      ...TextStyles.JaBox,
-      
-    }, { x: 0, y: 38.5, w: 115, h: 39 }, this)
+    this.labelJa = new Text('アイテム', TextStyles.JaBox, { x: 0, y: 38.5, w: 115, h: 39 }, this)
   }
 }
 

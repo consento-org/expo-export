@@ -134,6 +134,7 @@ declare module "sketch/dom" {
     textUnderline?: 'single'
     textStrikethrough?: 'single'
     fontStyle?: 'italic' | 'bold'
+    getDefaultLineHeight (): number | undefined
   }
   export class SharedStyle<T extends Style<T>> {
     id: string

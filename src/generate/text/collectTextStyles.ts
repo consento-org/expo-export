@@ -1,15 +1,15 @@
-import { Document, SharedStyle, TextStyle } from 'sketch/dom'
+import { Document, SharedStyle, TextStyle, Text } from 'sketch/dom'
 import { Hierarchy } from '../../util/hierarchy'
 import { TextFormat, ITextFormat } from './TextFormat'
 import { fontShortID } from '../font'
 
 export type TGetFontName = (id: string) => string
 
-export function processStyle (style: TextStyle): ITextFormat {
+export function processStyle (style: TextStyle, lineHeight?: number): ITextFormat {
   return {
     fontSize: style.fontSize,
     color: style.textColor,
-    lineHeight: style.lineHeight,
+    lineHeight: style.lineHeight ?? style.getDefaultLineHeight() ?? lineHeight,
     textTransform: style.textTransform,
     textAlign: style.alignment,
     textAlignVertical: style.verticalAlignment
@@ -17,10 +17,14 @@ export function processStyle (style: TextStyle): ITextFormat {
 }
 
 function processShared (shared: SharedStyle<TextStyle>, fontName: TGetFontName): TextFormat {
+  const tmpText = new Text()
+  tmpText.text = 'hello'
+  tmpText.sharedStyleId = shared.id
+  tmpText.style.syncWithSharedStyle(shared)
   return new TextFormat({
     id: shared.id,
     fontFamily: fontShortID(fontName(shared.id)),
-    ...processStyle(shared.style)
+    ...processStyle(shared.style, tmpText.style.getDefaultLineHeight())
   })
 }
 
