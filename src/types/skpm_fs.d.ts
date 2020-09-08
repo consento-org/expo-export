@@ -21,6 +21,7 @@ declare module '@skpm/fs' {
     mkdirSync (path: string): boolean
     readFileSync (path: string, encoding: string): string
     readFileSync (path: string): Buffer
+    realpathSync (path: string): string
     statSync (path: string): Stat
     Stat: Stat
   }

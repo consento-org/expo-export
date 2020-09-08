@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync, writeFileSync, mkdirSync } from '@skpm/fs'
+import { existsSync, readFileSync, statSync, writeFileSync, mkdirSync, realpathSync } from '@skpm/fs'
 
 export function dirname (name: string): string {
   const pos = name.lastIndexOf('/')
@@ -98,7 +98,10 @@ export function readPluginAsset (file: string): Buffer {
   if (!/\/$/.test(url)) {
     url += '/'
   }
-  return readFileSync(`${url}Contents/Resources/${file}`.replace(/^file:\/\//, ''))
+  url = (`${url}Contents/Resources/${file}`).replace(/^file:\/\//, '')
+  url = decodeURI(url)
+  url = realpathSync(url)
+  return readFileSync(url)
 }
 
 export function write (pth: string, data: any): boolean {
