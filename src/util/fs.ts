@@ -94,7 +94,11 @@ export function targetFolder (path: string): (sub: string) => string {
 }
 
 export function readPluginAsset (file: string): Buffer {
-  return readFileSync(`${(global as any).context.plugin.url().absoluteString() as string}/Contents/Resources/${file}`.replace(/^file:\/\//, ''))
+  let url = (global as any).context.plugin.url().absoluteString() as string
+  if (!/\/$/.test(url)) {
+    url += '/'
+  }
+  return readFileSync(`${url}Contents/Resources/${file}`.replace(/^file:\/\//, ''))
 }
 
 export function write (pth: string, data: any): boolean {
