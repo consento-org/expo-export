@@ -136,7 +136,7 @@ const _isIgnored = LRUCache<boolean, AnyLayer | Page>((_: string, item: AnyLayer
 }, 1000)
 
 export function isIgnored (item: AnyLayer | Page): boolean {
-  return _isIgnored(item.id, item)
+  return item === undefined || item === null || _isIgnored(item.id, item)
 }
 
 export function iterate (item: AnyLayer, handler: FTreeWalker, stackNames: string[]): void {
