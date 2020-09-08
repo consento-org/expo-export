@@ -228,10 +228,15 @@ export class Component {
     this.backgroundColor = backgroundColor
     this.width = width
     this.height = height
-    this.Render = this.Render.bind(this)
     this.Text = this.Text.bind(this)
+    this.Polygon = this.Polygon.bind(this)
     this.Image = this.Image.bind(this)
     this.Slice9 = this.Slice9.bind(this)
+    this.Render = this.Render.bind(this)
+    this.renderText = this.renderText.bind(this)
+    this.renderPolygon = this.renderPolygon.bind(this)
+    this.renderImage = this.renderImage.bind(this)
+    this.renderSlice9 = this.renderSlice9.bind(this)
   }
 
   Text (props: ITextProps): JSX.Element {
@@ -467,6 +472,7 @@ export class ImagePlacement {
     this.place = new Placement(frame)
     this.parent = parent
     this.Render = this.Render.bind(this)
+    this.img = this.img.bind(this)
   }
 
   Render (props: IBaseProps<Image, ImageStyle>): JSX.Element {
@@ -490,6 +496,7 @@ export class Slice9Placement {
     this.asset = asset
     this.place = new Placement(frame)
     this.parent = parent
+    this.render = this.render.bind(this)
   }
 
   render (style?: ViewStyle, ref?: React.Ref<View>, onLayout?: () => any): JSX.Element {
@@ -576,6 +583,7 @@ export class RGBA {
     this.g = exists(parts) ? parseInt(parts[2], 16) : 255
     this.b = exists(parts) ? parseInt(parts[3], 16) : 255
     this.a = exists(parts) && exists(parts[4]) ? parseInt(parts[4], 16) : 255
+    this.avg = this.avg.bind(this)
   }
 
   toString (): string {
@@ -656,6 +664,7 @@ export class Border {
     this.dashPattern = options === null || options.dashPattern === undefined ? [] : options.dashPattern
     this.borderStyle = dashPatternToBorderStyle(this.dashPattern)
     this.radius = options === null || options.radius === undefined ? 0 : options.radius
+    this.style = this.style.bind(this)
   }
 
   style (): ViewStyle {
@@ -709,6 +718,7 @@ export class Polygon {
     this.parent = parent
     this.Render = this.Render.bind(this)
     this.RenderRect = this.RenderRect.bind(this)
+    this.borderStyle = this.borderStyle.bind(this)
   }
 
   Render (props: IBaseProps<Image, ImageStyle>): JSX.Element {
@@ -799,6 +809,8 @@ export class Text {
       position: 'absolute'
     }
     this.Render = this.Render.bind(this)
+    this.render = this.render.bind(this)
+    this.renderAbsolute = this.renderAbsolute.bind(this)
   }
 
   Render (props: ITextBaseProps): JSX.Element {

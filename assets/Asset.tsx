@@ -36,6 +36,7 @@ export class ImageAsset {
       }
       return this.img(style)
     }
+    this.img = this.img.bind(this)
   }
 
   img (style?: FlexStyle, ref?: React.Ref<Image>, onLayout?: () => any): JSX.Element {
@@ -116,6 +117,7 @@ export class Slice9 {
       throw new Error('For a slice-9 we need 9 resources!')
     }
     this._slices = slices
+    this.render = this.render.bind(this)
   }
 
   render (style?: ViewStyle, ref?: React.Ref<View>, onLayout?: () => any): JSX.Element {
