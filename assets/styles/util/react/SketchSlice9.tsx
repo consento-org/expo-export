@@ -1,10 +1,10 @@
 import { applyRenderOptions, IRenderProps, IBaseProps, SketchInLayer } from './SketchInLayer'
 import { Slice9Placement } from '../Slice9Placement'
 import { View, ViewStyle } from 'react-native'
-import { Layer } from '../Layer'
+import { ILayer } from '../types'
 
 export interface ISlice9Props extends IBaseProps<View, ViewStyle> {
-  layer: Layer
+  layer: ILayer
   prototype: Slice9Placement
 }
 

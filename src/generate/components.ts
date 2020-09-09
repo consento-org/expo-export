@@ -18,7 +18,7 @@ abstract class Component {
     this.type = type
   }
 
-  abstract format (designName: string, name: string, imports: Imports, getColor: FGetColor): string
+  abstract format (designName: string, imports: Imports, getColor: FGetColor): string
 
   renderFrame (): string {
     return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
@@ -33,11 +33,11 @@ class Image extends Component {
     this.asset = asset
   }
 
-  format (designName: string, name: string, imports: Imports, _: FGetColor): string {
+  format (designName: string, imports: Imports, _: FGetColor): string {
     addImport(imports, `./src/styles/${designName}/Asset`, 'Asset')
     addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
     addImport(imports, './src/styles/util/react/SketchImage', [])
-    return `  ${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return `new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -49,11 +49,11 @@ class Slice9 extends Component {
     this.asset = asset
   }
 
-  format (_designName: string, name: string, imports: Imports, _: FGetColor): string {
+  format (_designName: string, imports: Imports, _: FGetColor): string {
     addImport(imports, './src/Asset', 'Asset')
     addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
     addImport(imports, './src/styles/util/react/SketchSlice9', [])
-    return `  ${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return `new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -88,10 +88,10 @@ class TextComponent extends Component {
     this.textStyle = textStyle
   }
 
-  format (designName: string, name: string, imports: Imports, getColor: FGetColor): string {
+  format (designName: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/TextBox', 'TextBox')
     addImport(imports, './src/styles/util/react/SketchTextBox', [])
-    return `  ${name} = new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
+    return `new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
   }
 
   renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
@@ -149,10 +149,10 @@ class Link extends Component {
       })
   }
 
-  format (designName: string, name: string, imports: Imports): string {
+  format (designName: string, imports: Imports): string {
     addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
     addImport(imports, './src/styles/util/LayerPlacement', 'LayerPlacement')
-    return `  ${name} = new LayerPlacement(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
+    return `new LayerPlacement(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
   }
 
   renderTextOverrides (): string {
@@ -222,10 +222,10 @@ class Polygon extends Component {
     this.shadows = style.shadows.filter(shadow => shadow.enabled && isVisibleColor(shadow.color))
   }
 
-  format (_designName: string, name: string, imports: Imports, getColor: FGetColor): string {
+  format (_designName: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/Polygon', 'Polygon')
     addImport(imports, './src/styles/util/react/SketchPolygon', [])
-    return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
+    return `new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
   }
 
   renderBorders (imports, getColor: FGetColor): string {
@@ -321,10 +321,6 @@ class Polygon extends Component {
   }
 }
 
-function classForTarget (target: string): string {
-  return `${target.charAt(0).toUpperCase()}${target.substr(1)}Class`
-}
-
 interface IComponent {
   name: string
   artboard: Artboard
@@ -395,22 +391,24 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
 
 function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-  addImport(imports, './src/styles/util/Layer', 'Layer')
   const properties = Object.keys(component.items).map(name =>
-    component.items[name].format(designName, name, imports, getColor)
+    `  ${name}: ${component.items[name].format(designName, imports, getColor)}`
   )
 
   return {
     imports,
-    code: `/* eslint-disable @typescript-eslint/lines-between-class-members */
-export class ${classForTarget(component.name)} extends Layer {
-${properties.join('\n')}
-  constructor () {
-    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})
+    code: `
+export const ${component.name} = {
+  name: '${component.name}',
+  width: ${component.artboard.frame.width},
+  height: ${component.artboard.frame.height}${
+    !component.artboard.background.enabled ? ''
+    : `,
+  backgroundColor: ${getColor(component.artboard.background.color, imports)}`}${
+    properties.length === 0 ? '' : `,
+${properties.join(',\n')}`
   }
 }
-
-export const ${component.name} = new ${classForTarget(component.name)}()
 `
   }
 }

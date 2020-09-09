@@ -99,8 +99,7 @@ export function writeTypeScript (pth: string, imports: Imports, code: string, ta
     importsString += '\n'
   }
   return write(target(pth), `${disclaimer}
-${importsString}${code.trim()}
-`)
+${importsString}${code}`.trim() + '\n')
 }
 
 export function readPluginTypeScript (pth: string, imports: Imports = {}): ITypeScript {

@@ -1,10 +1,10 @@
 import { SketchInLayer, IBaseProps, applyRenderOptions, IRenderProps } from './SketchInLayer'
 import { Image, ImageStyle } from 'react-native'
 import { ImagePlacement } from '../ImagePlacement'
-import { Layer } from '../Layer'
+import { ILayer } from '../types'
 
 export interface IImageProps extends IBaseProps<Image, ImageStyle> {
-  layer: Layer
+  layer: ILayer
   prototype: ImagePlacement
 }
 

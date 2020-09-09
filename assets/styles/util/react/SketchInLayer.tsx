@@ -3,7 +3,7 @@ import { FlexStyle, Insets, GestureResponderEvent, ViewStyle, TouchableOpacity, 
 import { Placement } from '../Placement'
 import { useVUnits } from '../useVUnits'
 import { exists } from '../lang'
-import { Layer } from '../Layer'
+import { ILayer } from '../types'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch' | 'none'
 
@@ -28,7 +28,7 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
 
 export interface IRenderProps<T extends React.Component, TStyle extends FlexStyle> extends IBaseProps<T, TStyle> {
   place: Placement
-  layer: Layer
+  layer: ILayer
   debug?: boolean
   hitSlop?: Insets
   item: (opts: {
@@ -46,7 +46,7 @@ export interface IRenderOptions {
   onLayout?: () => any
 }
 
-export function renderItem (layer: Layer, item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug, hitSlop }: IRenderOptions = {}): JSX.Element {
+export function renderItem (layer: ILayer, item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug, hitSlop }: IRenderOptions = {}): JSX.Element {
   const { vw, vh } = useVUnits()
   const style: ViewStyle = {
     position: 'absolute',

@@ -1,7 +1,7 @@
 import { Placement, IFrameData } from './Placement'
-import { Layer } from './Layer'
+import { ILayer } from './types'
 
-export class LayerPlacement <TTexts, TLayer extends Layer = Layer> {
+export class LayerPlacement <TTexts, TLayer extends ILayer = ILayer> {
   place: Placement
   layer: TLayer
   text: TTexts
