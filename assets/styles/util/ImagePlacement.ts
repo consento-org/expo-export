@@ -1,14 +1,14 @@
 import { Image, ImageStyle } from 'react-native'
-import { Component, IBaseProps } from './Component'
+import { Layer, IBaseProps } from './Layer'
 import { ImageAsset } from './ImageAsset'
 import { Placement, IFrameData } from './Placement'
 
-export class ImagePlacement {
+export class ImagePlacement <TParent extends Layer = Layer> {
   place: Placement
   asset: () => ImageAsset
-  parent: Component
+  parent: TParent
 
-  constructor (asset: () => ImageAsset, frame: IFrameData, parent: Component) {
+  constructor (asset: () => ImageAsset, frame: IFrameData, parent: TParent) {
     this.asset = asset
     this.place = new Placement(frame)
     this.parent = parent

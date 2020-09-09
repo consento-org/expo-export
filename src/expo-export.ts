@@ -53,8 +53,8 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
   './src/styles/util/Border': { pth: 'styles/util/Border.ts', imports: { 'react-native': [], './src/styles/util/Fill': [] } },
   './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
-  './src/styles/util/Component': {
-    pth: 'styles/util/Component.tsx',
+  './src/styles/util/Layer': {
+    pth: 'styles/util/Layer.tsx',
     imports: {
       react: [],
       'react-native': [],
@@ -74,13 +74,13 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     pth: 'styles/util/ImagePlacement.ts',
     imports: {
       'react-native': [],
-      './src/styles/util/Component': [],
+      './src/styles/util/Layer': [],
       './src/styles/util/ImageAsset': [],
       './src/styles/util/Placement': []
     }
   },
   './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
-  './src/styles/util/Link': { pth: 'styles/util/Link.ts', imports: { './src/styles/util/Placement': [] } },
+  './src/styles/util/LayerPlacement': { pth: 'styles/util/LayerPlacement.ts', imports: { './src/styles/util/Placement': [], './src/styles/util/Layer': [] } },
   './src/styles/util/Placement': { pth: 'styles/util/Placement.ts', imports: {} },
   './src/styles/util/Polygon': {
     pth: 'styles/util/Polygon.tsx',
@@ -89,7 +89,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       'react-native': [],
       'expo-linear-gradient': [],
       './src/styles/util/lang': [],
-      './src/styles/util/Component': [],
+      './src/styles/util/Layer': [],
       './src/styles/util/Placement': [],
       './src/styles/util/Fill': [],
       './src/styles/util/Border': [],
@@ -102,7 +102,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     pth: 'styles/util/Slice9Placement.ts',
     imports: {
       'react-native': [],
-      './src/styles/util/Component': [],
+      './src/styles/util/Layer': [],
       './src/styles/util/Slice9Asset': [],
       './src/styles/util/Placement': []
     }
@@ -113,7 +113,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       react: [],
       'react-native': [],
       './src/styles/util/lang': [],
-      './src/styles/util/Component': [],
+      './src/styles/util/Layer': [],
       './src/styles/util/Placement': []
     }
   },

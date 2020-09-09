@@ -164,10 +164,10 @@ class Link extends Component {
   }
 
   format (designName: string, name: string, imports: Imports): IComponentPropertyFormat {
-    addImport(imports, `./src/styles/${designName}/component/${this.target}`, this.target)
-    addImport(imports, './src/styles/util/Link', 'Link')
+    addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
+    addImport(imports, './src/styles/util/LayerPlacement', 'LayerPlacement')
     return {
-      property: `  ${name} = new Link(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
+      property: `  ${name} = new LayerPlacement(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
     }
   }
 
@@ -414,7 +414,7 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
 
 function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-  addImport(imports, './src/styles/util/Component', 'Component')
+  addImport(imports, './src/styles/util/Layer', 'Layer')
   const properties = Object.keys(component.items).map(name =>
     component.items[name].format(designName, name, imports, getColor)
   )
@@ -424,7 +424,7 @@ function renderComponent (designName: string, component: IComponent, getColor: F
   return {
     imports,
     code: `/* eslint-disable lines-between-class-members */
-export class ${classForTarget(component.name)} extends Component {
+export class ${classForTarget(component.name)} extends Layer {
 ${body}
   constructor () {
     super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})${propertyInit}
@@ -442,7 +442,7 @@ export function * generateComponents (document: Document, textStyles: TIDLookup,
   for (const component of collectComponents(document, textStyles, config)) {
     yield {
       ...renderComponent(designName, component, getColor),
-      pth: `./src/styles/${designName}/component/${component.name}.ts`
+      pth: `./src/styles/${designName}/layer/${component.name}.ts`
     }
   }
 }

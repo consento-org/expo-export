@@ -1,7 +1,7 @@
 import React from 'react'
 import { TextStyle, Text as NativeText, TextInput, ReturnKeyTypeOptions } from 'react-native'
 import { useDefault, exists } from './lang'
-import { Component, TTextContentType, ITextBaseProps } from './Component'
+import { Layer, TTextContentType, ITextBaseProps } from './Layer'
 import { Placement, IFrameData } from './Placement'
 
 export interface ITextRenderOptions {
@@ -30,14 +30,14 @@ export interface ITextRenderOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = (): void => {}
 
-export class Text {
+export class Text <TParent extends Layer = Layer> {
   text: string
   style: TextStyle
   styleAbsolute: TextStyle
   place: Placement
-  parent: Component
+  parent: TParent
 
-  constructor (text: string, style: TextStyle, frame: IFrameData, parent: Component) {
+  constructor (text: string, style: TextStyle, frame: IFrameData, parent: TParent) {
     this.text = text
     this.style = style
     this.parent = parent

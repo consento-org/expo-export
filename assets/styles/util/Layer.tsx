@@ -114,7 +114,7 @@ export interface IRenderProps<T extends React.Component, TStyle extends FlexStyl
   }) => JSX.Element
 }
 
-export class Component {
+export class Layer {
   name: string
   backgroundColor: string | undefined
   width: number
