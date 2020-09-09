@@ -1,17 +1,14 @@
 import { ViewStyle, View } from 'react-native'
-import { Layer } from './Layer'
 import { Slice9Asset } from './Slice9Asset'
 import { IFrameData, Placement } from './Placement'
 
-export class Slice9Placement <TParent extends Layer = Layer> {
+export class Slice9Placement {
   place: Placement
   asset: () => Slice9Asset
-  parent: TParent
 
-  constructor (asset: () => Slice9Asset, frame: IFrameData, parent: TParent) {
+  constructor (asset: () => Slice9Asset, frame: IFrameData) {
     this.asset = asset
     this.place = new Placement(frame)
-    this.parent = parent
     this.render = this.render.bind(this)
   }
 

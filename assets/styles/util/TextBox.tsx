@@ -1,8 +1,36 @@
 import React from 'react'
 import { TextStyle, Text, TextInput, ReturnKeyTypeOptions } from 'react-native'
 import { useDefault, exists } from './lang'
-import { Layer, TTextContentType, ITextBaseProps } from './Layer'
 import { Placement, IFrameData } from './Placement'
+
+export type TTextContentType = 'none'
+| 'URL'
+| 'addressCity'
+| 'addressCityAndState'
+| 'addressState'
+| 'countryName'
+| 'creditCardNumber'
+| 'emailAddress'
+| 'familyName'
+| 'fullStreetAddress'
+| 'givenName'
+| 'jobTitle'
+| 'location'
+| 'middleName'
+| 'name'
+| 'namePrefix'
+| 'nameSuffix'
+| 'nickname'
+| 'organizationName'
+| 'postalCode'
+| 'streetAddressLine1'
+| 'streetAddressLine2'
+| 'sublocality'
+| 'telephoneNumber'
+| 'username'
+| 'password'
+| 'newPassword'
+| 'oneTimeCode'
 
 export interface ITextRenderOptions {
   value?: string
@@ -30,34 +58,23 @@ export interface ITextRenderOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = (): void => {}
 
-export class TextBox <TParent extends Layer = Layer> {
+export class TextBox {
   text: string
   style: TextStyle
   styleAbsolute: TextStyle
   place: Placement
-  parent: TParent
 
-  constructor (text: string, style: TextStyle, frame: IFrameData, parent: TParent) {
+  constructor (text: string, style: TextStyle, frame: IFrameData) {
     this.text = text
     this.style = style
-    this.parent = parent
     this.place = new Placement(frame)
     this.styleAbsolute = {
       ...style,
       ...this.place.style(),
       position: 'absolute'
     }
-    this.Render = this.Render.bind(this)
     this.render = this.render.bind(this)
     this.renderAbsolute = this.renderAbsolute.bind(this)
-  }
-
-  Render (props: ITextBaseProps): JSX.Element {
-    return this.parent.Text({
-      ...props,
-      value: props.value === undefined ? this.text : props.value,
-      prototype: this
-    })
   }
 
   render (props: ITextRenderOptions): JSX.Element {

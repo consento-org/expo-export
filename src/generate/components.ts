@@ -18,16 +18,11 @@ abstract class Component {
     this.type = type
   }
 
-  abstract format (designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat
+  abstract format (designName: string, name: string, imports: Imports, getColor: FGetColor): string
 
   renderFrame (): string {
     return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
   }
-}
-
-interface IComponentPropertyFormat {
-  property: string
-  init?: string
 }
 
 class Image extends Component {
@@ -38,14 +33,10 @@ class Image extends Component {
     this.asset = asset
   }
 
-  format (designName: string, name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
+  format (designName: string, name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, `./src/styles/${designName}/Asset`, 'Asset')
     addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
-    return {
-      property: `  ${name}: ImagePlacement`,
-      init: `
-    this.${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()}, this)`
-    }
+    return `  ${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -57,14 +48,10 @@ class Slice9 extends Component {
     this.asset = asset
   }
 
-  format (_designName: string, name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
+  format (_designName: string, name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, './src/Asset', 'Asset')
     addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
-    return {
-      property: `  ${name}: Text`,
-      init: `
-    this.${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()}, this)`
-    }
+    return `  ${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -99,21 +86,17 @@ class TextComponent extends Component {
     this.textStyle = textStyle
   }
 
-  format (designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
+  format (designName: string, name: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/TextBox', 'TextBox')
-    return {
-      property: `  ${name}: TextBox`,
-      init: `
-    this.${name} = new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()}, this)`
-    }
+    return `  ${name} = new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
   }
 
   renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
     const layerStyle = processStyle(this._layer.style)
     if (this.textStyle === undefined) {
       return `{
-      ${getTextFormatRenderProps(designName, layerStyle, getColor, imports).join(',\n      ')}
-    }`
+    ${getTextFormatRenderProps(designName, layerStyle, getColor, imports).join(',\n      ')}
+  }`
     }
     addImport(imports, `./src/styles/${designName}/TextStyles`, 'TextStyles')
     const difference = compareTextFormat(this.textStyle.style, layerStyle)
@@ -121,9 +104,9 @@ class TextComponent extends Component {
       return `TextStyles.${this.textStyle.name}`
     }
     return `{
-      ...TextStyles.${this.textStyle.name},
-      ${getTextFormatRenderProps(designName, difference, getColor, imports).join(',\n      ')}
-    }`
+    ...TextStyles.${this.textStyle.name},
+    ${getTextFormatRenderProps(designName, difference, getColor, imports).join(',\n      ')}
+  }`
   }
 }
 
@@ -163,12 +146,10 @@ class Link extends Component {
       })
   }
 
-  format (designName: string, name: string, imports: Imports): IComponentPropertyFormat {
+  format (designName: string, name: string, imports: Imports): string {
     addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
     addImport(imports, './src/styles/util/LayerPlacement', 'LayerPlacement')
-    return {
-      property: `  ${name} = new LayerPlacement(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
-    }
+    return `  ${name} = new LayerPlacement(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
   }
 
   renderTextOverrides (): string {
@@ -238,13 +219,9 @@ class Polygon extends Component {
     this.shadows = style.shadows.filter(shadow => shadow.enabled && isVisibleColor(shadow.color))
   }
 
-  format (_designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
+  format (_designName: string, name: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/Polygon', 'Polygon')
-    return {
-      property: `  ${name}: Polygon`,
-      init: `
-    this.${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)}, this)`
-    }
+    return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
   }
 
   renderBorders (imports, getColor: FGetColor): string {
@@ -282,8 +259,8 @@ class Polygon extends Component {
       props.push(['radius', `${this.borderRadius}`])
     }
     return `{${props.map(([prop, value]) => `
-      ${prop}: ${value}`).join(',')}
-    }`
+    ${prop}: ${value}`).join(',')}
+  }`
   }
 
   renderShadows (imports: Imports, getColor: FGetColor): string {
@@ -295,8 +272,8 @@ class Polygon extends Component {
       shadows.push(`{ x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
     }
     return `[
-      ${shadows.join(',\n      ')}
-    ]`
+    ${shadows.join(',\n      ')}
+  ]`
   }
 
   renderFills (imports: Imports, getColor: FGetColor): string {
@@ -314,22 +291,22 @@ class Polygon extends Component {
     if (fill.fillType === FillType.Gradient) {
       addImport(imports, './src/styles/util/Fill', 'GradientType')
       return `{
-      gradient: {
-        type: GradientType.${mapGradientType(fill.gradient.gradientType)},
-        stops: [${fill.gradient.stops.map(stop => `{
-          color: ${getColor(stop.color, imports)},
-          position: ${stop.position}
-        }`).join(', ')}],
-        from: {
-          x: ${fill.gradient.from.x},
-          y: ${fill.gradient.from.y}
-        },
-        to: {
-          x: ${fill.gradient.to.x},
-          y: ${fill.gradient.to.y}
-        }
+    gradient: {
+      type: GradientType.${mapGradientType(fill.gradient.gradientType)},
+      stops: [${fill.gradient.stops.map(stop => `{
+        color: ${getColor(stop.color, imports)},
+        position: ${stop.position}
+      }`).join(', ')}],
+      from: {
+        x: ${fill.gradient.from.x},
+        y: ${fill.gradient.from.y}
+      },
+      to: {
+        x: ${fill.gradient.to.x},
+        y: ${fill.gradient.to.y}
       }
-    }`
+    }
+  }`
     }
     if (fill.fillType === FillType.Pattern) {
       // This requires for the image of all gradient patterns to be
@@ -418,16 +395,14 @@ function renderComponent (designName: string, component: IComponent, getColor: F
   const properties = Object.keys(component.items).map(name =>
     component.items[name].format(designName, name, imports, getColor)
   )
-  const body = properties.map(property => property.property).join('\n')
-  const propertyInit = properties.map(property => property.init).filter(Boolean).join('')
 
   return {
     imports,
-    code: `/* eslint-disable lines-between-class-members */
+    code: `/* eslint-disable @typescript-eslint/lines-between-class-members */
 export class ${classForTarget(component.name)} extends Layer {
-${body}
+${properties.join('\n')}
   constructor () {
-    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})${propertyInit}
+    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})
   }
 }
 

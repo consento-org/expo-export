@@ -2,7 +2,6 @@ import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { View, ViewStyle } from 'react-native'
 import { isSketchError } from './lang'
-import { Layer, IBaseProps } from './Layer'
 import { Placement, IFrameData } from './Placement'
 import { Fill, TFillData } from './Fill'
 import { Border, TBorderData } from './Border'
@@ -14,25 +13,15 @@ export class Polygon {
   borderRadius: number
   border: Border
   shadows: Shadow[]
-  parent: Layer
 
-  constructor (frame: IFrameData, fill: TFillData | null, border: TBorderData | null, shadows: TShadowData[], parent: Layer) {
+  constructor (frame: IFrameData, fill: TFillData | null, border: TBorderData | null, shadows: TShadowData[]) {
     this.place = new Placement(frame)
     this.fill = new Fill(fill)
     this.border = new Border(border)
     this.borderRadius = this.border.radius
     this.shadows = shadows.map(data => new Shadow(data))
-    this.parent = parent
-    this.Render = this.Render.bind(this)
     this.RenderRect = this.RenderRect.bind(this)
     this.borderStyle = this.borderStyle.bind(this)
-  }
-
-  Render (props: IBaseProps<View, ViewStyle>): JSX.Element {
-    return this.parent.Polygon({
-      ...props,
-      prototype: this
-    })
   }
 
   RenderRect ({ style, ref, onLayout }: { style?: ViewStyle, ref?: React.Ref<any>, onLayout?: () => any } = {}): JSX.Element {
