@@ -51,15 +51,75 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 }
 
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
+  './src/styles/util/Border': { pth: 'styles/util/Border.ts', imports: { 'react-native': [], './src/styles/util/Fill': [] } },
   './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
-  './src/styles/util/Slice9Asset': { pth: 'styles/util/Slice9Asset.tsx', imports: { './src/styles/util/lang': [] } },
-  './src/styles/util/ImageAsset': { pth: 'styles/util/ImageAsset.tsx', imports: { './src/styles/util/lang': [] } },
-  './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
-  './src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { './src/styles/util/createGlobalEffect': [] } },
+  './src/styles/util/Component': {
+    pth: 'styles/util/Component.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/useVUnits': [],
+      './src/styles/util/lang': [],
+      './src/styles/util/Text': [],
+      './src/styles/util/ImagePlacement': [],
+      './src/styles/util/Polygon': [],
+      './src/styles/util/Slice9Placement': [],
+      './src/styles/util/Placement': []
+    }
+  },
   './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
-  './src/Asset': { pth: 'Asset.tsx', imports: { './src/styles/util/lang': [] } }
+  './src/styles/util/Fill': { pth: 'styles/util/Fill.ts', imports: { './src/styles/util/lang': [] } },
+  './src/styles/util/ImageAsset': { pth: 'styles/util/ImageAsset.tsx', imports: { react: [], 'react-native': [], './src/styles/util/lang': [] } },
+  './src/styles/util/ImagePlacement': {
+    pth: 'styles/util/ImagePlacement.ts',
+    imports: {
+      'react-native': [],
+      './src/styles/util/Component': [],
+      './src/styles/util/ImageAsset': [],
+      './src/styles/util/Placement': []
+    }
+  },
+  './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
+  './src/styles/util/Link': { pth: 'styles/util/Link.ts', imports: { './src/styles/util/Placement': [] } },
+  './src/styles/util/Placement': { pth: 'styles/util/Placement.ts', imports: {} },
+  './src/styles/util/Polygon': {
+    pth: 'styles/util/Polygon.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      'expo-linear-gradient': [],
+      './src/styles/util/lang': [],
+      './src/styles/util/Component': [],
+      './src/styles/util/Placement': [],
+      './src/styles/util/Fill': [],
+      './src/styles/util/Border': [],
+      './src/styles/util/Shadow': []
+    }
+  },
+  './src/styles/util/Shadow': { pth: 'styles/util/Shadow.ts', imports: {} },
+  './src/styles/util/Slice9Asset': { pth: 'styles/util/Slice9Asset.tsx', imports: { react: [], 'react-native': [], './src/styles/util/lang': [] } },
+  './src/styles/util/Slice9Placement': {
+    pth: 'styles/util/Slice9Placement.ts',
+    imports: {
+      'react-native': [],
+      './src/styles/util/Component': [],
+      './src/styles/util/Slice9Asset': [],
+      './src/styles/util/Placement': []
+    }
+  },
+  './src/styles/util/Text': {
+    pth: 'styles/util/Text.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/lang': [],
+      './src/styles/util/Component': [],
+      './src/styles/util/Placement': []
+    }
+  },
+  './src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { './src/styles/util/createGlobalEffect': [] } }
 }
-const runtimeImports = new Set(['react-native'])
+const runtimeImports = new Set(['react', 'react-native'])
 
 export function * generateOutput (document: Document, opts: IExpoExportOpts, url: string, context: any): Generator<IOutput> {
   const imports: Imports = {}

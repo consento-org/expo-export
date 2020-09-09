@@ -8,3 +8,14 @@ export function useDefault <T> (value: T | null | undefined, defaultValue: T): T
   }
   return defaultValue
 }
+
+export function isSketchError (err: any): err is ISketchError {
+  if (err === null || typeof err !== 'object') {
+    return false
+  }
+  return typeof err.error === 'string'
+}
+
+export interface ISketchError {
+  error: string
+}

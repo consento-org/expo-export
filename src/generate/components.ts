@@ -2,7 +2,7 @@ import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOpti
 import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName } from '../util/dom'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
-import { Imports, addImport, ITypeScript, readPluginTypeScript } from '../util/render'
+import { Imports, addImport, ITypeScript } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
 import { TIDLookup, TIDData, getTextFormatRenderProps, formatFontProps } from './text/renderHierarchy'
@@ -40,7 +40,7 @@ class Image extends Component {
 
   format (designName: string, name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
     addImport(imports, `./src/styles/${designName}/Asset`, 'Asset')
-    addImport(imports, './src/styles/Component', 'ImagePlacement')
+    addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
     return {
       property: `  ${name}: ImagePlacement`,
       init: `
@@ -59,7 +59,7 @@ class Slice9 extends Component {
 
   format (_designName: string, name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
     addImport(imports, './src/Asset', 'Asset')
-    addImport(imports, './src/styles/Component', 'Slice9Placement')
+    addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
     return {
       property: `  ${name}: Text`,
       init: `
@@ -100,7 +100,7 @@ class TextComponent extends Component {
   }
 
   format (designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, './src/styles/Component', 'Text')
+    addImport(imports, './src/styles/util/Text', 'Text')
     return {
       property: `  ${name}: Text`,
       init: `
@@ -165,7 +165,7 @@ class Link extends Component {
 
   format (designName: string, name: string, imports: Imports): IComponentPropertyFormat {
     addImport(imports, `./src/styles/${designName}/component/${this.target}`, this.target)
-    addImport(imports, './src/styles/Component', 'Link')
+    addImport(imports, './src/styles/util/Link', 'Link')
     return {
       property: `  ${name} = new Link(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
     }
@@ -239,7 +239,7 @@ class Polygon extends Component {
   }
 
   format (_designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, './src/styles/Component', 'Polygon')
+    addImport(imports, './src/styles/util/Polygon', 'Polygon')
     return {
       property: `  ${name}: Polygon`,
       init: `
@@ -312,7 +312,7 @@ class Polygon extends Component {
       return getColor(fill.color, imports)
     }
     if (fill.fillType === FillType.Gradient) {
-      addImport(imports, './src/styles/Component', 'GradientType')
+      addImport(imports, './src/styles/util/Fill', 'GradientType')
       return `{
       gradient: {
         type: GradientType.${mapGradientType(fill.gradient.gradientType)},
@@ -414,7 +414,7 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
 
 function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-  addImport(imports, './src/styles/Component', 'Component')
+  addImport(imports, './src/styles/util/Component', 'Component')
   const properties = Object.keys(component.items).map(name =>
     component.items[name].format(designName, name, imports, getColor)
   )
@@ -439,20 +439,10 @@ export const ${component.name} = new ${classForTarget(component.name)}()
 export function * generateComponents (document: Document, textStyles: TIDLookup, config: IConfig): Generator<ITypeScript> {
   const getColor = getColorFactory(document)
   const designName = getDesignName(document)
-  let empty = true
   for (const component of collectComponents(document, textStyles, config)) {
-    empty = false
     yield {
       ...renderComponent(designName, component, getColor),
       pth: `./src/styles/${designName}/component/${component.name}.ts`
     }
-  }
-  if (!empty) {
-    yield readPluginTypeScript('styles/Component.tsx', {
-      './src/styles/util/lang': [],
-      './src/styles/util/useVUnits': [],
-      './src/styles/util/Slice9Asset': [],
-      './src/styles/util/ImageAsset': []
-    })
   }
 }
