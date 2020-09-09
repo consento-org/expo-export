@@ -11,6 +11,10 @@ export function dirname (name: string): string {
   return name.substr(0, pos)
 }
 
+export function basename (name: string): string {
+  return name.substr(name.lastIndexOf('/') + 1)
+}
+
 export function resolve (base: string, path: string): string {
   if (path.charAt(0) !== '/') {
     path = `${base}/${path}`
@@ -88,9 +92,16 @@ export function getConfig (path: string): IConfig {
   return config as IConfig
 }
 
+export function getDesignNameByPath (path: string): string {
+  return basename(path).replace(/\.sketch$/, '')
+}
+
 export function targetFolder (path: string): (sub: string) => string {
   const config = getConfig(path)
-  return (sub: string) => sub === '' ? config.targetFolder : `${config.targetFolder}/${sub}`
+  return (sub: string) => {
+    sub = sub.replace(/^\.\//, '')
+    return sub === '' ? config.targetFolder : `${config.targetFolder}/${sub}`
+  }
 }
 
 export function readPluginAsset (file: string, encoding: string): string
@@ -107,6 +118,7 @@ export function readPluginAsset (file: string, encoding?: string): Buffer | stri
 }
 
 export function write (pth: string, data: any): boolean {
+  pth = pth.replace(/^\.\//, '')
   if (data === undefined) {
     console.log(`Skipping ${pth}.`)
     return

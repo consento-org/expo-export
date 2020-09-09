@@ -1,5 +1,6 @@
 import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath, Slice, Override } from 'sketch/dom'
 import { LRUCache } from './string'
+import { getDesignNameByPath } from './fs'
 
 interface IDocumentData {
   textStyleWithID: (id: string) => undefined | {
@@ -13,6 +14,10 @@ interface IDocumentData {
       }
     }
   }
+}
+
+export function getDesignName (document: Document): string {
+  return getDesignNameByPath(document.path)
 }
 
 export enum Type {

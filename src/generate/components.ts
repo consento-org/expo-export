@@ -1,5 +1,5 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
-import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9 } from '../util/dom'
+import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName } from '../util/dom'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, ITypeScript, readPluginTypeScript } from '../util/render'
@@ -18,7 +18,7 @@ abstract class Component {
     this.type = type
   }
 
-  abstract format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat
+  abstract format (designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat
 
   renderFrame (): string {
     return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
@@ -38,9 +38,9 @@ class Image extends Component {
     this.asset = asset
   }
 
-  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/Asset', 'Asset')
-    addImport(imports, 'src/styles/Component', 'ImagePlacement')
+  format (designName: string, name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
+    addImport(imports, `./src/styles/${designName}/Asset`, 'Asset')
+    addImport(imports, './src/styles/Component', 'ImagePlacement')
     return {
       property: `  ${name}: ImagePlacement`,
       init: `
@@ -57,9 +57,9 @@ class Slice9 extends Component {
     this.asset = asset
   }
 
-  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/Asset', 'Asset')
-    addImport(imports, 'src/styles/Component', 'Slice9Placement')
+  format (_designName: string, name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
+    addImport(imports, './src/Asset', 'Asset')
+    addImport(imports, './src/styles/Component', 'Slice9Placement')
     return {
       property: `  ${name}: Text`,
       init: `
@@ -99,30 +99,30 @@ class TextComponent extends Component {
     this.textStyle = textStyle
   }
 
-  format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/styles/Component', 'Text')
+  format (designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
+    addImport(imports, './src/styles/Component', 'Text')
     return {
       property: `  ${name}: Text`,
       init: `
-    this.${name} = new Text('${safeText(this.text)}', ${this.renderTextStyle(imports, getColor)}, ${this.renderFrame()}, this)`
+    this.${name} = new Text('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()}, this)`
     }
   }
 
-  renderTextStyle (imports: Imports, getColor: FGetColor): string {
+  renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
     const layerStyle = processStyle(this._layer.style)
     if (this.textStyle === undefined) {
       return `{
-      ${getTextFormatRenderProps(layerStyle, getColor, imports).join(',\n      ')}
+      ${getTextFormatRenderProps(designName, layerStyle, getColor, imports).join(',\n      ')}
     }`
     }
-    addImport(imports, 'src/styles/TextStyles', 'TextStyles')
+    addImport(imports, `./src/styles/${designName}/TextStyles`, 'TextStyles')
     const difference = compareTextFormat(this.textStyle.style, layerStyle)
     if (difference === null) {
       return `TextStyles.${this.textStyle.name}`
     }
     return `{
       ...TextStyles.${this.textStyle.name},
-      ${getTextFormatRenderProps(difference, getColor, imports).join(',\n      ')}
+      ${getTextFormatRenderProps(designName, difference, getColor, imports).join(',\n      ')}
     }`
   }
 }
@@ -163,9 +163,9 @@ class Link extends Component {
       })
   }
 
-  format (name: string, imports: Imports): IComponentPropertyFormat {
-    addImport(imports, `src/styles/component/${this.target}`, this.target)
-    addImport(imports, 'src/styles/Component', 'Link')
+  format (designName: string, name: string, imports: Imports): IComponentPropertyFormat {
+    addImport(imports, `./src/styles/${designName}/component/${this.target}`, this.target)
+    addImport(imports, './src/styles/Component', 'Link')
     return {
       property: `  ${name} = new Link(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
     }
@@ -238,8 +238,8 @@ class Polygon extends Component {
     this.shadows = style.shadows.filter(shadow => shadow.enabled && isVisibleColor(shadow.color))
   }
 
-  format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/styles/Component', 'Polygon')
+  format (_designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
+    addImport(imports, './src/styles/Component', 'Polygon')
     return {
       property: `  ${name}: Polygon`,
       init: `
@@ -312,7 +312,7 @@ class Polygon extends Component {
       return getColor(fill.color, imports)
     }
     if (fill.fillType === FillType.Gradient) {
-      addImport(imports, 'src/styles/Component', 'GradientType')
+      addImport(imports, './src/styles/Component', 'GradientType')
       return `{
       gradient: {
         type: GradientType.${mapGradientType(fill.gradient.gradientType)},
@@ -412,11 +412,11 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
   }
 }
 
-function renderComponent (component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
+function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-  addImport(imports, 'src/styles/Component', 'Component')
+  addImport(imports, './src/styles/Component', 'Component')
   const properties = Object.keys(component.items).map(name =>
-    component.items[name].format(name, imports, getColor)
+    component.items[name].format(designName, name, imports, getColor)
   )
   const body = properties.map(property => property.property).join('\n')
   const propertyInit = properties.map(property => property.init).filter(Boolean).join('')
@@ -438,15 +438,16 @@ export const ${component.name} = new ${classForTarget(component.name)}()
 
 export function * generateComponents (document: Document, textStyles: TIDLookup, config: IConfig): Generator<ITypeScript> {
   const getColor = getColorFactory(document)
+  const designName = getDesignName(document)
   let empty = true
   for (const component of collectComponents(document, textStyles, config)) {
     empty = false
     yield {
-      ...renderComponent(component, getColor),
-      pth: `src/styles/component/${component.name}.ts`
+      ...renderComponent(designName, component, getColor),
+      pth: `./src/styles/${designName}/component/${component.name}.ts`
     }
   }
   if (!empty) {
-    yield readPluginTypeScript('styles/Component.tsx', { 'src/styles/util/lang': [], 'src/styles/util/useVUnits': [] })
+    yield readPluginTypeScript('styles/Component.tsx', { './src/styles/util/lang': [], './src/styles/util/useVUnits': [] })
   }
 }

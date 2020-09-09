@@ -51,10 +51,12 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 }
 
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
-  'src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
-  'src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { 'src/styles/util/createGlobalEffect': [] } },
-  'src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} }
+  './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
+  './src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { './src/styles/util/createGlobalEffect': [] } },
+  './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
+  './src/Asset': { pth: 'Asset.tsx', imports: { './src/styles/util/lang': [] } }
 }
+const runtimeImports = new Set(['react-native'])
 
 export function * generateOutput (document: Document, opts: IExpoExportOpts, url: string, context: any): Generator<IOutput> {
   const imports: Imports = {}
@@ -78,11 +80,13 @@ export function * generateOutput (document: Document, opts: IExpoExportOpts, url
     if (!missingImport) {
       break
     }
+    // Preventing infinite loop
+    written.add(missingImport)
     const missingFile = knownTSDeps[missingImport]
     if (!missingFile) {
-      console.log(`Warning: ${missingImport} was referenced by ${imports[missingImport].join(', ')} but not generated this time!`)
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete imports[missingImport]
+      if (!runtimeImports.has(missingImport)) {
+        console.log(`Warning: ${missingImport} was referenced by ${imports[missingImport].join(', ')} but not generated this time!`)
+      }
       continue
     }
     const ts = readPluginTypeScript(missingFile.pth, missingFile.imports)

@@ -3,7 +3,13 @@ import { dirname, write, readPluginAsset } from './fs'
 
 export interface Imports { [from: string]: string[] }
 
-export function addImport (target: Imports, from: string, symbol: string): Imports {
+export function addImport (target: Imports, from: string, symbol: string | string[]): Imports {
+  if (Array.isArray(symbol)) {
+    for (const child of symbol) {
+      addImport(target, from, child)
+    }
+    return target
+  }
   let byFrom = target[from]
   if (byFrom === undefined) {
     byFrom = []
@@ -18,18 +24,26 @@ export function addImport (target: Imports, from: string, symbol: string): Impor
 export function renderImports (imports: Imports, location: string): string {
   const statements = []
   for (const from in imports) {
-    const fromParts = from.split('/')
-    const locationParts = location.split('/')
-    while (fromParts.length > 1 && locationParts.length > 0 && fromParts[0] === locationParts[0]) {
-      fromParts.shift()
-      locationParts.shift()
-    }
-    if (locationParts.length === 0) {
-      fromParts.unshift('.')
-    } else {
-      for (let i = 0; i < locationParts.length; i++) {
-        fromParts.unshift('..')
+    let fromParts: string[]
+    if (/^.\//.test(from)) {
+      fromParts = from.split('/')
+      if (fromParts[0] === '.') {
+        fromParts.shift()
       }
+      const locationParts = location.replace(/^\.\//, '').split('/')
+      while (fromParts.length > 1 && locationParts.length > 0 && fromParts[0] === locationParts[0]) {
+        fromParts.shift()
+        locationParts.shift()
+      }
+      if (locationParts.length === 0) {
+        fromParts.unshift('.')
+      } else {
+        for (let i = 0; i < locationParts.length; i++) {
+          fromParts.unshift('..')
+        }
+      }
+    } else {
+      fromParts = [from]
     }
     const symbols = imports[from]
     // Symbols might be empty in when rendering typescript file from the plugin
@@ -89,7 +103,7 @@ ${importsString}${code.trim()}
 
 export function readPluginTypeScript (pth: string, imports: Imports = {}): ITypeScript {
   return {
-    pth: `src/${pth}`,
+    pth: `./src/${pth}`,
     imports,
     code: readPluginAsset(pth, 'utf-8')
   }

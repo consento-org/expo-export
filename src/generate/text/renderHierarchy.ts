@@ -5,6 +5,7 @@ import { toMaxDecimals } from '../../util/number'
 import { FGetColor, getColorFactory } from '../color'
 import { safeChildName } from '../../util/string'
 import { Imports, addImport } from '../../util/render'
+import { getDesignName } from '../../util/dom'
 
 function has<T = any> (entry: T | null | undefined): entry is T {
   return entry !== null && entry !== undefined
@@ -34,11 +35,11 @@ function reduceStack (stack: StackEntry[]): ITextFormat {
   return result
 }
 
-export function getTextFormatRenderProps (style: ITextFormat, getColor: FGetColor, imports: Imports): string[] {
+export function getTextFormatRenderProps (designName: string, style: ITextFormat, getColor: FGetColor, imports: Imports): string[] {
   const props = []
   if (has(style.color)) props.push(`color: ${getColor(style.color, imports)}`)
   if (has(style.fontFamily)) {
-    addImport(imports, 'src/styles/Font', 'Font')
+    addImport(imports, `./src/styles/${designName}/Font`, 'Font')
     props.push(`fontFamily: Font.${style.fontFamily}`)
   }
   if (has(style.fontSize)) props.push(`fontSize: ${toMaxDecimals(style.fontSize, 2)}`)
@@ -49,9 +50,9 @@ export function getTextFormatRenderProps (style: ITextFormat, getColor: FGetColo
   return props
 }
 
-function renderFormat (getColor: FGetColor, imports: Imports, stack: StackEntry[], fullName: string): TIDData {
+function renderFormat (designName: string, getColor: FGetColor, imports: Imports, stack: StackEntry[], fullName: string): TIDData {
   const style = reduceStack(stack)
-  const props = getTextFormatRenderProps(style, getColor, imports)
+  const props = getTextFormatRenderProps(designName, style, getColor, imports)
   if (props.length === 0) {
     return null
   }
@@ -78,25 +79,26 @@ interface StackEntry {
   format: TextFormat
 }
 
-function _renderHierarchy (getColor: FGetColor, imports: Imports, styles: Hierarchy<TextFormat>, stack: StackEntry[], textStyles: TIDLookup): void {
+function _renderHierarchy (designName: string, getColor: FGetColor, imports: Imports, styles: Hierarchy<TextFormat>, stack: StackEntry[], textStyles: TIDLookup): void {
   for (const name in styles) {
     const node = styles[name]
     stack.push({ name, format: node.item })
     const fullName = fontStyleName(stack)
     if (node.item !== null && node.item !== undefined) {
-      const entry = renderFormat(getColor, imports, stack, fullName)
+      const entry = renderFormat(designName, getColor, imports, stack, fullName)
       if (entry !== null) {
         textStyles[node.item !== undefined ? node.item.id : ((Math.random() * 0xFFFFFFFFFFFF) | 0).toString(32)] = entry
       }
     }
-    _renderHierarchy(getColor, imports, node.children, stack, textStyles)
+    _renderHierarchy(designName, getColor, imports, node.children, stack, textStyles)
     stack.pop()
   }
 }
 
 export function renderHierarchy (document: Document, imports: Imports, styles: Hierarchy<TextFormat>): TIDLookup {
   const getColor = getColorFactory(document)
+  const designName = getDesignName(document)
   const textStyles: TIDLookup = {}
-  _renderHierarchy(getColor, imports, styles, [], textStyles)
+  _renderHierarchy(designName, getColor, imports, styles, [], textStyles)
   return textStyles
 }

@@ -1,9 +1,7 @@
 import sketch, { Document, AnyLayer, Slice, Artboard } from 'sketch/dom'
-import { readPluginAsset } from '../util/fs'
-import { isIgnored, getSlice9Layer, isArtboard, isExported } from '../util/dom'
+import { isIgnored, getSlice9Layer, isArtboard, isExported, getDesignName } from '../util/dom'
 import { slugifyName, childName, stringSort } from '../util/string'
-import { template, replace } from '../util/template'
-import { ITypeScript, IOutput, IDataOutput } from '../util/render'
+import { ITypeScript, IOutput, IDataOutput, addImport, Imports } from '../util/render'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
@@ -83,6 +81,7 @@ function isFilled (obj: Object): boolean {
 }
 
 export function * generateAssets (document: Document): Generator<IOutput> {
+  const designName = getDesignName(document)
   const assets: { [key: string]: string } = {}
   const slice9s: { [key: string]: ISlice9 } = {}
   for (const page of document.pages) {
@@ -121,69 +120,69 @@ export function * generateAssets (document: Document): Generator<IOutput> {
     }
   }
   if (isFilled(assets) || isFilled(slice9s)) {
+    const prefix: string[] = []
+    const imports: Imports = {}
+    if (isFilled(assets)) {
+      addImport(imports, './src/Asset', ['Cache', 'ImageAsset'])
+      addImport(imports, 'react-native', 'ImageSourcePropType')
+      prefix.push('const images = new Cache<ImageAsset, ImageSourcePropType>(ImageAsset)')
+    }
+    if (isFilled(slice9s)) {
+      addImport(imports, './src/Asset', ['Slice9', 'Slice9Args'])
+      prefix.push('const slice9s = new Cache<Slice9, Slice9Args>(Slice9)')
+    }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     yield ({
-      pth: 'src/Asset.tsx',
-      imports: {
-        'src/styles/util/lang': []
-      },
-      code: template(
-        readPluginAsset('Asset.tsx').toString(),
-        {
-          lines: {
-            skip: () => '',
-            images: input => Object.keys(assets).length > 0 ? input : '',
-            slice9: input => Object.keys(slice9s).length > 0 ? input : ''
-          },
-          blocks: {
-            properties: parts => {
-              let result = []
-              template(parts, {
-                blocks: {
-                  image: template => {
-                    result = result.concat(
-                      Object.keys(assets).sort(stringSort).map(name => {
-                        const asset = assets[name]
-                        return replace(template, {
-                          name, asset
-                        })
-                      })
-                    )
-                    return ''
-                  },
-                  slice9: template => {
-                    result = result.concat(
-                      Object.keys(slice9s).sort(stringSort).map(name => {
-                        const slice9 = slice9s[name]
-                        return replace(template, {
-                          slice9: name,
-                          width: slice9.width,
-                          height: slice9.height,
-                          sliceX: slice9.slice.x,
-                          sliceY: slice9.slice.y,
-                          sliceW: slice9.slice.width,
-                          sliceH: slice9.slice.height,
-                          path0: slice9.path(0, 0),
-                          path1: slice9.path(0, 1),
-                          path2: slice9.path(0, 2),
-                          path3: slice9.path(1, 0),
-                          path4: slice9.path(1, 1),
-                          path5: slice9.path(1, 2),
-                          path6: slice9.path(2, 0),
-                          path7: slice9.path(2, 1),
-                          path8: slice9.path(2, 2)
-                        })
-                      })
-                    )
-                    return ''
-                  }
-                }
-              })
-              return result.map(entry => entry.replace(/\n$/ig, '')).join(',\n') + '\n'
-            }
-          }
-        }
-      )
+      pth: `./src/styles/${designName}/Asset.ts`,
+      imports,
+      code: `
+${prefix.join('\n')}
+
+export const Asset = {${
+  []
+    .concat(
+      Object
+        .keys(assets)
+        .sort(stringSort)
+        .map(name => {
+          const asset = assets[name]
+          return `
+  ${name} () {
+    return images.fetch('${name}', () => require('../../../${asset}'))
+  }`
+        })
+    )
+    .concat(
+      Object
+        .keys(slice9s)
+        .sort(stringSort)
+        .map(name => {
+          const slice9 = slice9s[name]
+          const { width, height, slice } = slice9
+          return `
+  ${name} () {
+    return slice9s.fetch('${name}', () => ({
+      w: ${width},
+      h: ${height},
+      slice: { x: ${slice.x}, y: ${slice.y}, w: ${slice.width}, h: ${slice.height} },
+      slices: [
+        require('../../../${slice9.path(0, 0)}'),
+        require('../../../${slice9.path(0, 1)}'),
+        require('../../../${slice9.path(0, 2)}'),
+        require('../../../${slice9.path(1, 0)}'),
+        require('../../../${slice9.path(1, 1)}'),
+        require('../../../${slice9.path(1, 2)}'),
+        require('../../../${slice9.path(2, 0)}'),
+        require('../../../${slice9.path(2, 1)}'),
+        require('../../../${slice9.path(2, 2)}')
+      ]
+    }))
+  }`
+      })
+    )
+    .join(',')
+}
+}`
     } as ITypeScript)
   }
 }

@@ -2,7 +2,7 @@ import React from 'react'
 import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType, TouchableOpacity, FlexStyle, GestureResponderEvent } from 'react-native'
 import { exists } from './styles/util/lang'
 
-class Cache<Type, Args> {
+export class Cache<Type, Args> {
   cache: { [key: string]: Type } = {}
   clazz: new (Args) => Type
 
@@ -144,39 +144,4 @@ export class Slice9 {
       </View>
     </View>
   }
-}
-
-const images = new Cache<ImageAsset, ImageSourcePropType>(ImageAsset) // !!!images
-const slice9s = new Cache<Slice9, Slice9Args>(Slice9) // !!!slice9
-
-export const Asset = {
-  // ^properties
-  // ^image
-  $name () {
-    return images.fetch('$name', () => require('../$asset'))
-  }
-  // $image
-  // eslint-disable-next-line comma-style
-  , // !!!skip
-  // ^slice9
-  $slice9 () {
-    return slice9s.fetch('$slice9', () => ({
-      w: Number('$width'),
-      h: Number('$height'),
-      slice: { x: Number('$sliceX'), y: Number('$sliceY'), w: Number('$sliceWidth'), h: Number('$sliceHeight') },
-      slices: [
-        require('../$path0'),
-        require('../$path1'),
-        require('../$path2'),
-        require('../$path3'),
-        require('../$path4'),
-        require('../$path5'),
-        require('../$path6'),
-        require('../$path7'),
-        require('../$path8')
-      ]
-    }))
-  }
-  // $slice9
-  // $properties
 }
