@@ -448,6 +448,11 @@ export function * generateComponents (document: Document, textStyles: TIDLookup,
     }
   }
   if (!empty) {
-    yield readPluginTypeScript('styles/Component.tsx', { './src/styles/util/lang': [], './src/styles/util/useVUnits': [] })
+    yield readPluginTypeScript('styles/Component.tsx', {
+      './src/styles/util/lang': [],
+      './src/styles/util/useVUnits': [],
+      './src/styles/util/Slice9Asset': [],
+      './src/styles/util/ImageAsset': []
+    })
   }
 }

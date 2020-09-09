@@ -1,5 +1,6 @@
 import React from 'react'
-import { ImageAsset, Slice9 } from '../Asset'
+import { Slice9Asset } from './util/Slice9Asset'
+import { ImageAsset } from './util/ImageAsset'
 import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Insets, ReturnKeyTypeOptions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useVUnits } from './util/useVUnits'
@@ -383,10 +384,10 @@ export class ImagePlacement {
 
 export class Slice9Placement {
   place: Placement
-  asset: () => Slice9
+  asset: () => Slice9Asset
   parent: Component
 
-  constructor (asset: () => Slice9, frame: IFrameData, parent: Component) {
+  constructor (asset: () => Slice9Asset, frame: IFrameData, parent: Component) {
     this.asset = asset
     this.place = new Placement(frame)
     this.parent = parent

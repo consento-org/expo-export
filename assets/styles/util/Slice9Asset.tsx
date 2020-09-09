@@ -1,49 +1,5 @@
 import React from 'react'
-import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType, TouchableOpacity, FlexStyle, GestureResponderEvent } from 'react-native'
-import { exists } from './styles/util/lang'
-
-export class Cache<Type, Args> {
-  cache: { [key: string]: Type } = {}
-  clazz: new (Args) => Type
-
-  constructor (clazz: new (Args: Args) => Type) {
-    this.clazz = clazz
-  }
-
-  fetch (key: string, load: () => Args): Type {
-    let result = this.cache[key]
-    if (result === undefined) {
-      // eslint-disable-next-line new-cap
-      result = new this.clazz(load())
-      this.cache[key] = result
-    }
-    return result
-  }
-}
-
-export class ImageAsset {
-  source: ImageSourcePropType
-  component: (props: { style?: FlexStyle, onPress?: (event: GestureResponderEvent) => void }) => JSX.Element
-
-  constructor (source: ImageSourcePropType) {
-    this.source = source
-    this.component = ({ style, onPress }) => {
-      if (onPress !== undefined) {
-        return <TouchableOpacity onPress={onPress} style={style}>{this.img()}</TouchableOpacity>
-      }
-      return this.img(style)
-    }
-    this.img = this.img.bind(this)
-  }
-
-  img (style?: FlexStyle, ref?: React.Ref<Image>, onLayout?: () => any): JSX.Element {
-    const imgStyle = style as ImageStyle
-    if (exists(imgStyle) && imgStyle.resizeMode === 'stretch') {
-      return <Image ref={ref} onLayout={onLayout} source={this.source} style={imgStyle} fadeDuration={0} />
-    }
-    return <Image ref={ref} onLayout={onLayout} source={this.source} style={imgStyle} />
-  }
-}
+import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType } from 'react-native'
 
 export interface Slice9Args {
   w: number
@@ -62,7 +18,7 @@ const rowsStyle: ViewStyle = {
   flexDirection: 'row'
 }
 
-export class Slice9 {
+export class Slice9Asset {
   width: number
   height: number
   _rows: ViewStyle[]

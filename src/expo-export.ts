@@ -51,6 +51,9 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 }
 
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
+  './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
+  './src/styles/util/Slice9Asset': { pth: 'styles/util/Slice9Asset.tsx', imports: { './src/styles/util/lang': [] } },
+  './src/styles/util/ImageAsset': { pth: 'styles/util/ImageAsset.tsx', imports: { './src/styles/util/lang': [] } },
   './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
   './src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { './src/styles/util/createGlobalEffect': [] } },
   './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },

@@ -123,13 +123,15 @@ export function * generateAssets (document: Document): Generator<IOutput> {
     const prefix: string[] = []
     const imports: Imports = {}
     if (isFilled(assets)) {
-      addImport(imports, './src/Asset', ['Cache', 'ImageAsset'])
       addImport(imports, 'react-native', 'ImageSourcePropType')
+      addImport(imports, './src/styles/util/Cache', 'Cache')
+      addImport(imports, './src/styles/util/ImageAsset', 'ImageAsset')
       prefix.push('const images = new Cache<ImageAsset, ImageSourcePropType>(ImageAsset)')
     }
     if (isFilled(slice9s)) {
-      addImport(imports, './src/Asset', ['Slice9', 'Slice9Args'])
-      prefix.push('const slice9s = new Cache<Slice9, Slice9Args>(Slice9)')
+      addImport(imports, './src/styles/util/Cache', 'Cache')
+      addImport(imports, './src/styles/util/Slice9Asset', ['Slice9Asset', 'Slice9Args'])
+      prefix.push('const slice9s = new Cache<Slice9Asset, Slice9Args>(Slice9Asset)')
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     yield ({
