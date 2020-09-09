@@ -4,16 +4,18 @@ import { dirname, write, readPluginAsset } from './fs'
 export interface Imports { [from: string]: string[] }
 
 export function addImport (target: Imports, from: string, symbol: string | string[]): Imports {
+  let byFrom = target[from]
+  if (byFrom === undefined) {
+    byFrom = []
+    target[from] = byFrom
+  }
+  // Note: it is important here to create the array even though the input
+  //       shall be an array, to indicate an intrinsic dependency
   if (Array.isArray(symbol)) {
     for (const child of symbol) {
       addImport(target, from, child)
     }
     return target
-  }
-  let byFrom = target[from]
-  if (byFrom === undefined) {
-    byFrom = []
-    target[from] = byFrom
   }
   if (!byFrom.includes(symbol)) {
     byFrom.push(symbol)

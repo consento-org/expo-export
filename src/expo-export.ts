@@ -58,13 +58,12 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     imports: {
       react: [],
       'react-native': [],
-      './src/styles/util/useVUnits': [],
-      './src/styles/util/lang': [],
       './src/styles/util/TextBox': [],
       './src/styles/util/ImagePlacement': [],
       './src/styles/util/Polygon': [],
       './src/styles/util/Slice9Placement': [],
-      './src/styles/util/Placement': []
+      './src/styles/util/Placement': [],
+      './src/styles/util/react/SketchInLayer': []
     }
   },
   './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
@@ -94,6 +93,53 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       './src/styles/util/Fill': [],
       './src/styles/util/Border': [],
       './src/styles/util/Shadow': []
+    }
+  },
+  './src/styles/util/react/SketchInLayer': {
+    pth: 'styles/util/react/SketchInLayer.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/Placement': [],
+      './src/styles/util/useVUnits': [],
+      './src/styles/util/lang': [],
+      './src/styles/util/Layer': []
+    }
+  },
+  './src/styles/util/react/SketchImage': {
+    pth: 'styles/util/react/SketchImage.tsx',
+    imports: {
+      'react-native': [],
+      './src/styles/util/react/SketchInLayer': [],
+      './src/styles/util/ImagePlacement': [],
+      './src/styles/util/Layer': []
+    }
+  },
+  './src/styles/util/react/SketchPolygon': {
+    pth: 'styles/util/react/SketchPolygon.tsx',
+    imports: {
+      'react-native': [],
+      './src/styles/util/react/SketchInLayer': [],
+      './src/styles/util/Polygon': [],
+      './src/styles/util/Layer': []
+    }
+  },
+  './src/styles/util/react/SketchSlice9': {
+    pth: 'styles/util/react/SketchSlice9.tsx',
+    imports: {
+      'react-native': [],
+      './src/styles/util/react/SketchInLayer': [],
+      './src/styles/util/Slice9Placement': [],
+      './src/styles/util/Layer': []
+    }
+  },
+  './src/styles/util/react/SketchTextBox': {
+    pth: 'styles/util/react/SketchTextBox.tsx',
+    imports: {
+      'react-native': [],
+      './src/styles/util/react/SketchTextBox': [],
+      './src/styles/util/TextBox': [],
+      './src/styles/util/Layer': []
     }
   },
   './src/styles/util/Shadow': { pth: 'styles/util/Shadow.ts', imports: {} },

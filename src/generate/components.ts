@@ -36,6 +36,7 @@ class Image extends Component {
   format (designName: string, name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, `./src/styles/${designName}/Asset`, 'Asset')
     addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
+    addImport(imports, './src/styles/util/react/SketchImage', [])
     return `  ${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
@@ -51,6 +52,7 @@ class Slice9 extends Component {
   format (_designName: string, name: string, imports: Imports, _: FGetColor): string {
     addImport(imports, './src/Asset', 'Asset')
     addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
+    addImport(imports, './src/styles/util/react/SketchSlice9', [])
     return `  ${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
@@ -88,6 +90,7 @@ class TextComponent extends Component {
 
   format (designName: string, name: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/TextBox', 'TextBox')
+    addImport(imports, './src/styles/util/react/SketchTextBox', [])
     return `  ${name} = new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
   }
 
@@ -221,6 +224,7 @@ class Polygon extends Component {
 
   format (_designName: string, name: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/Polygon', 'Polygon')
+    addImport(imports, './src/styles/util/react/SketchPolygon', [])
     return `  ${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
   }
 
