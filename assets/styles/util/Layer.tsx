@@ -1,8 +1,8 @@
 import React from 'react'
-import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Insets, ReturnKeyTypeOptions } from 'react-native'
+import { Image, ImageStyle, TextStyle, TextInput, Text, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Insets, ReturnKeyTypeOptions } from 'react-native'
 import { useVUnits } from './useVUnits'
 import { exists } from './lang'
-import { Text } from './Text'
+import { TextBox } from './TextBox'
 import { ImagePlacement } from './ImagePlacement'
 import { Polygon } from './Polygon'
 import { Slice9Placement } from './Slice9Placement'
@@ -66,7 +66,7 @@ export type TTextContentType = 'none'
 | 'newPassword'
 | 'oneTimeCode'
 
-export interface ITextBaseProps extends IBaseProps<NativeText | TextInput, TextStyle> {
+export interface ITextBaseProps extends IBaseProps<Text | TextInput, TextStyle> {
   value?: string
   selectable?: boolean
   debug?: boolean
@@ -89,7 +89,7 @@ export interface ITextBaseProps extends IBaseProps<NativeText | TextInput, TextS
 
 export interface ITextProps extends ITextBaseProps {
   value: string
-  prototype: Text
+  prototype: TextBox
 }
 
 export interface IPolygonProps extends IBaseProps<View, ViewStyle> {
@@ -159,7 +159,7 @@ export class Layer {
         ref,
         onBlur: props.onBlur
       })
-    } as IRenderProps<NativeText, TextStyle>
+    } as IRenderProps<Text, TextStyle>
     return this.Render(renderProps)
   }
 
@@ -172,7 +172,7 @@ export class Layer {
         style: applyRenderOptions(props, props.prototype.place, style),
         ref
       })
-    } as IRenderProps<NativeText, TextStyle>
+    } as IRenderProps<Text, TextStyle>
     return this.Render(renderProps)
   }
 
@@ -212,7 +212,7 @@ export class Layer {
     })
   }
 
-  renderText ({ text, opts, value, style, onEdit, ref, onLayout, onBlur }: { text: Text, opts?: IRenderOptions, value?: string, style?: TextStyle, onEdit?: (text: string) => any, ref?: React.Ref<TextInput>, onLayout?: () => any, onBlur?: () => any }): JSX.Element {
+  renderText ({ text, opts, value, style, onEdit, ref, onLayout, onBlur }: { text: TextBox, opts?: IRenderOptions, value?: string, style?: TextStyle, onEdit?: (text: string) => any, ref?: React.Ref<TextInput>, onLayout?: () => any, onBlur?: () => any }): JSX.Element {
     style = applyRenderOptions(opts, text.place, style)
     return this._renderItem(text.render({ value, style, onEdit, ref, onLayout, onBlur }), text.place, opts)
   }

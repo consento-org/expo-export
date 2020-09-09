@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextStyle, Text as NativeText, TextInput, ReturnKeyTypeOptions } from 'react-native'
+import { TextStyle, Text, TextInput, ReturnKeyTypeOptions } from 'react-native'
 import { useDefault, exists } from './lang'
 import { Layer, TTextContentType, ITextBaseProps } from './Layer'
 import { Placement, IFrameData } from './Placement'
@@ -7,7 +7,7 @@ import { Placement, IFrameData } from './Placement'
 export interface ITextRenderOptions {
   value?: string
   style?: TextStyle
-  ref?: React.Ref<NativeText | TextInput>
+  ref?: React.Ref<Text | TextInput>
   selectable?: boolean
   selectTextOnFocus?: boolean
   textContentType?: TTextContentType
@@ -30,7 +30,7 @@ export interface ITextRenderOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = (): void => {}
 
-export class Text <TParent extends Layer = Layer> {
+export class TextBox <TParent extends Layer = Layer> {
   text: string
   style: TextStyle
   styleAbsolute: TextStyle
@@ -94,7 +94,7 @@ export class Text <TParent extends Layer = Layer> {
         returnKeyType={props.returnKeyType}
       >{value}</TextInput>
     }
-    return <NativeText
+    return <Text
       onLayout={props.onLayout}
       ref={props.ref}
       style={{
@@ -102,7 +102,7 @@ export class Text <TParent extends Layer = Layer> {
         ...props.style
       }}
       selectable={props.selectable}
-    >{value}</NativeText>
+    >{value}</Text>
   }
 
   renderAbsolute (opts: ITextRenderOptions): JSX.Element {

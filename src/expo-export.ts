@@ -60,7 +60,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       'react-native': [],
       './src/styles/util/useVUnits': [],
       './src/styles/util/lang': [],
-      './src/styles/util/Text': [],
+      './src/styles/util/TextBox': [],
       './src/styles/util/ImagePlacement': [],
       './src/styles/util/Polygon': [],
       './src/styles/util/Slice9Placement': [],
@@ -107,8 +107,8 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       './src/styles/util/Placement': []
     }
   },
-  './src/styles/util/Text': {
-    pth: 'styles/util/Text.tsx',
+  './src/styles/util/TextBox': {
+    pth: 'styles/util/TextBox.tsx',
     imports: {
       react: [],
       'react-native': [],

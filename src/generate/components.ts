@@ -100,11 +100,11 @@ class TextComponent extends Component {
   }
 
   format (designName: string, name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, './src/styles/util/Text', 'Text')
+    addImport(imports, './src/styles/util/TextBox', 'TextBox')
     return {
-      property: `  ${name}: Text`,
+      property: `  ${name}: TextBox`,
       init: `
-    this.${name} = new Text('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()}, this)`
+    this.${name} = new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()}, this)`
     }
   }
 
