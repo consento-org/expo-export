@@ -1,9 +1,6 @@
 import React from 'react'
 import { Image, ImageStyle, View, ViewStyle, ImageSourcePropType, TouchableOpacity, FlexStyle, GestureResponderEvent } from 'react-native'
-
-function exists <T> (value: T | null | undefined): value is T {
-  return value !== null && value !== undefined
-}
+import { exists } from './styles/util/lang'
 
 class Cache<Type, Args> {
   cache: { [key: string]: Type } = {}

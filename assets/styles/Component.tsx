@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { ImageAsset, Slice9 } from '../Asset'
-import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Dimensions, Insets, ReturnKeyTypeOptions, Keyboard, KeyboardEvent } from 'react-native'
+import { Image, ImageStyle, TextStyle, TextInput, Text as NativeText, View, ViewStyle, FlexStyle, TouchableOpacity, GestureResponderEvent, Insets, ReturnKeyTypeOptions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useVUnits } from './util/useVUnits'
+import { exists, useDefault } from './util/lang'
 
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch' | 'none'
 export interface IRenderOptions {
@@ -13,103 +15,6 @@ export interface IRenderOptions {
   onLayout?: () => any
 }
 
-export function createGlobalEffect <T> ({ update, init }: {
-  update: () => T | undefined
-  init: (handler: () => any) => () => any
-}): () => T {
-  const listeners = new Set<(lastUpdate: number) => any>()
-  let output: T = update()
-  let globalLastUpdate: number
-  function updateOutput (): void {
-    const newOutput = update()
-    if (newOutput === undefined) {
-      return
-    }
-    output = newOutput
-    globalLastUpdate = Date.now()
-    for (const update of listeners) {
-      update(globalLastUpdate)
-    }
-  }
-  let exit: () => any
-  return () => {
-    const setLastUpdate = useState<number>(globalLastUpdate)[1]
-    useEffect(() => {
-      listeners.add(setLastUpdate)
-      if (listeners.size === 1) {
-        exit = init(updateOutput)
-      }
-      return () => {
-        listeners.delete(setLastUpdate)
-        if (listeners.size === 0) {
-          exit()
-        }
-      }
-    }, [false]) // Only update the effect once
-    return output
-  }
-}
-
-export enum TOrientation {
-  horizontal = 'horizontal',
-  vertical = 'vertical'
-}
-
-export interface IVUnits {
-  vw: (number: number) => number
-  vh: (number: number) => number
-  vmin: (number: number) => number
-  vmax: (number: number) => number
-  orientation: TOrientation
-  isHorz: boolean
-  isVert: boolean
-}
-
-const mem = {
-  vw: null,
-  vh: null
-}
-
-let keyboardSize = 0
-export const useVUnits = createGlobalEffect({
-  update () {
-    const { width, height } = Dimensions.get('window')
-    const vw = width / 100
-    const vh = (height - keyboardSize) / 100
-    if (vw === mem.vw && vh === mem.vh) {
-      return
-    }
-    mem.vw = vw
-    mem.vh = vh
-    const orientation = vw > vh ? TOrientation.horizontal : TOrientation.vertical
-    return Object.freeze({
-      vw: (number: number = 1) => vw * number,
-      vh: (number: number = 1) => vh * number,
-      vmin: (number: number = 1) => Math.min(vw * number, vh * number),
-      vmax: (number: number = 1) => Math.max(vw * number, vh * number),
-      orientation: orientation,
-      isHorz: orientation === TOrientation.horizontal,
-      isVert: orientation === TOrientation.vertical
-    })
-  },
-  init: handler => {
-    Dimensions.addEventListener('change', handler)
-    const keyboardHandler = (e: KeyboardEvent): void => {
-      keyboardSize = e.endCoordinates.height
-      handler()
-    }
-    Keyboard.addListener('keyboardDidChangeFrame', keyboardHandler)
-    Keyboard.addListener('keyboardDidShow', keyboardHandler)
-    Keyboard.addListener('keyboardDidHide', keyboardHandler)
-    return () => {
-      Dimensions.removeEventListener('change', handler)
-      Keyboard.removeListener('keyboardDidShow', keyboardHandler)
-      Keyboard.removeListener('keyboardDidChangeFrame', keyboardHandler)
-      Keyboard.removeListener('keyboardDidHide', keyboardHandler)
-    }
-  }
-})
-
 function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions, place: Placement, style?: T): T {
   if (style === null || style === undefined) {
     style = {} as any
@@ -117,17 +22,6 @@ function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions
   style.width = horz === 'stretch' ? '100%' : place.width
   style.height = vert === 'stretch' ? '100%' : place.height
   return style
-}
-
-function exists <T> (value: T | null | undefined): value is T {
-  return value !== null && value !== undefined
-}
-
-function useDefault <T> (value: T | null | undefined, defaultValue: T): T {
-  if (exists(value)) {
-    return value
-  }
-  return defaultValue
 }
 
 export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle> {

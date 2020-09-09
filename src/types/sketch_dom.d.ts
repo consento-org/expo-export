@@ -205,7 +205,7 @@ declare module "sketch/dom" {
     getParentSymbolMaster (): SymbolMaster | undefined
   }
 
-  export class Artboard extends Group<Type.artboard> {
+  export class Artboard<TType extends string = Type.artboard> extends Group<TType> {
     background: {
       enabled: boolean
       includedInExport: boolean
@@ -288,7 +288,7 @@ declare module "sketch/dom" {
     overrides: Override[]
   }
 
-  export class SymbolMaster extends Layer<Type.master> {
+  export class SymbolMaster extends Artboard<Type.master> {
     symbolId: string
   }
 

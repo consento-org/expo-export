@@ -1,11 +1,11 @@
 import { Document } from 'sketch/dom'
-import { disclaimer } from './disclaimer'
+import { ITypeScript } from '../util/render'
 
 export function fontShortID (fontFamily: string): string {
   return fontFamily.replace(/ |-/ig, '')
 }
 
-export function generateFonts (document: Document, fontName: (id: string) => string): string {
+export function generateFonts (document: Document, fontName: (id: string) => string): ITypeScript {
   const fontMap: { [key: string]: boolean } = {}
 
   document.sharedTextStyles.forEach((style) => {
@@ -13,9 +13,10 @@ export function generateFonts (document: Document, fontName: (id: string) => str
   })
 
   const fonts = Object.keys(fontMap)
-
-  return `${disclaimer}
-import * as ExpoFont from 'expo-font'
+  return {
+    pth: 'src/styles/Font.ts',
+    imports: {},
+    code: `import * as ExpoFont from 'expo-font'
 
 export enum Font {
 ${fonts.map((font) => `  ${fontShortID(font)} = '${font}'`).join(',\n')}
@@ -27,4 +28,5 @@ ${fonts.map((font) => `    [Font.${fontShortID(font)}]: require('../../assets/fo
   })
 }
 `
+  }
 }

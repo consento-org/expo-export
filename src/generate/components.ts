@@ -1,11 +1,10 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
-import { iterateDocument, isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, isSlice9, FillType, isTextOverride } from '../util/dom'
-import { write, readPluginAsset, IConfig } from '../util/fs'
+import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9 } from '../util/dom'
+import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
-import { Imports, addImport, renderImports } from '../util/render'
+import { Imports, addImport, ITypeScript, readPluginTypeScript } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
-import { disclaimer } from './disclaimer'
 import { TIDLookup, TIDData, getTextFormatRenderProps, formatFontProps } from './text/renderHierarchy'
 import { ITextFormat } from './text/TextFormat'
 import { processStyle } from './text/collectTextStyles'
@@ -351,115 +350,103 @@ interface IComponent {
   items: { [name: string]: Component }
 }
 
-function hasSlice9 (artboard: Artboard): boolean {
-  for (let i = 0; i < artboard.layers.length; i++) {
-    if (isSlice9(artboard.layers[0])) {
-      return true
-    }
-  }
-  return false
-}
-
-function isExportedArtboard (artboard: Artboard): boolean {
-  if (artboard.exportFormats.length > 0) {
-    return true
-  }
-  return hasSlice9(artboard)
-}
-
-function collectComponents (document: Document, textStyles: TIDLookup, config: IConfig): { [path: string]: IComponent } {
-  const components = {}
-  let component: IComponent
-  iterateDocument(document, (layer, parentNames): boolean => {
-    if (parentNames.length === 0) {
-      if (isArtboard(layer) && !isExportedArtboard(layer)) {
-        component = {
-          name: childName(layer.name),
-          artboard: layer,
-          items: {}
-        }
-        components[component.name] = component
-        return false
-      } else {
-        component = undefined
-        return true
-      }
-    }
-    if (layer.hidden && !config.exportHidden) {
-      return true
-    }
-    if (component === undefined) {
-      return true
-    }
-    const name = childName(layer.name)
-    if (layer.exportFormats.length > 0) {
-      component.items[name] = new Image(layer)
+function getItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
+  if (isSymbolInstance(layer)) {
+    const master = document.getSymbolMasterWithID(layer.symbolId)
+    if (isIgnored(master)) {
       return
     }
-    if (isSymbolInstance(layer)) {
-      const master = document.getSymbolMasterWithID(layer.symbolId)
-      if (isIgnored(master)) {
-        return
+    const masterName = childName(master.name)
+    if (isArtboard(master)) {
+      if (isExported(master)) {
+        return new Image(layer, masterName)
       }
-      const masterName = childName(master.name)
-      if (isArtboard(master) && hasSlice9(master)) {
-        component.items[name] = new Slice9(layer, masterName)
-      } else if (master.exportFormats.length > 0) {
-        component.items[name] = new Image(layer, masterName)
-      } else {
-        component.items[name] = new Link(document, layer, masterName)
-      }
-      return
-    }
-    if (isShape(layer)) {
-      if (layer.layers.length === 1) {
-        component.items[name] = new Polygon(layer.layers[0], layer.style)
+      if (hasSlice9(master)) {
+        return new Slice9(layer, masterName)
       }
     }
-    if (isShapePath(layer)) {
-      component.items[name] = new Polygon(layer, layer.style)
+    return new Link(document, layer, masterName)
+  }
+  if (isShape(layer)) {
+    if (layer.layers.length === 1) {
+      return new Polygon(layer.layers[0], layer.style)
     }
-    if (isTextLayer(layer)) {
-      const style = textStyles[layer.sharedStyleId]
-      component.items[name] = new TextComponent(layer, style)
-    }
-  })
-  return components
+  }
+  if (isShapePath(layer)) {
+    return new Polygon(layer, layer.style)
+  }
+  if (isTextLayer(layer)) {
+    const style = textStyles[layer.sharedStyleId]
+    return new TextComponent(layer, style)
+  }
 }
 
-function renderComponent (component: IComponent, getColor: FGetColor): string {
+function collectItems (document: Document, artboard: Artboard, textStyles: TIDLookup, filter: (layer: AnyLayer) => boolean): { [name: string]: Component } {
+  const items: { [name: string]: Component } = {}
+  for (const layer of recursiveLayers(artboard, filter)) {
+    const item = getItem(document, layer, textStyles)
+    if (item !== undefined) {
+      items[childName(layer.name)] = item
+    }
+  }
+  return items
+}
+
+function * collectComponents (document: Document, textStyles: TIDLookup, config: IConfig): Generator<IComponent> {
+  let filter = (layer: AnyLayer): boolean => !isIgnored(layer)
+  if (!config.exportHidden) {
+    const _filter = filter
+    filter = (layer: AnyLayer) => !layer.hidden || _filter(layer)
+  }
+  for (const page of document.pages) {
+    for (const artboard of page.layers) {
+      if (!isArtboard(artboard)) continue
+      if (isExported(artboard) || hasSlice9(artboard) || !filter(artboard)) continue
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      yield ({
+        name: childName(artboard.name),
+        artboard: artboard,
+        items: collectItems(document, artboard, textStyles, filter)
+      } as IComponent)
+    }
+  }
+}
+
+function renderComponent (component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
   addImport(imports, 'src/styles/Component', 'Component')
-  const properties = Object.keys(component.items).map(name => component.items[name].format(name, imports, getColor))
+  const properties = Object.keys(component.items).map(name =>
+    component.items[name].format(name, imports, getColor)
+  )
   const body = properties.map(property => property.property).join('\n')
-  const propertyInit = properties.map(property => property.init).filter(init => init !== undefined).join('')
-  const constructorBody = `
-    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})${propertyInit}`
+  const propertyInit = properties.map(property => property.init).filter(Boolean).join('')
 
-  return `${disclaimer}
-${renderImports(imports, 'src/styles/component')}
-
-/* eslint-disable lines-between-class-members */
+  return {
+    imports,
+    code: `/* eslint-disable lines-between-class-members */
 export class ${classForTarget(component.name)} extends Component {
 ${body}
-  constructor () {${constructorBody}
+  constructor () {
+    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})${propertyInit}
   }
 }
 
 export const ${component.name} = new ${classForTarget(component.name)}()
 `
+  }
 }
 
-export function writeComponents (document: Document, target: (path: string) => string, textStyles: TIDLookup, config: IConfig): void {
-  const components = collectComponents(document, textStyles, config)
+export function * generateComponents (document: Document, textStyles: TIDLookup, config: IConfig): Generator<ITypeScript> {
   const getColor = getColorFactory(document)
-  let hasComponent = false
-  for (const name in components) {
-    hasComponent = true
-    write(target(`src/styles/component/${name}.ts`), renderComponent(components[name], getColor))
+  let empty = true
+  for (const component of collectComponents(document, textStyles, config)) {
+    empty = false
+    yield {
+      ...renderComponent(component, getColor),
+      pth: `src/styles/component/${component.name}.ts`
+    }
   }
-  if (hasComponent) {
-    write(target('src/styles/Component.tsx'), `${disclaimer}
-${readPluginAsset('styles/Component.tsx').toString()}`)
+  if (!empty) {
+    yield readPluginTypeScript('styles/Component.tsx', { 'src/styles/util/lang': [], 'src/styles/util/useVUnits': [] })
   }
 }

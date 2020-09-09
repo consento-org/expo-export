@@ -93,7 +93,9 @@ export function targetFolder (path: string): (sub: string) => string {
   return (sub: string) => sub === '' ? config.targetFolder : `${config.targetFolder}/${sub}`
 }
 
-export function readPluginAsset (file: string): Buffer {
+export function readPluginAsset (file: string, encoding: string): string
+export function readPluginAsset (file: string): Buffer
+export function readPluginAsset (file: string, encoding?: string): Buffer | string {
   let url = (global as any).context.plugin.url().absoluteString() as string
   if (!/\/$/.test(url)) {
     url += '/'
@@ -101,7 +103,7 @@ export function readPluginAsset (file: string): Buffer {
   url = (`${url}Contents/Resources/${file}`).replace(/^file:\/\//, '')
   url = decodeURI(url)
   url = realpathSync(url)
-  return readFileSync(url)
+  return readFileSync(url, encoding)
 }
 
 export function write (pth: string, data: any): boolean {

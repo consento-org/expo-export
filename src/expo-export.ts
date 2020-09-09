@@ -1,12 +1,13 @@
 import { alert } from 'sketch/ui'
 import { Document } from 'sketch/dom'
-import { write, targetFolder, getConfig } from './util/fs'
+import { targetFolder, getConfig } from './util/fs'
 import { generateColors } from './generate/color'
 import { generateFonts } from './generate/font'
 import { generateTextStyles } from './generate/text'
-import { writeAssets } from './generate/assets'
-import { writeComponents } from './generate/components'
+import { generateAssets } from './generate/assets'
+import { generateComponents } from './generate/components'
 import { createFontNameLookup } from './util/dom'
+import { IOutput, writeOutput, isTypeScript, addImport, Imports, readPluginTypeScript, ITypeScript } from './util/render'
 
 export interface IExpoExportOpts {
   color: boolean
@@ -14,6 +15,80 @@ export interface IExpoExportOpts {
   textStyle: boolean
   assets: boolean
   components: boolean
+}
+
+function * _generateOutput (document: Document, opts: IExpoExportOpts, url: string, context: any): Generator<IOutput> {
+  const config = getConfig(url)
+  const fontNameLookup = createFontNameLookup(document, context.document)
+  if (opts.color) {
+    console.log('→ Generating colors')
+    yield generateColors(document)
+  }
+  if (opts.font) {
+    console.log('→ Generating fonts')
+    yield generateFonts(document, fontNameLookup)
+  }
+  if (opts.textStyle || opts.assets || opts.components) {
+    console.log('→ Collecting TextStyles')
+    const { textStyles, textStyleData } = generateTextStyles(document, fontNameLookup)
+    if (opts.textStyle) {
+      console.log('→ Generating TextStyles')
+      yield textStyleData
+    }
+    if (opts.assets) {
+      console.log('→ Generating Assets')
+      for (const output of generateAssets(document)) {
+        yield output
+      }
+    }
+    if (opts.components) {
+      console.log('→ Generating Components')
+      for (const output of generateComponents(document, textStyles, config)) {
+        yield output
+      }
+    }
+  }
+}
+
+const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
+  'src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
+  'src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { 'src/styles/util/createGlobalEffect': [] } },
+  'src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} }
+}
+
+export function * generateOutput (document: Document, opts: IExpoExportOpts, url: string, context: any): Generator<IOutput> {
+  const imports: Imports = {}
+  const written = new Set()
+  const processTs = (output: ITypeScript): void => {
+    for (const from in output.imports) {
+      addImport(imports, from, output.pth)
+    }
+    written.add(output.pth.replace(/\.tsx?$/, ''))
+  }
+  for (const output of _generateOutput(document, opts, url, context)) {
+    if (isTypeScript(output)) {
+      processTs(output)
+    }
+    yield output
+  }
+
+  console.log('→ Adding dependencies')
+  do {
+    const missingImport = Object.keys(imports).filter(imported => !written.has(imported))[0]
+    if (!missingImport) {
+      break
+    }
+    const missingFile = knownTSDeps[missingImport]
+    if (!missingFile) {
+      console.log(`Warning: ${missingImport} was referenced by ${imports[missingImport].join(', ')} but not generated this time!`)
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete imports[missingImport]
+      continue
+    }
+    const ts = readPluginTypeScript(missingFile.pth, missingFile.imports)
+    processTs(ts)
+    yield ts
+  } while (true)
 }
 
 export function expoExport (opts: IExpoExportOpts, context: any): void {
@@ -25,14 +100,8 @@ export function expoExport (opts: IExpoExportOpts, context: any): void {
   if (url === null) {
     return alert('URL missing', 'Please save the document first!')
   }
-  const config = getConfig(url)
   const target = targetFolder(url)
-  const fontNameLookup = createFontNameLookup(document, context.document)
-  if (opts.color) write(target('src/styles/Color.ts'), generateColors(document))
-  if (opts.font) write(target('src/styles/Font.ts'), generateFonts(document, fontNameLookup))
-  const { textStyles, textStyleData } = generateTextStyles(document, fontNameLookup)
-  if (opts.textStyle) write(target('src/styles/TextStyles.ts'), textStyleData)
-
-  if (opts.assets) writeAssets(document, target)
-  if (opts.components) writeComponents(document, target, textStyles, config)
+  for (const output of generateOutput(document, opts, url, context)) {
+    writeOutput(output, target)
+  }
 }

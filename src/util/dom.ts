@@ -111,19 +111,29 @@ export function isSlice (item: AnyLayer): item is Slice {
   return item.type === Type.slice
 }
 
+export function getSlice9Layer (item: Artboard): Slice | undefined {
+  for (const layer of item.layers) {
+    if (isSlice9(layer)) return layer
+  }
+}
+
 export function isSlice9 (item: AnyLayer): item is Slice {
   if (!isSlice(item)) return false
   if (item.name !== 'slice-9') return false
-  const artboard = item.getParentArtboard()
-  return artboard.id === item.parent.id
+  return true
 }
 
 export function isTextOverride (item: Override): item is Override<Text, string> {
   return item.property === 'stringValue'
 }
 
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-export type FTreeWalker = (item: AnyLayer, stackNames: string[]) => void | true | false
+export function hasSlice9 (group: Artboard): boolean {
+  return getSlice9Layer(group) !== undefined
+}
+
+export function isExported (artboard: Artboard): boolean {
+  return artboard.exportFormats.length > 0
+}
 
 const _isIgnored = LRUCache<boolean, AnyLayer | Page>((_: string, item: AnyLayer | Page) => {
   const parent: AnyParent = item.parent
@@ -139,28 +149,14 @@ export function isIgnored (item: AnyLayer | Page): boolean {
   return item === undefined || item === null || _isIgnored(item.id, item)
 }
 
-export function iterate (item: AnyLayer, handler: FTreeWalker, stackNames: string[]): void {
-  if (isIgnored(item)) {
-    return
+export function * recursiveLayers (container: AnyGroup, filter: (layer: AnyLayer) => boolean): Generator<AnyLayer> {
+  for (const layer of container.layers) {
+    if (!filter(layer)) continue
+    yield layer
+    if (isGroup(layer)) {
+      for (const child of recursiveLayers(layer, filter)) {
+        yield child
+      }
+    }
   }
-  if (handler(item, stackNames) === true) {
-    return
-  }
-  if (item instanceof Group) {
-    stackNames.push(item.name)
-    eachItem(item, handler, stackNames)
-    stackNames.pop()
-  }
-}
-
-function eachItem (container: AnyGroup, handler: FTreeWalker, stackNames: string[]): void {
-  for (const item of container.layers) {
-    iterate(item, handler, stackNames)
-  }
-}
-
-export function iterateDocument (document: Document, handler: FTreeWalker): void {
-  document.pages
-    .filter(page => !isIgnored(page))
-    .forEach(page => eachItem(page, handler, []))
 }

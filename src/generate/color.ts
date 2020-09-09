@@ -1,7 +1,6 @@
 import { Document, ColorAsset } from 'sketch/dom'
 import { slugify, safeChildName } from '../util/string'
-import { Imports, addImport } from '../util/render'
-import { disclaimer } from './disclaimer'
+import { Imports, addImport, ITypeScript } from '../util/render'
 
 export type FGetColor = (color: string, imports?: Imports) => string
 
@@ -30,14 +29,16 @@ export function nameForColor (color: ColorAsset): string {
   return safeChildName(slugify(color.name, '_'))
 }
 
-export function generateColors (document: Document): string | undefined {
+export function generateColors (document: Document): ITypeScript | undefined {
   const colors = document.colors.filter(color => isActiveColor(color))
   if (colors.length === 0) {
     return
   }
-  return `${disclaimer}
-export enum Color {
+  return {
+    pth: 'src/styles/Color.ts',
+    imports: {},
+    code: `export enum Color {
 ${colors.map(color => `  ${nameForColor(color)} = '${color.color}'`).join(',\n')}
-}
-`
+}`
+  }
 }
