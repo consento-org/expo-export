@@ -1,5 +1,5 @@
 import React from 'react'
-import { FlexStyle, Insets, GestureResponderEvent, ViewStyle, TouchableOpacity, View } from 'react-native'
+import { FlexStyle, Insets, GestureResponderEvent, ViewStyle, TouchableOpacity, View, LayoutChangeEvent } from 'react-native'
 import { Placement } from '../Placement'
 import { useVUnits } from '../useVUnits'
 import { exists } from '../lang'
@@ -22,15 +22,14 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
   horz?: TRenderGravity
   style?: TStyle
   debug?: boolean
+  hitSlop?: Insets
   onPress?: (event: GestureResponderEvent) => any
-  onLayout?: () => any
+  onLayout?: (nativeEvent: LayoutChangeEvent) => any
 }
 
 export interface IRenderProps<T extends React.Component, TStyle extends FlexStyle> extends IBaseProps<T, TStyle> {
   place: Placement
   layer: ILayer
-  debug?: boolean
-  hitSlop?: Insets
   item: (opts: {
     ref?: React.Ref<T>
     style?: TStyle
@@ -43,7 +42,7 @@ export interface IRenderOptions {
   debug?: boolean
   hitSlop?: Insets
   onPress?: (event: GestureResponderEvent) => any
-  onLayout?: () => any
+  onLayout?: (nativeEvent: LayoutChangeEvent) => any
 }
 
 export function renderItem (layer: ILayer, item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug, hitSlop }: IRenderOptions = {}): JSX.Element {
