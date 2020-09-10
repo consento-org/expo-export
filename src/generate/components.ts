@@ -2,7 +2,7 @@ import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOpti
 import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName } from '../util/dom'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
-import { Imports, addImport, ITypeScript } from '../util/render'
+import { Imports, addImport, ITypeScript, isFilled } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
 import { TIDLookup, TIDData, getTextFormatRenderProps, formatFontProps } from './text/renderHierarchy'
@@ -97,9 +97,11 @@ class TextComponent extends Component {
   renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
     const layerStyle = processStyle(this._layer.style)
     if (this.textStyle === undefined) {
-      return `{
-    ${getTextFormatRenderProps(designName, layerStyle, getColor, imports).join(',\n      ')}
-  }`
+      return `{${
+      getTextFormatRenderProps(designName, layerStyle, getColor, imports).map(prop => `
+      ${prop}`).join(',')
+    }
+    }`
     }
     addImport(imports, `./src/styles/${designName}/TextStyles`, 'TextStyles')
     const difference = compareTextFormat(this.textStyle.style, layerStyle)
@@ -107,9 +109,11 @@ class TextComponent extends Component {
       return `TextStyles.${this.textStyle.name}`
     }
     return `{
-    ...TextStyles.${this.textStyle.name},
-    ${getTextFormatRenderProps(designName, difference, getColor, imports).join(',\n      ')}
-  }`
+      ...TextStyles.${this.textStyle.name},${
+      getTextFormatRenderProps(designName, difference, getColor, imports).map(prop => `
+      ${prop}`).join(',')
+    }
+    }`
   }
 }
 
@@ -159,9 +163,9 @@ class Link extends Component {
     if (this.textOverrides.length === 0) {
       return '{}'
     }
-    return `{
-    ${this.textOverrides.map(override => `${override.path}: '${safeText(override.value)}'`).join(',\n    ')}
-  }`
+    return `{${this.textOverrides.map(override => `
+      ${override.path}: '${safeText(override.value)}'`).join(',')}
+    }`
   }
 }
 
@@ -263,21 +267,21 @@ class Polygon extends Component {
       props.push(['radius', `${this.borderRadius}`])
     }
     return `{${props.map(([prop, value]) => `
-    ${prop}: ${value}`).join(',')}
-  }`
+      ${prop}: ${value}`).join(',')}
+    }`
   }
 
   renderShadows (imports: Imports, getColor: FGetColor): string {
     if (this.shadows.length === 0) {
       return '[]'
     }
-    const shadows = []
+    const shadows: string[] = []
     for (const shadow of this.shadows) {
       shadows.push(`{ x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
     }
-    return `[
-    ${shadows.join(',\n      ')}
-  ]`
+    return `[${shadows.map(shadow => `
+      ${shadow}`).join(',')}
+    ]`
   }
 
   renderFills (imports: Imports, getColor: FGetColor): string {
@@ -295,22 +299,22 @@ class Polygon extends Component {
     if (fill.fillType === FillType.Gradient) {
       addImport(imports, './src/styles/util/Fill', 'GradientType')
       return `{
-    gradient: {
-      type: GradientType.${mapGradientType(fill.gradient.gradientType)},
-      stops: [${fill.gradient.stops.map(stop => `{
-        color: ${getColor(stop.color, imports)},
-        position: ${stop.position}
-      }`).join(', ')}],
-      from: {
-        x: ${fill.gradient.from.x},
-        y: ${fill.gradient.from.y}
-      },
-      to: {
-        x: ${fill.gradient.to.x},
-        y: ${fill.gradient.to.y}
+      gradient: {
+        type: GradientType.${mapGradientType(fill.gradient.gradientType)},
+        stops: [${fill.gradient.stops.map(stop => `{
+          color: ${getColor(stop.color, imports)},
+          position: ${stop.position}
+        }`).join(', ')}],
+        from: {
+          x: ${fill.gradient.from.x},
+          y: ${fill.gradient.from.y}
+        },
+        to: {
+          x: ${fill.gradient.to.x},
+          y: ${fill.gradient.to.y}
+        }
       }
-    }
-  }`
+    }`
     }
     if (fill.fillType === FillType.Pattern) {
       // This requires for the image of all gradient patterns to be
@@ -391,9 +395,6 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
 
 function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-  const properties = Object.keys(component.items).map(name =>
-    `  ${name}: ${component.items[name].format(designName, imports, getColor)}`
-  )
 
   return {
     imports,
@@ -405,8 +406,12 @@ export const ${component.name} = {
     !component.artboard.background.enabled ? ''
     : `,
   backgroundColor: ${getColor(component.artboard.background.color, imports)}`}${
-    properties.length === 0 ? '' : `,
-${properties.join(',\n')}`
+    !isFilled(component.items) ? '' : `,
+  layers: {${Object.keys(component.items).map(name => `
+    ${name}: ${component.items[name].format(designName, imports, getColor)}`
+).join(',')}
+  }`
+
   }
 }
 `

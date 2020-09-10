@@ -59,8 +59,8 @@ function renderFormat (designName: string, getColor: FGetColor, imports: Imports
   return {
     name: fullName,
     style,
-    output: `export const ${fullName}: TextStyle = Object.freeze({
-  ${props.join(',\n  ')}
+    output: `export const ${fullName}: TextStyle = Object.freeze({${props.map(prop => `
+  ${prop}`).join(',')}
 })
 `
   }

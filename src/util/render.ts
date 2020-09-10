@@ -3,6 +3,13 @@ import { dirname, write, readPluginAsset } from './fs'
 
 export interface Imports { [from: string]: string[] }
 
+export function isFilled (obj: Object): boolean {
+  for (const _ in obj) {
+    return true
+  }
+  return false
+}
+
 export function addImport (target: Imports, from: string, symbol: string | string[]): Imports {
   let byFrom = target[from]
   if (byFrom === undefined) {

@@ -1,7 +1,7 @@
 import sketch, { Document, AnyLayer, Slice, Artboard } from 'sketch/dom'
 import { isIgnored, getSlice9Layer, isArtboard, isExported, getDesignName } from '../util/dom'
 import { slugifyName, childName, stringSort } from '../util/string'
-import { ITypeScript, IOutput, IDataOutput, addImport, Imports } from '../util/render'
+import { ITypeScript, IOutput, IDataOutput, addImport, Imports, isFilled } from '../util/render'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
@@ -71,13 +71,6 @@ function * slice9Export (artboard: Artboard, item: Slice, slice9s: { [assetName:
     }
   }
   workSlice.remove()
-}
-
-function isFilled (obj: Object): boolean {
-  for (const _ in obj) {
-    return true
-  }
-  return false
 }
 
 interface IAssetData {
