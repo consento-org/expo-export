@@ -1,5 +1,6 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
 import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName } from '../util/dom'
+import { GradientType as OutputGradientType } from '../../assets/styles/util/Fill'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, ITypeScript, isFilled } from '../util/render'
@@ -204,7 +205,7 @@ function getBorderRadius (layer: ShapePath): number {
   return radius
 }
 
-function mapGradientType (input: GradientType): 'linear' | 'radial' | 'angular' {
+function mapGradientType (input: GradientType): OutputGradientType {
   if (input === 'Linear') return 'linear'
   if (input === 'Radial') return 'radial'
   return 'angular'
