@@ -55,13 +55,12 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
   './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
   './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
   './src/styles/util/Fill': { pth: 'styles/util/Fill.ts', imports: { './src/styles/util/lang': [] } },
-  './src/styles/util/ImageAsset': { pth: 'styles/util/ImageAsset.tsx', imports: { react: [], 'react-native': [], './src/styles/util/lang': [] } },
   './src/styles/util/ImagePlacement': {
     pth: 'styles/util/ImagePlacement.ts',
     imports: {
       'react-native': [],
-      './src/styles/util/ImageAsset': [],
-      './src/styles/util/Placement': []
+      './src/styles/util/Placement': [],
+      './src/styles/util/types': []
     }
   },
   './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
@@ -94,10 +93,13 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
   './src/styles/util/react/SketchImage': {
     pth: 'styles/util/react/SketchImage.tsx',
     imports: {
+      react: [],
       'react-native': [],
       './src/styles/util/react/SketchInLayer': [],
       './src/styles/util/ImagePlacement': [],
-      './src/styles/util/types': []
+      './src/styles/util/types': [],
+      './src/styles/util/lang': [],
+      './src/styles/util/Placement': []
     }
   },
   './src/styles/util/react/SketchPolygon': {
@@ -112,10 +114,12 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
   './src/styles/util/react/SketchSlice9': {
     pth: 'styles/util/react/SketchSlice9.tsx',
     imports: {
+      react: [],
       'react-native': [],
       './src/styles/util/react/SketchInLayer': [],
       './src/styles/util/Slice9Placement': [],
-      './src/styles/util/types': []
+      './src/styles/util/types': [],
+      './src/styles/util/Placement': []
     }
   },
   './src/styles/util/react/SketchTextBox': {
@@ -129,13 +133,12 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     }
   },
   './src/styles/util/Shadow': { pth: 'styles/util/Shadow.ts', imports: {} },
-  './src/styles/util/Slice9Asset': { pth: 'styles/util/Slice9Asset.tsx', imports: { react: [], 'react-native': [], './src/styles/util/lang': [] } },
   './src/styles/util/Slice9Placement': {
     pth: 'styles/util/Slice9Placement.ts',
     imports: {
       'react-native': [],
-      './src/styles/util/Slice9Asset': [],
-      './src/styles/util/Placement': []
+      './src/styles/util/Placement': [],
+      './src/styles/util/types': []
     }
   },
   './src/styles/util/TextBox': {

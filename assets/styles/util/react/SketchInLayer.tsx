@@ -87,7 +87,7 @@ export function renderItem (layer: ILayer, item: React.ReactNode, place: Placeme
   if (exists(onPress)) {
     return <TouchableOpacity onLayout={onLayout} onPress={onPress} style={style} hitSlop={hitSlop}>{item}</TouchableOpacity>
   }
-  return <View style={style}>{item}</View>
+  return <View onLayout={onLayout} style={style}>{item}</View>
 }
 
 export const SketchInLayer = <T extends React.Component, S extends FlexStyle> (props: IRenderProps<T, S>): JSX.Element => {

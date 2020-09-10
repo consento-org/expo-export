@@ -34,10 +34,10 @@ class Image extends Component {
   }
 
   format (designName: string, imports: Imports, _: FGetColor): string {
-    addImport(imports, `./src/styles/${designName}/Asset`, 'Asset')
+    addImport(imports, `./src/styles/${designName}/ImageAsset`, 'ImageAsset')
     addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
     addImport(imports, './src/styles/util/react/SketchImage', [])
-    return `new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return `new ImagePlacement(ImageAsset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -50,10 +50,10 @@ class Slice9 extends Component {
   }
 
   format (_designName: string, imports: Imports, _: FGetColor): string {
-    addImport(imports, './src/Asset', 'Asset')
+    addImport(imports, './src/Slice9', 'Slice9')
     addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
     addImport(imports, './src/styles/util/react/SketchSlice9', [])
-    return `new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return `new Slice9Placement(Slice9.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 

@@ -1,18 +1,12 @@
-import { ViewStyle, View } from 'react-native'
-import { Slice9Asset } from './Slice9Asset'
-import { IFrameData, Placement } from './Placement'
+import { Placement, IFrameData } from './Placement'
+import { ISlice9 } from './types'
 
 export class Slice9Placement {
   place: Placement
-  asset: () => Slice9Asset
+  slice9: ISlice9
 
-  constructor (asset: () => Slice9Asset, frame: IFrameData) {
-    this.asset = asset
+  constructor (slice9: ISlice9, frame: IFrameData) {
+    this.slice9 = slice9
     this.place = new Placement(frame)
-    this.render = this.render.bind(this)
-  }
-
-  render (style?: ViewStyle, ref?: React.Ref<View>, onLayout?: () => any): JSX.Element {
-    return this.asset().render(style, ref, onLayout)
   }
 }
