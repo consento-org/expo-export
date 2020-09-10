@@ -54,19 +54,19 @@ export interface IGradient {
 }
 
 function calcAvgColor (stops: IStop[]): string {
-  let rgba: RGBA
-  for (const stop of stops) {
-    const col = new RGBA(stop.color)
-    if (rgba === undefined) {
-      rgba = col
-    } else {
-      rgba = rgba.avg(col)
-    }
+  const first = stops[0]
+  if (first === undefined) {
+    return '#ffffffff'
+  }
+  let rgba: RGBA = new RGBA(first.color)
+  for (let i = 1; i < stops.length; i++) {
+    const stop = stops[i]
+    rgba = rgba.avg(new RGBA(stop.color))
   }
   return rgba.toString()
 }
 
-export type TFillData = string | IGradient | ISketchError
+export type TFillData = string | IGradient | ISketchError | null
 
 export const WHITE = '#ffffffff'
 
@@ -75,7 +75,7 @@ export class Fill {
   color: string
   constructor (data: TFillData) {
     this.data = data
-    if (this.data === null || isSketchError(this.data)) {
+    if (!exists(this.data) || isSketchError(this.data)) {
       this.color = WHITE
     } else if (typeof this.data === 'string') {
       this.color = this.data

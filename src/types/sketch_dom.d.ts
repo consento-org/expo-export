@@ -260,7 +260,7 @@ declare module "sketch/dom" {
   export type ShapeType = 'Rectangle' | 'Oval' | 'Triangle' | 'Polygon' | 'Star' | 'Custom'
   export type ArrowHead = 'None' | 'OpenArrow' | 'FilledArrow' | 'Line' | 'OpenCircle' | 'FilledCircle' | 'OpenSquare' | 'FilledSquare'
   export type LineEnd = 'Butt' | 'Round' | 'Projecting'
-  export type LineJoin = 'Miter' | 'Round' | 'Bevel'
+  export type LineJoin = 'Miter' | 'Mitter' | 'Round' | 'Bevel'
 
   export class BorderOptions {
     startArrowhead: ArrowHead

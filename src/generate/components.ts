@@ -1,5 +1,5 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
-import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName } from '../util/dom'
+import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName, svgLinejoin, svgLinecap } from '../util/dom'
 import { GradientType as OutputGradientType } from '../../assets/styles/util/Fill'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
@@ -245,30 +245,22 @@ class Polygon extends Component {
 
   renderBorder (border: Border, imports: Imports, getColor: FGetColor): string {
     const options = this.borderOptions
-    const props = [
-      ['fill', this.renderFill(border, imports, getColor)],
-      ['thickness', border.thickness]
-    ]
-    if (options.endArrowhead !== DEFAULT_ARROWHEAD) {
-      props.push(['endArrowhead', `'${options.endArrowhead}'`])
-    }
-    if (options.startArrowhead !== DEFAULT_ARROWHEAD) {
-      props.push(['startArrowhead', `'${options.startArrowhead}'`])
-    }
-    if (options.lineEnd !== DEFAULT_LINE_END) {
-      props.push(['lineEnd', `'${options.lineEnd}'`])
-    }
-    if (options.lineJoin !== DEFAULT_LINE_JOIN) {
-      props.push(['lineJoin', `'${options.lineJoin}'`])
-    }
-    if (options.dashPattern.length > 0) {
-      props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
-    }
-    if (this.borderRadius > 0) {
-      props.push(['radius', `${this.borderRadius}`])
-    }
-    return `{${props.map(([prop, value]) => `
-      ${prop}: ${value}`).join(',')}
+    return `{
+      fill: ${this.renderFill(border, imports, getColor)},
+      thickness: ${border.thickness}${
+        options.endArrowhead === DEFAULT_ARROWHEAD ? '' : `,
+      endArrowhead: '${options.endArrowhead}'`
+      }${options.startArrowhead === DEFAULT_ARROWHEAD ? '' : `,
+      startArrowhead: '${options.startArrowhead}'`
+      }${options.lineEnd === DEFAULT_LINE_END ? '' : `,
+      strokeLinecap: '${svgLinecap(options.lineEnd)}'`
+      }${options.lineJoin === DEFAULT_LINE_JOIN ? '' : `,
+      strokeLinejoin: '${svgLinejoin(options.lineJoin)}'`
+      }${options.dashPattern.length === 0 ? '' : `,
+      dashPattern: [ ${options.dashPattern.join(', ')} ]`
+      }${this.borderRadius === 0 ? '' : `,
+      radius: ${this.borderRadius}`
+      }
     }`
   }
 
@@ -276,12 +268,9 @@ class Polygon extends Component {
     if (this.shadows.length === 0) {
       return '[]'
     }
-    const shadows: string[] = []
-    for (const shadow of this.shadows) {
-      shadows.push(`{ x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
-    }
-    return `[${shadows.map(shadow => `
-      ${shadow}`).join(',')}
+    return `[${this.shadows.map(shadow => `
+      { x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`
+    ).join(',')}
     ]`
   }
 
@@ -298,22 +287,14 @@ class Polygon extends Component {
       return getColor(fill.color, imports)
     }
     if (fill.fillType === FillType.Gradient) {
-      addImport(imports, './src/styles/util/Fill', 'GradientType')
       return `{
       gradient: {
-        type: GradientType.${mapGradientType(fill.gradient.gradientType)},
-        stops: [${fill.gradient.stops.map(stop => `{
-          color: ${getColor(stop.color, imports)},
-          position: ${stop.position}
-        }`).join(', ')}],
-        from: {
-          x: ${fill.gradient.from.x},
-          y: ${fill.gradient.from.y}
-        },
-        to: {
-          x: ${fill.gradient.to.x},
-          y: ${fill.gradient.to.y}
-        }
+        type: '${mapGradientType(fill.gradient.gradientType)}',
+        stops: [${fill.gradient.stops.map(stop => `
+          { color: ${getColor(stop.color, imports)}, position: ${stop.position} }`).join(',')}
+        ],
+        from: { x: ${fill.gradient.from.x}, y: ${fill.gradient.from.y} },
+        to: { x: ${fill.gradient.to.x}, y: ${fill.gradient.to.y} }
       }
     }`
     }
@@ -332,7 +313,7 @@ interface IComponent {
   items: { [name: string]: Component }
 }
 
-function getItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
+function collectItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
   if (isSymbolInstance(layer)) {
     const master = document.getSymbolMasterWithID(layer.symbolId)
     if (isIgnored(master)) {
@@ -366,7 +347,7 @@ function getItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): C
 function collectItems (document: Document, artboard: Artboard, textStyles: TIDLookup, filter: (layer: AnyLayer) => boolean): { [name: string]: Component } {
   const items: { [name: string]: Component } = {}
   for (const layer of recursiveLayers(artboard, filter)) {
-    const item = getItem(document, layer, textStyles)
+    const item = collectItem(document, layer, textStyles)
     if (item !== undefined) {
       items[childName(layer.name)] = item
     }

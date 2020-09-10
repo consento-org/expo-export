@@ -1,7 +1,7 @@
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { View, ViewStyle } from 'react-native'
-import { isSketchError } from './lang'
+import { isSketchError, exists } from './lang'
 import { Placement, IFrameData } from './Placement'
 import { Fill, TFillData } from './Fill'
 import { Border, TBorderData } from './Border'
@@ -26,7 +26,7 @@ export class Polygon {
 
   RenderRect ({ style, ref, onLayout }: { style?: ViewStyle, ref?: React.Ref<any>, onLayout?: () => any } = {}): JSX.Element {
     const data = this.fill.data
-    if (data === null) {
+    if (!exists(data)) {
       return <View style={{
         ...style,
         ...this.borderStyle()

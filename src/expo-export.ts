@@ -128,7 +128,6 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       'react-native': [],
       './src/styles/util/react/SketchTextBox': [],
       './src/styles/util/TextBox': [],
-      './src/styles/util/lang': [],
       './src/styles/util/types': []
     }
   },

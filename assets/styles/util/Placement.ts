@@ -46,9 +46,7 @@ export class Placement {
   }
 
   size<T extends IStylePlace> (style?: T): T {
-    if (style === undefined || style === null) {
-      style = {} as any
-    }
+    style = (style ?? {}) as T
     style.width = this.width
     style.height = this.height
     return style

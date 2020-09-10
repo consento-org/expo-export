@@ -1,6 +1,7 @@
-import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath, Slice, Override } from 'sketch/dom'
+import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath, Slice, Override, LineEnd, LineJoin } from 'sketch/dom'
 import { LRUCache } from './string'
 import { getDesignNameByPath } from './fs'
+import { Linecap, Linejoin } from 'react-native-svg'
 
 interface IDocumentData {
   textStyleWithID: (id: string) => undefined | {
@@ -14,6 +15,26 @@ interface IDocumentData {
       }
     }
   }
+}
+
+export function svgLinecap (lineEnd: LineEnd): Linecap {
+  if (lineEnd === 'Butt') {
+    return 'butt'
+  }
+  if (lineEnd === 'Projecting') {
+    return 'square'
+  }
+  return 'round'
+}
+
+export function svgLinejoin (lineJoin: LineJoin): Linejoin {
+  if (lineJoin === 'Miter' || lineJoin === 'Mitter') {
+    return 'miter'
+  }
+  if (lineJoin === 'Bevel') {
+    return 'bevel'
+  }
+  return 'round'
 }
 
 export function getDesignName (document: Document): string {

@@ -84,7 +84,9 @@
     "**/*.d.ts",
     "/src/types/"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "react-native-svg": "^12.1.0"
+  },
   "bugs": {
     "url": "https://github.com/consento-org/expo-export/issues"
   },

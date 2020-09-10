@@ -1,6 +1,6 @@
 import React from 'react'
 import { TextStyle, Text, TextInput, ReturnKeyTypeOptions } from 'react-native'
-import { useDefault, exists } from './lang'
+import { exists } from './lang'
 import { Placement, IFrameData } from './Placement'
 
 export type TTextContentType = 'none'
@@ -78,11 +78,11 @@ export class TextBox {
   }
 
   render (props: ITextRenderOptions): JSX.Element {
-    let value = String(useDefault(props.value, this.text))
+    let value = props.value ?? this.text
     const originalValue = value
-    const isEditable = exists(props.onEdit) || exists(props.onInstantEdit)
-    const onInstantEdit = useDefault(props.onInstantEdit, noop)
-    const onEdit = useDefault(props.onEdit, noop)
+    const isEditable = exists(props.onEdit ?? props.onInstantEdit)
+    const onInstantEdit = props.onInstantEdit ?? noop
+    const onEdit = props.onEdit ?? noop
     if (isEditable) {
       return <TextInput
         onChangeText={text => {
@@ -123,7 +123,7 @@ export class TextBox {
   }
 
   renderAbsolute (opts: ITextRenderOptions): JSX.Element {
-    if (opts.style === undefined || opts.style === null) {
+    if (!exists(opts.style)) {
       opts.style = this.styleAbsolute
     } else {
       opts.style = {

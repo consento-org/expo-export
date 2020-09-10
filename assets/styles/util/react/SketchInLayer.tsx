@@ -8,9 +8,7 @@ import { ILayer } from '../types'
 export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch' | 'none'
 
 export function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions, place: Placement, style?: T): T {
-  if (style === null || style === undefined) {
-    style = {} as any
-  }
+  style = (style ?? {}) as T
   style.width = horz === 'stretch' ? '100%' : place.width
   style.height = vert === 'stretch' ? '100%' : place.height
   return style

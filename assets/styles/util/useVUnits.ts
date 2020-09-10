@@ -2,8 +2,8 @@ import { Dimensions, Keyboard, KeyboardEvent } from 'react-native'
 import { createGlobalEffect } from './createGlobalEffect'
 
 const mem = {
-  vw: null,
-  vh: null
+  vw: NaN,
+  vh: NaN
 }
 
 let keyboardSize = 0
@@ -60,4 +60,4 @@ export const useVUnits = createGlobalEffect({
       Keyboard.removeListener('keyboardDidHide', keyboardHandler)
     }
   }
-})
+}) as () => IVUnits

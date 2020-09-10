@@ -2,41 +2,36 @@ import { ViewStyle } from 'react-native'
 import { Fill, TFillData } from './Fill'
 
 export type TArrowHead = 'None' | 'OpenArrow' | 'FilledArrow' | 'Line' | 'OpenCircle' | 'FilledCircle' | 'OpenSquare' | 'FilledSquare'
-export type TLineEnd = 'Butt' | 'Round' | 'Projecting'
-export type TLineJoin = 'Miter' | 'Round' | 'Bevel'
+export type TLinecap = 'butt' | 'square' | 'round'
+export type TLinejoin = 'miter' | 'bevel' | 'round'
+export type TBorderStyle = 'dotted' | 'dashed' | 'solid'
 
 export interface TBorderData {
   fill?: TFillData
   thickness?: number
   endArrowhead?: TArrowHead
   startArrowhead?: TArrowHead
-  lineEnd?: TLineEnd
-  lineJoin?: TLineJoin
+  strokeLinecap?: TLinecap
+  strokeLinejoin?: TLinejoin
   dashPattern?: number[]
   radius?: number
 }
 
-export enum TBorderStyle {
-  dotted = 'dotted',
-  dashed = 'dashed',
-  solid = 'solid'
-}
-
 function dashPatternToBorderStyle (dashPattern: number[]): TBorderStyle {
   if (dashPattern.length === 1) {
-    return TBorderStyle.dotted
+    return 'dotted'
   }
   if (dashPattern.length === 2) {
-    return TBorderStyle.dashed
+    return 'dashed'
   }
-  return TBorderStyle.solid
+  return 'solid'
 }
 
 export class Border {
   endArrowhead: TArrowHead
   startArrowhead: TArrowHead
-  lineEnd: TLineEnd
-  lineJoin: TLineJoin
+  strokeLinecap: TLinecap
+  strokeLinejoin: TLinejoin
   dashPattern: number[]
   fill: Fill
   thickness: number
@@ -44,15 +39,15 @@ export class Border {
   borderStyle: TBorderStyle
 
   constructor (options: TBorderData | null) {
-    this.fill = new Fill(options === null || options.fill === undefined ? null : options.fill)
-    this.thickness = options === null || options.thickness === undefined ? 0 : options.thickness
-    this.endArrowhead = options === null || options.endArrowhead === undefined ? 'None' : options.endArrowhead
-    this.startArrowhead = options === null || options.startArrowhead === undefined ? 'None' : options.startArrowhead
-    this.lineEnd = options === null || options.lineEnd === undefined ? 'Projecting' : options.lineEnd
-    this.lineJoin = options === null || options.lineJoin === undefined ? 'Miter' : options.lineJoin
-    this.dashPattern = options === null || options.dashPattern === undefined ? [] : options.dashPattern
+    this.fill = new Fill(options?.fill ?? null)
+    this.thickness = options?.thickness ?? 0
+    this.endArrowhead = options?.endArrowhead ?? 'None'
+    this.startArrowhead = options?.startArrowhead ?? 'None'
+    this.strokeLinecap = options?.strokeLinecap ?? 'square'
+    this.strokeLinejoin = options?.strokeLinejoin ?? 'miter'
+    this.dashPattern = options?.dashPattern ?? []
+    this.radius = options?.radius ?? 0
     this.borderStyle = dashPatternToBorderStyle(this.dashPattern)
-    this.radius = options === null || options.radius === undefined ? 0 : options.radius
     this.style = this.style.bind(this)
   }
 

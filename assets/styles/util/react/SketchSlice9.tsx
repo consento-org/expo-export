@@ -1,6 +1,6 @@
 import React from 'react'
-import { applyRenderOptions, IRenderProps, SketchInLayer } from './SketchInLayer'
 import { View, ViewStyle, Image, ImageStyle } from 'react-native'
+import { applyRenderOptions, IRenderProps, SketchInLayer } from './SketchInLayer'
 import { ISlice9 } from '../types'
 import { Slice9Placement } from '../Slice9Placement'
 import { Placement } from '../Placement'
@@ -55,7 +55,7 @@ export const SketchSlice9 = (props: ISlice9Props): JSX.Element => {
   return SketchInLayer({
     ...props,
     place,
-    item: ({ ref, style }: { ref: React.Ref<View>, style: ViewStyle }) => {
+    item: ({ ref, style }: { ref?: React.Ref<View>, style?: ViewStyle }) => {
       return <View
         style={applyRenderOptions(props, place, {
           display: 'flex',
