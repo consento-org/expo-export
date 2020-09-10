@@ -6,12 +6,16 @@ import { getDesignName } from '../util/dom'
 
 export function generateTextStyles (document: Document, fontName: (id: string) => string): {
   textStyles: TIDLookup
-  textStyleData: ITypeScript
+  textStyleData?: ITypeScript
 } {
   const styles = collectTextStyles(document, fontName)
   const imports: Imports = {}
   const textStyles = renderHierarchy(document, imports, styles)
+  const textStyleList = Object.values(textStyles)
   const designName = getDesignName(document)
+  if (textStyleList.length === 0) {
+    return { textStyles }
+  }
   return {
     textStyles,
     textStyleData: {
@@ -19,9 +23,9 @@ export function generateTextStyles (document: Document, fontName: (id: string) =
       imports,
       code: `import { TextStyle } from 'react-native'
 
-${Object.values(textStyles).map(entry => entry.output).join('\n')}
+${textStyleList.map(entry => entry.output).join('\n')}
 export const TextStyles = {
-  ${Object.values(textStyles).map(entry => entry.name).join(',\n  ')}
+  ${textStyleList.map(entry => entry.name).join(',\n  ')}
 }`
     }
   }

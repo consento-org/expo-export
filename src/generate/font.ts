@@ -1,5 +1,5 @@
 import { Document } from 'sketch/dom'
-import { ITypeScript } from '../util/render'
+import { ITypeScript, isFilled } from '../util/render'
 import { getDesignName } from '../util/dom'
 
 export function fontShortID (fontFamily: string): string {
@@ -12,6 +12,10 @@ export function generateFonts (document: Document, fontName: (id: string) => str
   document.sharedTextStyles.forEach((style) => {
     fontMap[fontName(style.id)] = true
   })
+
+  if (!isFilled(fontMap)) {
+    return
+  }
 
   const fonts = Object.keys(fontMap)
   const designName = getDesignName(document)
