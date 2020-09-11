@@ -6,9 +6,9 @@ import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, ITypeScript, isFilled } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
-import { TIDLookup, TIDData, getTextFormatRenderProps, formatFontProps } from './text/renderHierarchy'
-import { ITextFormat } from './text/TextFormat'
-import { processStyle } from './text/collectTextStyles'
+import { renderTextStyle } from './text/renderTextStyle'
+import { TIDLookup } from './text'
+import { ITextStyleEntry, processStyle } from './text/collectStyleHierarchy'
 
 abstract class Component {
   layer: AnyLayer
@@ -58,31 +58,24 @@ class Slice9 extends Component {
   }
 }
 
-const compareTextProps = formatFontProps.filter(prop => prop !== 'fontFamily')
-
-function compareTextFormat (base: ITextFormat, target: ITextFormat): ITextFormat {
-  let difference: ITextFormat = null
-  compareTextProps.forEach(key => {
-    if (target[key] !== base[key] && target[key] !== null && target[key] !== undefined) {
-      if (difference === null) {
-        difference = {}
-      }
-      difference[key] = target[key]
-    }
-  })
-  return difference
-}
-
 function safeText (input: string): string {
   return input.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')
+}
+
+function indentSecondLine (input: string, indent: string): string {
+  const lines = input.split('\n')
+  for (let i = 1; i < lines.length; i++) {
+    lines[i] = `${indent}${lines[i]}`
+  }
+  return lines.join('\n')
 }
 
 class TextComponent extends Component {
   _layer: Text
   text: string
-  textStyle: TIDData
+  textStyle: ITextStyleEntry
 
-  constructor (layer: Text, textStyle: TIDData) {
+  constructor (layer: Text, textStyle: ITextStyleEntry) {
     super(layer, 'text')
     this._layer = layer
     this.text = layer.text
@@ -96,25 +89,7 @@ class TextComponent extends Component {
   }
 
   renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
-    const layerStyle = processStyle(this._layer.style)
-    if (this.textStyle === undefined) {
-      return `{${
-      getTextFormatRenderProps(designName, layerStyle, getColor, imports).map(prop => `
-      ${prop}`).join(',')
-    }
-    }`
-    }
-    addImport(imports, `./src/styles/${designName}/TextStyles`, 'TextStyles')
-    const difference = compareTextFormat(this.textStyle.style, layerStyle)
-    if (difference === null) {
-      return `TextStyles.${this.textStyle.name}`
-    }
-    return `{
-      ...TextStyles.${this.textStyle.name},${
-      getTextFormatRenderProps(designName, difference, getColor, imports).map(prop => `
-      ${prop}`).join(',')
-    }
-    }`
+    return indentSecondLine(renderTextStyle(designName, imports, getColor, processStyle(this._layer.style), this.textStyle), '    ')
   }
 }
 
