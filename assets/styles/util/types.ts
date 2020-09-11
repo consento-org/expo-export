@@ -6,9 +6,10 @@ export interface ISize {
   height: number
 }
 
-export interface ILayer extends ISize {
+export interface ILayer<TLayers = any> extends ISize {
   name: string
   backgroundColor?: string | undefined
+  layers?: TLayers
 }
 
 export interface IImageAsset extends ILayer {
