@@ -1,11 +1,9 @@
-import { applyRenderOptions, IBaseProps, SketchInLayer } from './SketchInLayer'
 import { View, ViewStyle } from 'react-native'
+import { applyRenderOptions, IBaseProps, SketchInLayer } from './SketchInLayer'
 import { Polygon } from '../Polygon'
-import { ILayer } from '../types'
 
 export interface IPolygonProps extends IBaseProps<View, ViewStyle> {
   prototype: Polygon
-  layer: ILayer
 }
 
 export const SketchPolygon = (props: IPolygonProps): JSX.Element => {

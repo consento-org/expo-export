@@ -51,10 +51,10 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 }
 
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
-  './src/styles/util/Border': { pth: 'styles/util/Border.ts', imports: { 'react-native': [], './src/styles/util/Fill': [] } },
+  './src/styles/util/Border': { pth: 'styles/util/Border.ts', imports: { 'react-native': [], './src/styles/util/Fill': [], './src/styles/util/types': [] } },
   './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
   './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
-  './src/styles/util/Fill': { pth: 'styles/util/Fill.ts', imports: { './src/styles/util/lang': [] } },
+  './src/styles/util/Fill': { pth: 'styles/util/Fill.ts', imports: { './src/styles/util/lang': [], './src/styles/util/types': [] } },
   './src/styles/util/ImagePlacement': {
     pth: 'styles/util/ImagePlacement.ts',
     imports: {
@@ -65,7 +65,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
   },
   './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
   './src/styles/util/LayerPlacement': { pth: 'styles/util/LayerPlacement.ts', imports: { './src/styles/util/Placement': [], './src/styles/util/types': [] } },
-  './src/styles/util/Placement': { pth: 'styles/util/Placement.ts', imports: {} },
+  './src/styles/util/Placement': { pth: 'styles/util/Placement.ts', imports: { 'react-native': [], './src/styles/util/types': [] } },
   './src/styles/util/Polygon': {
     pth: 'styles/util/Polygon.tsx',
     imports: {
@@ -75,6 +75,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       './src/styles/util/lang': [],
       './src/styles/util/Placement': [],
       './src/styles/util/Fill': [],
+      './src/styles/util/types': [],
       './src/styles/util/Border': [],
       './src/styles/util/Shadow': []
     }
@@ -107,8 +108,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     imports: {
       'react-native': [],
       './src/styles/util/react/SketchInLayer': [],
-      './src/styles/util/Polygon': [],
-      './src/styles/util/types': []
+      './src/styles/util/Polygon': []
     }
   },
   './src/styles/util/react/SketchSlice9': {
@@ -127,8 +127,7 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     imports: {
       'react-native': [],
       './src/styles/util/react/SketchTextBox': [],
-      './src/styles/util/TextBox': [],
-      './src/styles/util/types': []
+      './src/styles/util/TextBox': []
     }
   },
   './src/styles/util/Shadow': { pth: 'styles/util/Shadow.ts', imports: {} },
@@ -146,7 +145,8 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
       react: [],
       'react-native': [],
       './src/styles/util/lang': [],
-      './src/styles/util/Placement': []
+      './src/styles/util/Placement': [],
+      './src/styles/util/types': []
     }
   },
   './src/styles/util/types': { pth: 'styles/util/types.ts', imports: {} },

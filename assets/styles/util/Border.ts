@@ -1,23 +1,18 @@
-import { ViewStyle } from 'react-native'
-import { Fill, TFillData } from './Fill'
-
-export type TArrowHead = 'None' | 'OpenArrow' | 'FilledArrow' | 'Line' | 'OpenCircle' | 'FilledCircle' | 'OpenSquare' | 'FilledSquare'
-export type TLinecap = 'butt' | 'square' | 'round'
-export type TLinejoin = 'miter' | 'bevel' | 'round'
-export type TBorderStyle = 'dotted' | 'dashed' | 'solid'
+import { Fill } from './Fill'
+import { ArrowHead, Linecap, Linejoin, BorderStyle, FillData } from './types'
 
 export interface TBorderData {
-  fill?: TFillData
+  fill?: FillData
   thickness?: number
-  endArrowhead?: TArrowHead
-  startArrowhead?: TArrowHead
-  strokeLinecap?: TLinecap
-  strokeLinejoin?: TLinejoin
+  endArrowhead?: ArrowHead
+  startArrowhead?: ArrowHead
+  strokeLinecap?: Linecap
+  strokeLinejoin?: Linejoin
   dashPattern?: number[]
   radius?: number
 }
 
-function dashPatternToBorderStyle (dashPattern: number[]): TBorderStyle {
+function dashPatternToBorderStyle (dashPattern: number[]): BorderStyle {
   if (dashPattern.length === 1) {
     return 'dotted'
   }
@@ -28,15 +23,15 @@ function dashPatternToBorderStyle (dashPattern: number[]): TBorderStyle {
 }
 
 export class Border {
-  endArrowhead: TArrowHead
-  startArrowhead: TArrowHead
-  strokeLinecap: TLinecap
-  strokeLinejoin: TLinejoin
+  endArrowhead: ArrowHead
+  startArrowhead: ArrowHead
+  strokeLinecap: Linecap
+  strokeLinejoin: Linejoin
   dashPattern: number[]
   fill: Fill
   thickness: number
   radius: number
-  borderStyle: TBorderStyle
+  borderStyle: BorderStyle
 
   constructor (options: TBorderData | null) {
     this.fill = new Fill(options?.fill ?? null)
@@ -48,15 +43,5 @@ export class Border {
     this.dashPattern = options?.dashPattern ?? []
     this.radius = options?.radius ?? 0
     this.borderStyle = dashPatternToBorderStyle(this.dashPattern)
-    this.style = this.style.bind(this)
-  }
-
-  style (): ViewStyle {
-    return {
-      borderRadius: this.radius,
-      borderColor: this.fill.color,
-      borderWidth: this.thickness,
-      borderStyle: this.borderStyle
-    }
   }
 }

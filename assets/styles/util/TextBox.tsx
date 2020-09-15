@@ -1,7 +1,8 @@
 import React from 'react'
 import { TextStyle, Text, TextInput, ReturnKeyTypeOptions } from 'react-native'
 import { exists } from './lang'
-import { Placement, IFrameData } from './Placement'
+import { Placement } from './Placement'
+import { IPlacement } from './types'
 
 export type TTextContentType = 'none'
 | 'URL'
@@ -64,10 +65,10 @@ export class TextBox {
   styleAbsolute: TextStyle
   place: Placement
 
-  constructor (text: string, style: TextStyle, frame: IFrameData) {
+  constructor (text: string, style: TextStyle, place: IPlacement) {
     this.text = text
     this.style = style
-    this.place = new Placement(frame)
+    this.place = new Placement(place)
     this.styleAbsolute = {
       ...style,
       ...this.place.style(),

@@ -2,19 +2,18 @@ import React from 'react'
 import { SketchInLayer, applyRenderOptions, IBaseProps } from './SketchInLayer'
 import { Image, ImageStyle } from 'react-native'
 import { ImagePlacement } from '../ImagePlacement'
-import { IImageAsset, ILayer } from '../types'
+import { IImageAsset } from '../types'
 import { exists } from '../lang'
 import { Placement } from '../Placement'
 
 export interface IImageProps extends IBaseProps<Image, ImageStyle> {
   prototype: ImagePlacement | IImageAsset
-  layer: ILayer
   fadeDuration?: number
 }
 
 export const SketchImage = (props: IImageProps): JSX.Element => {
   const image = props.prototype instanceof ImagePlacement ? props.prototype.image : props.prototype
-  const place = props.prototype instanceof ImagePlacement ? props.prototype.place : new Placement({ x: 0, y: 0, w: props.prototype.width, h: props.prototype.height })
+  const place = props.prototype instanceof ImagePlacement ? props.prototype.place : new Placement({ x: 0, y: 0, w: props.prototype.width, h: props.prototype.height, r: 0, b: 0 })
   let { fadeDuration } = props
 
   return SketchInLayer({

@@ -2,10 +2,20 @@ import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { View, ViewStyle } from 'react-native'
 import { isSketchError, exists } from './lang'
-import { Placement, IFrameData } from './Placement'
-import { Fill, TFillData } from './Fill'
+import { Placement } from './Placement'
+import { IPlacement, FillData, IShadow, IBorder } from './types'
+import { Fill } from './Fill'
 import { Border, TBorderData } from './Border'
-import { Shadow, TShadowData } from './Shadow'
+import { Shadow } from './Shadow'
+
+function borderStyle (border: IBorder): Pick<ViewStyle, 'borderRadius' | 'borderColor' | 'borderWidth' | 'borderStyle'> {
+  return {
+    borderRadius: border.radius,
+    borderColor: border.fill.color,
+    borderWidth: border.thickness,
+    borderStyle: border.borderStyle
+  }
+}
 
 export class Polygon {
   place: Placement
@@ -14,14 +24,13 @@ export class Polygon {
   border: Border
   shadows: Shadow[]
 
-  constructor (frame: IFrameData, fill: TFillData | null, border: TBorderData | null, shadows: TShadowData[]) {
+  constructor (frame: IPlacement, fill: FillData | null, border: TBorderData | null, shadows: IShadow[]) {
     this.place = new Placement(frame)
     this.fill = new Fill(fill)
     this.border = new Border(border)
     this.borderRadius = this.border.radius
     this.shadows = shadows.map(data => new Shadow(data))
     this.RenderRect = this.RenderRect.bind(this)
-    this.borderStyle = this.borderStyle.bind(this)
   }
 
   RenderRect ({ style, ref, onLayout }: { style?: ViewStyle, ref?: React.Ref<any>, onLayout?: () => any } = {}): JSX.Element {
@@ -29,13 +38,13 @@ export class Polygon {
     if (!exists(data)) {
       return <View style={{
         ...style,
-        ...this.borderStyle()
+        ...borderStyle(this.border)
       }} />
     }
     if (typeof data === 'string') {
       return <View style={{
         ...style,
-        ...this.borderStyle(),
+        ...borderStyle(this.border),
         backgroundColor: data
       }} />
     }
@@ -50,13 +59,9 @@ export class Polygon {
       ref={ref}
       onLayout={onLayout}
       style={{
-        ...this.borderStyle(),
+        ...borderStyle(this.border),
         ...style
       }}
     />
-  }
-
-  borderStyle (): ViewStyle {
-    return this.border.style()
   }
 }

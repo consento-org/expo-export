@@ -3,9 +3,7 @@ import { FlexStyle, Insets, GestureResponderEvent, ViewStyle, TouchableOpacity, 
 import { Placement } from '../Placement'
 import { useVUnits } from '../useVUnits'
 import { exists } from '../lang'
-import { ILayer } from '../types'
-
-export type TRenderGravity = 'start' | 'end' | 'center' | 'stretch' | 'none'
+import { RenderGravity } from '../types'
 
 export function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRenderOptions, place: Placement, style?: T): T {
   style = (style ?? {}) as T
@@ -16,8 +14,8 @@ export function applyRenderOptions<T extends FlexStyle> ({ horz, vert }: IRender
 
 export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle> {
   targetRef?: React.Ref<T>
-  vert?: TRenderGravity
-  horz?: TRenderGravity
+  vert?: RenderGravity
+  horz?: RenderGravity
   style?: TStyle
   debug?: boolean
   hitSlop?: Insets
@@ -27,7 +25,6 @@ export interface IBaseProps<T extends React.Component, TStyle extends FlexStyle>
 
 export interface IRenderProps<T extends React.Component, TStyle extends FlexStyle> extends IBaseProps<T, TStyle> {
   place: Placement
-  layer: ILayer
   item: (opts: {
     ref?: React.Ref<T>
     style?: TStyle
@@ -35,52 +32,27 @@ export interface IRenderProps<T extends React.Component, TStyle extends FlexStyl
 }
 
 export interface IRenderOptions {
-  vert?: TRenderGravity
-  horz?: TRenderGravity
+  vert?: RenderGravity
+  horz?: RenderGravity
   debug?: boolean
   hitSlop?: Insets
   onPress?: (event: GestureResponderEvent) => any
   onLayout?: (nativeEvent: LayoutChangeEvent) => any
 }
 
-export function renderItem (layer: ILayer, item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug, hitSlop }: IRenderOptions = {}): JSX.Element {
+export function renderItem (item: React.ReactNode, place: Placement, { horz, vert, onPress, onLayout, debug, hitSlop }: IRenderOptions = {}): JSX.Element {
   const { vw, vh } = useVUnits()
   const style: ViewStyle = {
-    position: 'absolute',
-    width: place.width,
-    height: place.height
+    position: 'absolute'
   }
-  if (!exists(horz) || horz === 'start') {
-    style.left = place.left
-  } else if (horz !== 'none') {
-    const right = (layer.width - place.right)
-    if (horz === 'center') {
-      style.left = vw(50) + (place.centerX - (layer.width / 2)) - (place.width / 2)
-    } else if (horz === 'stretch') {
-      style.left = place.left
-      style.width = vw(100) - right - place.left
-    } else {
-      style.left = vw(100) - right - place.width
-    }
-  }
-  if (!exists(vert) || vert === 'start') {
-    style.top = place.top
-  } else if (vert !== 'none') {
-    const bottom = (layer.width - place.right)
-    if (vert === 'center') {
-      style.top = vh(50) + (place.centerY - (layer.height / 2)) - (place.height / 2)
-    } else if (vert === 'stretch') {
-      style.top = place.top
-      style.height = vh(100) - bottom - place.top
-    } else {
-      style.top = vh(100) - bottom - place.height
-    }
-  }
-  if (debug) {
+  const max = { width: vw(100), height: vh(100) }
+  place.horz.render(horz ?? 'none', max, style)
+  place.vert.render(vert ?? 'none', max, style)
+  if (debug ?? false) {
     style.borderColor = '#04a'
     style.backgroundColor = '#ac8888888'
     style.borderWidth = 1
-    console.log({ style, horz, vert, place, width: layer.width, height: layer.height, vw100: vw(100), vh100: vh(100) })
+    console.log({ style, horz, vert, place, vw100: vw(100), vh100: vh(100) })
   }
   if (exists(onPress)) {
     return <TouchableOpacity onLayout={onLayout} onPress={onPress} style={style} hitSlop={hitSlop}>{item}</TouchableOpacity>
@@ -89,7 +61,7 @@ export function renderItem (layer: ILayer, item: React.ReactNode, place: Placeme
 }
 
 export const SketchInLayer = <T extends React.Component, S extends FlexStyle> (props: IRenderProps<T, S>): JSX.Element => {
-  return renderItem(props.layer, props.item({
+  return renderItem(props.item({
     ref: props.targetRef,
     style: props.style
   }), props.place, {

@@ -1,6 +1,6 @@
 import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
 import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName, svgLinejoin, svgLinecap } from '../util/dom'
-import { GradientType as OutputGradientType } from '../../assets/styles/util/Fill'
+import { GradientType as OutputGradientType } from '../../assets/styles/util/types'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
 import { Imports, addImport, ITypeScript, isFilled } from '../util/render'
@@ -22,7 +22,10 @@ abstract class Component {
   abstract format (designName: string, imports: Imports, getColor: FGetColor): string
 
   renderFrame (): string {
-    return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
+    const parent = this.layer.getParentArtboard()
+    const b: string = parent !== undefined ? `, b: ${parent.frame.height - this.layer.frame.height - this.layer.frame.y}` : ''
+    const r: string = parent !== undefined ? `, r: ${parent.frame.width - this.layer.frame.width - this.layer.frame.x}` : ''
+    return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)}${r}${b} }`
   }
 }
 

@@ -17,7 +17,7 @@ const rowsStyle: ViewStyle = {
 export const SketchSlice9 = (props: ISlice9Props): JSX.Element => {
   const slice9Input = props.prototype
   const slice9 = slice9Input instanceof Slice9Placement ? slice9Input.slice9 : slice9Input
-  const place = slice9Input instanceof Slice9Placement ? slice9Input.place : new Placement({ x: 0, y: 0, w: slice9Input.width, h: slice9Input.height })
+  const place = slice9Input instanceof Slice9Placement ? slice9Input.place : new Placement({ x: 0, y: 0, w: slice9Input.width, h: slice9Input.height, r: 0, b: 0 })
   const { slice } = slice9
   const slices = slice9.slices()
   const right = slice9.width - slice.right
