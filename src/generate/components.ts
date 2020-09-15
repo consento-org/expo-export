@@ -50,8 +50,8 @@ class Slice9 extends Component {
     this.asset = asset
   }
 
-  format (_designName: string, imports: Imports, _: FGetColor): string {
-    addImport(imports, './src/Slice9', 'Slice9')
+  format (designName: string, imports: Imports, _: FGetColor): string {
+    addImport(imports, `./src/styles/${designName}/Slice9`, 'Slice9')
     addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
     addImport(imports, './src/styles/util/react/SketchSlice9', [])
     return `new Slice9Placement(Slice9.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`

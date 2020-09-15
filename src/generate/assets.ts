@@ -116,6 +116,7 @@ function generateSlice9s (designName: string, slice9s: ISlice9s): ITypeScript {
   const imports: Imports = {}
   addImport(imports, 'react-native', 'ImageSourcePropType')
   addImport(imports, './src/styles/util/Cache', 'createCache')
+  addImport(imports, './src/styles/util/Placement', 'Placement')
   return {
     pth: `./src/styles/${designName}/Slice9.ts`,
     imports,
