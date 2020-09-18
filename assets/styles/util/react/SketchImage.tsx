@@ -1,35 +1,31 @@
 import React from 'react'
-import { SketchInLayer, applyRenderOptions, IBaseProps } from './SketchInLayer'
-import { Image, ImageStyle } from 'react-native'
-import { ImagePlacement } from '../ImagePlacement'
-import { IImageAsset } from '../types'
-import { exists } from '../lang'
-import { Placement } from '../Placement'
+import { Image, ImageStyle, ImageProps, TouchableWithoutFeedback, TouchableWithoutFeedbackProps, StyleSheet } from 'react-native'
+import { IImageAsset, IImagePlacement, isImagePlacement, ISketchElementProps } from '../types'
+import { getPlace } from '../Placement'
+import { extract } from '../lang'
 
-export interface IImageProps extends IBaseProps<Image, ImageStyle> {
-  prototype: ImagePlacement | IImageAsset
-  fadeDuration?: number
+export interface ISketchImageProps extends
+  ISketchElementProps<IImageAsset | IImagePlacement>,
+  Omit<ImageProps, 'source'>,
+  Omit<TouchableWithoutFeedbackProps, 'style'> {
+  ref?: React.Ref<Image>
+  onPress?: () => void
 }
 
-export const SketchImage = (props: IImageProps): JSX.Element => {
-  const image = props.prototype instanceof ImagePlacement ? props.prototype.image : props.prototype
-  const place = props.prototype instanceof ImagePlacement ? props.prototype.place : new Placement({ x: 0, y: 0, w: props.prototype.width, h: props.prototype.height, r: 0, b: 0 })
-  let { fadeDuration } = props
+export const SketchImage = (props: ISketchImageProps): JSX.Element => {
+  props = { ...props }
+  const { src, style } = extract(props, 'src', 'style')
+  const touchable: TouchableWithoutFeedbackProps = extract(props, 'disabled', 'onPress', 'onPressIn', 'onPressOut', 'onLongPress', 'delayPressIn', 'delayPressOut', 'delayLongPress')
+  const { image, place } = isImagePlacement(src) ? src : { image: src, place: getPlace(src) }
 
-  return SketchInLayer({
+  const imageProps: ImageProps = {
     ...props,
-    place,
-    item: ({ ref, style }: { ref?: React.Ref<Image>, style?: ImageStyle }) => {
-      if (!exists(fadeDuration) && exists(style) && style.resizeMode === 'stretch') {
-        // Fixing bugs when stretching items
-        fadeDuration = 0
-      }
-      return <Image
-        source={image.source()}
-        style={applyRenderOptions(props, place, style)}
-        fadeDuration={fadeDuration}
-        ref={ref}
-      />
-    }
-  })
+    source: image.source(),
+    style: StyleSheet.compose<ImageStyle>({ width: place.width, height: place.height }, style)
+  }
+  const isTouchable = Object.keys(touchable).length > 0 && (touchable.disabled === undefined || touchable.disabled === null || !touchable.disabled)
+  if (isTouchable) {
+    return React.createElement(TouchableWithoutFeedback, touchable, React.createElement(Image, imageProps))
+  }
+  return React.createElement(Image, imageProps)
 }

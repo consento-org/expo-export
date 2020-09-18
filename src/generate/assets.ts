@@ -28,8 +28,10 @@ export interface ISlice9 {
   slice: {
     x: number
     y: number
-    width: number
-    height: number
+    w: number
+    h: number
+    r: number
+    b: number
   }
 }
 
@@ -66,8 +68,10 @@ function * slice9Export (artboard: Artboard, item: Slice, slice9s: { [assetName:
     slice: {
       x: item.frame.x,
       y: item.frame.y,
-      width: item.frame.width,
-      height: item.frame.height
+      w: item.frame.width,
+      h: item.frame.height,
+      r: artboard.frame.width - item.frame.x - item.frame.width,
+      b: artboard.frame.height - item.frame.y - item.frame.height
     }
   }
   workSlice.remove()
@@ -143,9 +147,9 @@ Object
     return `
   ${name}: {
     name: '${name}',
-    width: ${slice.width},
-    height: ${slice.height},
-    slice: new Placement({ x: ${slice.x}, y: ${slice.y}, w: ${slice.width}, h: ${slice.height} }),
+    width: ${slice9.width},
+    height: ${slice9.height},
+    slice: new Placement({ x: ${slice.x}, y: ${slice.y}, w: ${slice.w}, h: ${slice.h}, r: ${slice.r}, b: ${slice.b} }),
     slices: lazySlices('${name}', () => [
       require('../../../${slice9.path(0, 0)}'),
       require('../../../${slice9.path(0, 1)}'),

@@ -355,7 +355,7 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
 
 function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-
+  addImport(imports, './src/styles/util/react/SketchElement', [])
   return {
     imports,
     code: `

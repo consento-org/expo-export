@@ -1,4 +1,4 @@
-import { ImageSourcePropType, TextStyle, FlexStyle } from 'react-native'
+import { ImageSourcePropType, TextStyle } from 'react-native'
 import { Placement } from './Placement'
 
 export interface ISize {
@@ -104,7 +104,6 @@ export interface IPolygon {
 export interface ITextBox {
   text: string
   style: TextStyle
-  styleAbsolute: TextStyle
   place: Placement
 }
 
@@ -165,12 +164,6 @@ export function isLayer (input: SketchType): input is ILayer {
   return 'name' in input
 }
 
-type StyleTemplate <TStyle extends FlexStyle, TElement> = (place: Placement, elem: TElement) => TStyle
-
-interface ISketchElementBase <TStyle extends FlexStyle, TSource> {
-  style?: TStyle | StyleTemplate<TStyle, TSource>
-}
-
-export interface ISketchElementProps <TStyle extends FlexStyle, TSource extends SketchType> extends ISketchElementBase<TStyle, TSource> {
+export interface ISketchElementProps <TSource extends SketchType> {
   src: TSource
 }

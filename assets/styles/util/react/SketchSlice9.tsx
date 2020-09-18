@@ -1,12 +1,12 @@
 import React from 'react'
-import { View, ViewStyle, Image, ImageStyle } from 'react-native'
-import { applyRenderOptions, IRenderProps, SketchInLayer } from './SketchInLayer'
-import { ISlice9 } from '../types'
-import { Slice9Placement } from '../Slice9Placement'
-import { Placement } from '../Placement'
+import { View, ViewStyle, Image, ImageStyle, ViewProps, StyleSheet } from 'react-native'
+import { ISlice9, ISlice9Placement, ISketchElementProps, isSlice9Placement } from '../types'
+import { getPlace, Placement } from '../Placement'
 
-export interface ISlice9Props extends IRenderProps<View, ViewStyle> {
-  prototype: Slice9Placement | ISlice9
+export interface ISketchSlice9Props extends
+  ISketchElementProps<ISlice9 | ISlice9Placement>,
+  ViewProps {
+  ref?: React.Ref<View>
 }
 
 const rowsStyle: ViewStyle = {
@@ -14,73 +14,100 @@ const rowsStyle: ViewStyle = {
   flexDirection: 'row'
 }
 
-export const SketchSlice9 = (props: ISlice9Props): JSX.Element => {
-  const slice9Input = props.prototype
-  const slice9 = slice9Input instanceof Slice9Placement ? slice9Input.slice9 : slice9Input
-  const place = slice9Input instanceof Slice9Placement ? slice9Input.place : new Placement({ x: 0, y: 0, w: slice9Input.width, h: slice9Input.height, r: 0, b: 0 })
-  const { slice } = slice9
+interface ISlicePartStyles {
+  box: ViewStyle
+  row_0: ViewStyle
+  row_1: ViewStyle
+  row_2: ViewStyle
+  cell_0: ImageStyle
+  cell_1: ImageStyle
+  cell_2: ImageStyle
+  cell_3: ImageStyle
+  cell_4: ImageStyle
+  cell_5: ImageStyle
+  cell_6: ImageStyle
+  cell_7: ImageStyle
+  cell_8: ImageStyle
+}
+
+const styleCache = new WeakMap<Placement, { [key: string]: ISlicePartStyles }>()
+function getStyles (place: Placement, width: number, height: number): ISlicePartStyles {
+  let byPlace = styleCache.get(place)
+  if (byPlace === undefined) {
+    byPlace = {}
+    styleCache.set(place, byPlace)
+  }
+  const key = `${width}x${height}`
+  let result = byPlace[key]
+  if (result === undefined) {
+    result = StyleSheet.create({
+      box: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: place.width,
+        height: place.height
+      },
+      row_0: {
+        ...rowsStyle,
+        height: place.y
+      },
+      row_1: {
+        ...rowsStyle,
+        flexGrow: 1,
+        flexShrink: 0,
+        marginTop: -0.05 // Fixing accidental appearing empty lines
+      },
+      row_2: {
+        ...rowsStyle,
+        height: place.bottom
+      },
+      // 'stretch' Causes images to flicker on first render
+      // It looks weird if only the streched images flicker.
+      cell_0: { resizeMode: 'stretch', width: place.left, height: place.top },
+      cell_1: { resizeMode: 'stretch', flexShrink: 1, flexGrow: 1, height: place.top },
+      cell_2: { resizeMode: 'stretch', width: place.right, height: place.top },
+      cell_3: { resizeMode: 'stretch', width: place.left, height: '100%' },
+      cell_4: { resizeMode: 'stretch', flexShrink: 1, flexGrow: 1, height: '100%' },
+      cell_5: { resizeMode: 'stretch', width: place.right, height: '100%' },
+      cell_6: { resizeMode: 'stretch', width: place.left, height: place.bottom },
+      cell_7: { resizeMode: 'stretch', flexShrink: 1, flexGrow: 1, height: place.bottom },
+      cell_8: { resizeMode: 'stretch', width: place.right, height: place.bottom }
+    })
+    byPlace[key] = result
+  }
+  return result
+}
+
+export const SketchSlice9 = (props: ISketchSlice9Props): JSX.Element => {
+  const { src } = props
+  const { slice9, place } = isSlice9Placement(src) ? src : { slice9: src, place: getPlace(src) }
+  const styles = getStyles(slice9.slice, place.width, place.height)
   const slices = slice9.slices()
-  const right = slice9.width - slice.right
-  const bottom = slice9.height - slice.bottom
-  const rows = [{
-    ...rowsStyle,
-    height: slice.y
-  }, {
-    ...rowsStyle,
-    flexGrow: 1,
-    marginTop: -0.05 // Fixing accidental appearing empty lines
-  }, {
-    ...rowsStyle,
-    height: bottom
-  }]
-  const styles = [
-    { width: slice.x, height: '100%' },
-    { flexGrow: 1, height: '100%' },
-    { width: right, height: '100%' },
-    { width: slice.x, height: '100%' },
-    { flexGrow: 1, height: '100%' },
-    { width: right, height: '100%' },
-    { width: slice.x, height: bottom },
-    { flexGrow: 1, height: bottom },
-    { width: right, height: bottom }
-  ].map((style: ImageStyle) => {
-    // Causes images to flicker on first render
-    // It looks weird if only the streched images flicker.
-    style.resizeMode = 'stretch'
-    return style
-  })
   if (slices.length !== 9) {
     throw new Error('For a slice-9 we need 9 resources!')
   }
-  return SketchInLayer({
-    ...props,
-    place,
-    item: ({ ref, style }: { ref?: React.Ref<View>, style?: ViewStyle }) => {
-      return <View
-        style={applyRenderOptions(props, place, {
-          display: 'flex',
-          flexDirection: 'column',
-          width: place.width,
-          height: place.height,
-          ...style
-        })}
-        ref={ref}>
-        <View style={rows[0]}>
-          <Image source={slices[0]} style={styles[0]} fadeDuration={0} />
-          <Image source={slices[1]} style={styles[1]} fadeDuration={0} />
-          <Image source={slices[2]} style={styles[2]} fadeDuration={0} />
-        </View>
-        <View style={rows[1]}>
-          <Image source={slices[3]} style={styles[3]} fadeDuration={0} />
-          <Image source={slices[4]} style={styles[4]} fadeDuration={0} />
-          <Image source={slices[5]} style={styles[5]} fadeDuration={0} />
-        </View>
-        <View style={rows[2]}>
-          <Image source={slices[6]} style={styles[6]} fadeDuration={0} />
-          <Image source={slices[7]} style={styles[7]} fadeDuration={0} />
-          <Image source={slices[8]} style={styles[8]} fadeDuration={0} />
-        </View>
+  return React.createElement(
+    View,
+    {
+      ...props,
+      style: StyleSheet.compose(styles.box, props.style)
+    },
+    <>
+      <View style={styles.row_0}>
+        <Image source={slices[0]} style={styles.cell_0} fadeDuration={0} />
+        <Image source={slices[1]} style={styles.cell_1} fadeDuration={0} />
+        <Image source={slices[2]} style={styles.cell_2} fadeDuration={0} />
       </View>
-    }
-  })
+      <View style={styles.row_1}>
+        <Image source={slices[3]} style={styles.cell_3} fadeDuration={0} />
+        <Image source={slices[4]} style={styles.cell_4} fadeDuration={0} />
+        <Image source={slices[5]} style={styles.cell_5} fadeDuration={0} />
+      </View>
+      <View style={styles.row_2}>
+        <Image source={slices[6]} style={styles.cell_6} fadeDuration={0} />
+        <Image source={slices[7]} style={styles.cell_7} fadeDuration={0} />
+        <Image source={slices[8]} style={styles.cell_8} fadeDuration={0} />
+      </View>
+    </>
+  )
 }

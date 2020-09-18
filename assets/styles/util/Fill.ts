@@ -32,7 +32,7 @@ export class RGBA {
   }
 }
 
-function calcAvgColor (stops: IStop[]): string {
+export function calcAvgColor (stops: IStop[]): string {
   const first = stops[0]
   if (first === undefined) {
     return '#ffffffff'
