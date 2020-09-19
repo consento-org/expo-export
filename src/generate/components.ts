@@ -1,13 +1,15 @@
-import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
-import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9 } from '../util/dom'
+import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance } from 'sketch/dom'
+import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, recursiveLayers, isExported, hasSlice9, getDesignName, svgLinejoin, svgLinecap } from '../util/dom'
+import { GradientType as OutputGradientType } from '../../assets/styles/util/types'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
-import { Imports, addImport, ITypeScript, readPluginTypeScript } from '../util/render'
+import { Imports, addImport, ITypeScript, isFilled } from '../util/render'
 import { toMaxDecimals } from '../util/number'
 import { childName } from '../util/string'
-import { TIDLookup, TIDData, getTextFormatRenderProps, formatFontProps } from './text/renderHierarchy'
-import { ITextFormat } from './text/TextFormat'
-import { processStyle } from './text/collectTextStyles'
+import { renderTextStyle } from './text/renderTextStyle'
+import { TIDLookup } from './text'
+import { ITextStyleEntry, processStyle } from './text/collectStyleHierarchy'
+import { SymbolOverride, processOverrides, IOverrides } from './component/overrides'
 
 abstract class Component {
   layer: AnyLayer
@@ -18,16 +20,14 @@ abstract class Component {
     this.type = type
   }
 
-  abstract format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat
+  abstract format (designName: string, imports: Imports, getColor: FGetColor): string
 
   renderFrame (): string {
-    return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)} }`
+    const parent = this.layer.getParentArtboard()
+    const b: string = parent !== undefined ? `, b: ${parent.frame.height - this.layer.frame.height - this.layer.frame.y}` : ''
+    const r: string = parent !== undefined ? `, r: ${parent.frame.width - this.layer.frame.width - this.layer.frame.x}` : ''
+    return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)}${r}${b} }`
   }
-}
-
-interface IComponentPropertyFormat {
-  property: string
-  init?: string
 }
 
 class Image extends Component {
@@ -38,14 +38,11 @@ class Image extends Component {
     this.asset = asset
   }
 
-  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/Asset', 'Asset')
-    addImport(imports, 'src/styles/Component', 'ImagePlacement')
-    return {
-      property: `  ${name}: ImagePlacement`,
-      init: `
-    this.${name} = new ImagePlacement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()}, this)`
-    }
+  format (designName: string, imports: Imports, _: FGetColor): string {
+    addImport(imports, `./src/styles/${designName}/ImageAsset`, 'ImageAsset')
+    addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
+    addImport(imports, './src/styles/util/react/SketchImage', [])
+    return `new ImagePlacement(ImageAsset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -57,127 +54,98 @@ class Slice9 extends Component {
     this.asset = asset
   }
 
-  format (name: string, imports: Imports, _: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/Asset', 'Asset')
-    addImport(imports, 'src/styles/Component', 'Slice9Placement')
-    return {
-      property: `  ${name}: Text`,
-      init: `
-    this.${name} = new Slice9Placement(Asset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()}, this)`
-    }
+  format (designName: string, imports: Imports, _: FGetColor): string {
+    addImport(imports, `./src/styles/${designName}/Slice9`, 'Slice9')
+    addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
+    addImport(imports, './src/styles/util/react/SketchSlice9', [])
+    return `new Slice9Placement(Slice9.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
-}
-
-const compareTextProps = formatFontProps.filter(prop => prop !== 'fontFamily')
-
-function compareTextFormat (base: ITextFormat, target: ITextFormat): ITextFormat {
-  let difference: ITextFormat = null
-  compareTextProps.forEach(key => {
-    if (target[key] !== base[key] && target[key] !== null && target[key] !== undefined) {
-      if (difference === null) {
-        difference = {}
-      }
-      difference[key] = target[key]
-    }
-  })
-  return difference
 }
 
 function safeText (input: string): string {
   return input.replace(/'/g, "\\'").replace(/\\/g, '\\\\').replace(/(\n|\r)/g, '\\n')
 }
 
+function indentSecondLine (input: string, indent: string): string {
+  const lines = input.split('\n')
+  for (let i = 1; i < lines.length; i++) {
+    lines[i] = `${indent}${lines[i]}`
+  }
+  return lines.join('\n')
+}
+
 class TextComponent extends Component {
   _layer: Text
   text: string
-  textStyle: TIDData
+  textStyle: ITextStyleEntry
 
-  constructor (layer: Text, textStyle: TIDData) {
+  constructor (layer: Text, textStyle: ITextStyleEntry) {
     super(layer, 'text')
     this._layer = layer
     this.text = layer.text
     this.textStyle = textStyle
   }
 
-  format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/styles/Component', 'Text')
-    return {
-      property: `  ${name}: Text`,
-      init: `
-    this.${name} = new Text('${safeText(this.text)}', ${this.renderTextStyle(imports, getColor)}, ${this.renderFrame()}, this)`
-    }
+  format (designName: string, imports: Imports, getColor: FGetColor): string {
+    addImport(imports, './src/styles/util/TextBox', 'TextBox')
+    addImport(imports, './src/styles/util/react/SketchTextBox', [])
+    return `new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
   }
 
-  renderTextStyle (imports: Imports, getColor: FGetColor): string {
-    const layerStyle = processStyle(this._layer.style)
-    if (this.textStyle === undefined) {
-      return `{
-      ${getTextFormatRenderProps(layerStyle, getColor, imports).join(',\n      ')}
-    }`
-    }
-    addImport(imports, 'src/styles/TextStyles', 'TextStyles')
-    const difference = compareTextFormat(this.textStyle.style, layerStyle)
-    if (difference === null) {
-      return `TextStyles.${this.textStyle.name}`
-    }
-    return `{
-      ...TextStyles.${this.textStyle.name},
-      ${getTextFormatRenderProps(difference, getColor, imports).join(',\n      ')}
-    }`
+  renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
+    return indentSecondLine(renderTextStyle(designName, imports, getColor, processStyle(this._layer.style), this.textStyle), '    ')
   }
 }
 
-interface ITextOverride {
-  path: string
-  value: string
-}
-
-function collectName (document: Document, override: Override<Text>): string {
-  var paths = override.path.split('/')
-  var prefix = ''
-  while (paths.length > 1) {
-    var parent = paths.shift()
-    var parentLayer = document.getLayerWithID(parent)
-    prefix += String(parentLayer.name) + '-'
-  }
-  return childName(prefix + override.affectedLayer.name)
+function formatSymbolOverride (textStyles: TIDLookup, designName: string, imports: Imports, indent: string, target: string, frame: string, overrides: IOverrides): string {
+  return `new LayerPlacement(${target}, ${target}.layers, ${frame}${
+    !isFilled(overrides)
+      ? ''
+      : `, ({ ${Object.keys(overrides).join(', ')} }) => ({${
+        Object.entries(overrides)
+          .map(([key, override]): string => {
+            if (override instanceof SymbolOverride) {
+              const target = override.target !== null ? override.target : `${key}.layer`
+              if (override.target !== null) {
+                addImport(imports, `./src/styles/${designName}/layer/${target}`, target)
+              }
+              return `
+${indent}  ${key}: ${formatSymbolOverride(textStyles, designName, imports, indent + '  ', target, `${key}.place`, override.overrides)}`
+            }
+            addImport(imports, './src/styles/util/TextBox', 'TextBox')
+            addImport(imports, './src/styles/util/react/SketchTextBox', [])
+            let style = `${key}.style`
+            if (override.styleID === undefined) {
+              const textStyle = textStyles[override.styleID]
+              if (textStyle) {
+                style = `TextStyles.${textStyle.name}`
+              }
+            }
+            return `
+${indent}  ${key}: new TextBox(${override.text !== undefined ? `'${override.text}'` : `${key}.text`}, ${style}, ${key}.place)`
+          })
+          .join(',')
+      }
+${indent}})`
+  })`
 }
 
 class Link extends Component {
   target: string
-  textOverrides: ITextOverride[]
-  document: Document
+  textStyles: TIDLookup
+  overrides?: IOverrides
 
-  constructor (document: Document, layer: SymbolInstance, target: string) {
+  constructor (textStyles: TIDLookup, layer: SymbolInstance, target: string, overrides?: IOverrides) {
     super(layer, 'link')
+    this.textStyles = textStyles
     this.target = target
-    this.document = document
-    this.textOverrides = layer.overrides
-      .map(override => isTextOverride(override) ? override : null)
-      .filter(override => override !== null && !override.isDefault)
-      .map(override => {
-        return {
-          path: collectName(document, override),
-          value: override.value
-        }
-      })
+    this.overrides = overrides
   }
 
-  format (name: string, imports: Imports): IComponentPropertyFormat {
-    addImport(imports, `src/styles/component/${this.target}`, this.target)
-    addImport(imports, 'src/styles/Component', 'Link')
-    return {
-      property: `  ${name} = new Link(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
-    }
-  }
-
-  renderTextOverrides (): string {
-    if (this.textOverrides.length === 0) {
-      return '{}'
-    }
-    return `{
-    ${this.textOverrides.map(override => `${override.path}: '${safeText(override.value)}'`).join(',\n    ')}
-  }`
+  format (designName: string, imports: Imports): string {
+    addImport(imports, './src/styles/util/LayerPlacement', 'LayerPlacement')
+    addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
+    return formatSymbolOverride(this.textStyles, designName, imports, '    ', this.target, this.renderFrame(), this.overrides)
   }
 }
 
@@ -216,7 +184,7 @@ function getBorderRadius (layer: ShapePath): number {
   return radius
 }
 
-function mapGradientType (input: GradientType): 'linear' | 'radial' | 'angular' {
+function mapGradientType (input: GradientType): OutputGradientType {
   if (input === 'Linear') return 'linear'
   if (input === 'Radial') return 'radial'
   return 'angular'
@@ -238,13 +206,10 @@ class Polygon extends Component {
     this.shadows = style.shadows.filter(shadow => shadow.enabled && isVisibleColor(shadow.color))
   }
 
-  format (name: string, imports: Imports, getColor: FGetColor): IComponentPropertyFormat {
-    addImport(imports, 'src/styles/Component', 'Polygon')
-    return {
-      property: `  ${name}: Polygon`,
-      init: `
-    this.${name} = new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)}, this)`
-    }
+  format (_designName: string, imports: Imports, getColor: FGetColor): string {
+    addImport(imports, './src/styles/util/Polygon', 'Polygon')
+    addImport(imports, './src/styles/util/react/SketchPolygon', [])
+    return `new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
   }
 
   renderBorders (imports, getColor: FGetColor): string {
@@ -259,30 +224,22 @@ class Polygon extends Component {
 
   renderBorder (border: Border, imports: Imports, getColor: FGetColor): string {
     const options = this.borderOptions
-    const props = [
-      ['fill', this.renderFill(border, imports, getColor)],
-      ['thickness', border.thickness]
-    ]
-    if (options.endArrowhead !== DEFAULT_ARROWHEAD) {
-      props.push(['endArrowhead', `'${options.endArrowhead}'`])
-    }
-    if (options.startArrowhead !== DEFAULT_ARROWHEAD) {
-      props.push(['startArrowhead', `'${options.startArrowhead}'`])
-    }
-    if (options.lineEnd !== DEFAULT_LINE_END) {
-      props.push(['lineEnd', `'${options.lineEnd}'`])
-    }
-    if (options.lineJoin !== DEFAULT_LINE_JOIN) {
-      props.push(['lineJoin', `'${options.lineJoin}'`])
-    }
-    if (options.dashPattern.length > 0) {
-      props.push(['dashPattern', `[ ${options.dashPattern.join(', ')} ]`])
-    }
-    if (this.borderRadius > 0) {
-      props.push(['radius', `${this.borderRadius}`])
-    }
-    return `{${props.map(([prop, value]) => `
-      ${prop}: ${value}`).join(',')}
+    return `{
+      fill: ${this.renderFill(border, imports, getColor)},
+      thickness: ${border.thickness}${
+        options.endArrowhead === DEFAULT_ARROWHEAD ? '' : `,
+      endArrowhead: '${options.endArrowhead}'`
+      }${options.startArrowhead === DEFAULT_ARROWHEAD ? '' : `,
+      startArrowhead: '${options.startArrowhead}'`
+      }${options.lineEnd === DEFAULT_LINE_END ? '' : `,
+      strokeLinecap: '${svgLinecap(options.lineEnd)}'`
+      }${options.lineJoin === DEFAULT_LINE_JOIN ? '' : `,
+      strokeLinejoin: '${svgLinejoin(options.lineJoin)}'`
+      }${options.dashPattern.length === 0 ? '' : `,
+      dashPattern: [ ${options.dashPattern.join(', ')} ]`
+      }${this.borderRadius === 0 ? '' : `,
+      radius: ${this.borderRadius}`
+      }
     }`
   }
 
@@ -290,12 +247,9 @@ class Polygon extends Component {
     if (this.shadows.length === 0) {
       return '[]'
     }
-    const shadows = []
-    for (const shadow of this.shadows) {
-      shadows.push(`{ x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`)
-    }
-    return `[
-      ${shadows.join(',\n      ')}
+    return `[${this.shadows.map(shadow => `
+      { x: ${shadow.x}, y: ${shadow.y}, blur: ${shadow.blur}, spread: ${shadow.spread}, color: ${getColor(shadow.color, imports)} }`
+    ).join(',')}
     ]`
   }
 
@@ -312,22 +266,14 @@ class Polygon extends Component {
       return getColor(fill.color, imports)
     }
     if (fill.fillType === FillType.Gradient) {
-      addImport(imports, 'src/styles/Component', 'GradientType')
       return `{
       gradient: {
-        type: GradientType.${mapGradientType(fill.gradient.gradientType)},
-        stops: [${fill.gradient.stops.map(stop => `{
-          color: ${getColor(stop.color, imports)},
-          position: ${stop.position}
-        }`).join(', ')}],
-        from: {
-          x: ${fill.gradient.from.x},
-          y: ${fill.gradient.from.y}
-        },
-        to: {
-          x: ${fill.gradient.to.x},
-          y: ${fill.gradient.to.y}
-        }
+        type: '${mapGradientType(fill.gradient.gradientType)}',
+        stops: [${fill.gradient.stops.map(stop => `
+          { color: ${getColor(stop.color, imports)}, position: ${stop.position} }`).join(',')}
+        ],
+        from: { x: ${fill.gradient.from.x}, y: ${fill.gradient.from.y} },
+        to: { x: ${fill.gradient.to.x}, y: ${fill.gradient.to.y} }
       }
     }`
     }
@@ -340,17 +286,13 @@ class Polygon extends Component {
   }
 }
 
-function classForTarget (target: string): string {
-  return `${target.charAt(0).toUpperCase()}${target.substr(1)}Class`
-}
-
 interface IComponent {
   name: string
   artboard: Artboard
   items: { [name: string]: Component }
 }
 
-function getItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
+function collectItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
   if (isSymbolInstance(layer)) {
     const master = document.getSymbolMasterWithID(layer.symbolId)
     if (isIgnored(master)) {
@@ -365,7 +307,7 @@ function getItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): C
         return new Slice9(layer, masterName)
       }
     }
-    return new Link(document, layer, masterName)
+    return new Link(textStyles, layer, masterName, processOverrides(document, layer))
   }
   if (isShape(layer)) {
     if (layer.layers.length === 1) {
@@ -384,7 +326,7 @@ function getItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): C
 function collectItems (document: Document, artboard: Artboard, textStyles: TIDLookup, filter: (layer: AnyLayer) => boolean): { [name: string]: Component } {
   const items: { [name: string]: Component } = {}
   for (const layer of recursiveLayers(artboard, filter)) {
-    const item = getItem(document, layer, textStyles)
+    const item = collectItem(document, layer, textStyles)
     if (item !== undefined) {
       items[childName(layer.name)] = item
     }
@@ -412,41 +354,38 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
   }
 }
 
-function renderComponent (component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
+function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
-  addImport(imports, 'src/styles/Component', 'Component')
-  const properties = Object.keys(component.items).map(name =>
-    component.items[name].format(name, imports, getColor)
-  )
-  const body = properties.map(property => property.property).join('\n')
-  const propertyInit = properties.map(property => property.init).filter(Boolean).join('')
-
+  addImport(imports, './src/styles/util/react/SketchElement', [])
   return {
     imports,
-    code: `/* eslint-disable lines-between-class-members */
-export class ${classForTarget(component.name)} extends Component {
-${body}
-  constructor () {
-    super('${component.name}', ${component.artboard.frame.width}, ${component.artboard.frame.height}${component.artboard.background.enabled ? `, ${getColor(component.artboard.background.color, imports)}` : ''})${propertyInit}
+    code: `
+export const ${component.name} = {
+  name: '${component.name}',
+  width: ${component.artboard.frame.width},
+  height: ${component.artboard.frame.height}${
+    !component.artboard.background.enabled ? ''
+    : `,
+  backgroundColor: ${getColor(component.artboard.background.color, imports)}`}${
+    !isFilled(component.items) ? '' : `,
+  layers: {${Object.keys(component.items).map(name => `
+    ${name}: ${component.items[name].format(designName, imports, getColor)}`
+).join(',')}
+  }`
+
   }
 }
-
-export const ${component.name} = new ${classForTarget(component.name)}()
 `
   }
 }
 
 export function * generateComponents (document: Document, textStyles: TIDLookup, config: IConfig): Generator<ITypeScript> {
   const getColor = getColorFactory(document)
-  let empty = true
+  const designName = getDesignName(document)
   for (const component of collectComponents(document, textStyles, config)) {
-    empty = false
     yield {
-      ...renderComponent(component, getColor),
-      pth: `src/styles/component/${component.name}.ts`
+      ...renderComponent(designName, component, getColor),
+      pth: `./src/styles/${designName}/layer/${component.name}.ts`
     }
-  }
-  if (!empty) {
-    yield readPluginTypeScript('styles/Component.tsx', { 'src/styles/util/lang': [], 'src/styles/util/useVUnits': [] })
   }
 }

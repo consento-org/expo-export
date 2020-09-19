@@ -16,6 +16,10 @@ export function safeChildName (input: string): string {
   return /^[a-z]/i.test(input) ? input : `${NON_ALPHA_PREFIX}${input}`
 }
 
+export function upperCamel (str: string): string {
+  return str.charAt(0).toUpperCase() + str.substr(1)
+}
+
 export function slugifyRaw (str: string, separator: string = '-'): string {
   reg.lastIndex = -1
   return str

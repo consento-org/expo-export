@@ -1,5 +1,7 @@
-import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath, Slice, Override } from 'sketch/dom'
+import { Document, AnyLayer, Text, Artboard, SymbolMaster, Image, SymbolInstance, Group, AnyGroup, Page, AnyParent, Shape, ShapePath, Slice, Override, LineEnd, LineJoin } from 'sketch/dom'
 import { LRUCache } from './string'
+import { getDesignNameByPath } from './fs'
+import { Linecap, Linejoin } from 'react-native-svg'
 
 interface IDocumentData {
   textStyleWithID: (id: string) => undefined | {
@@ -13,6 +15,30 @@ interface IDocumentData {
       }
     }
   }
+}
+
+export function svgLinecap (lineEnd: LineEnd): Linecap {
+  if (lineEnd === 'Butt') {
+    return 'butt'
+  }
+  if (lineEnd === 'Projecting') {
+    return 'square'
+  }
+  return 'round'
+}
+
+export function svgLinejoin (lineJoin: LineJoin): Linejoin {
+  if (lineJoin === 'Miter' || lineJoin === 'Mitter') {
+    return 'miter'
+  }
+  if (lineJoin === 'Bevel') {
+    return 'bevel'
+  }
+  return 'round'
+}
+
+export function getDesignName (document: Document): string {
+  return getDesignNameByPath(document.path)
 }
 
 export enum Type {
@@ -81,8 +107,8 @@ export function isShapePath (item: AnyLayer): item is ShapePath {
   return item.type === Type.shapePath
 }
 
-export function isTextLayer (item: AnyLayer): item is Text {
-  if (isIgnored(item)) return false
+export function isTextLayer (item: AnyLayer, includeIgnored: boolean = false): item is Text {
+  if (!includeIgnored && isIgnored(item)) return false
   return item.type === Type.text
 }
 
@@ -91,18 +117,18 @@ export function isArtboard (item: AnyLayer): item is Artboard {
   return item.type === Type.artboard || isSymbolMaster(item)
 }
 
-export function isImage (item: AnyLayer): item is Image {
-  if (isIgnored(item)) return false
+export function isImage (item: AnyLayer, includeIgnored: boolean = false): item is Image {
+  if (!includeIgnored && isIgnored(item)) return false
   return item.type === Type.image
 }
 
-export function isSymbolInstance (item: AnyLayer): item is SymbolInstance {
-  if (isIgnored(item)) return false
+export function isSymbolInstance (item: AnyLayer, includeIgnored: boolean = false): item is SymbolInstance {
+  if (!includeIgnored && isIgnored(item)) return false
   return item.type === Type.instance
 }
 
-export function isSymbolMaster (item: AnyLayer): item is SymbolMaster {
-  if (isIgnored(item)) return false
+export function isSymbolMaster (item: AnyLayer, includeIgnored: boolean = false): item is SymbolMaster {
+  if (!includeIgnored && isIgnored(item)) return false
   return item.type === Type.master
 }
 
@@ -125,6 +151,10 @@ export function isSlice9 (item: AnyLayer): item is Slice {
 
 export function isTextOverride (item: Override): item is Override<Text, string> {
   return item.property === 'stringValue'
+}
+
+export function isSymbolOverride (item: Override): item is Override<Text, string> {
+  return item.property === 'symbolID'
 }
 
 export function hasSlice9 (group: Artboard): boolean {

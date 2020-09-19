@@ -51,10 +51,100 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 }
 
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
-  'src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
-  'src/styles/util/useVUnits': { pth: 'styles/util/useVUnits.ts', imports: { 'src/styles/util/createGlobalEffect': [] } },
-  'src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} }
+  './src/styles/util/Border': { pth: 'styles/util/Border.ts', imports: { 'react-native': [], './src/styles/util/Fill': [], './src/styles/util/types': [] } },
+  './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
+  './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
+  './src/styles/util/Fill': { pth: 'styles/util/Fill.ts', imports: { './src/styles/util/lang': [], './src/styles/util/types': [] } },
+  './src/styles/util/ImagePlacement': {
+    pth: 'styles/util/ImagePlacement.ts',
+    imports: {
+      'react-native': [],
+      './src/styles/util/Placement': [],
+      './src/styles/util/types': []
+    }
+  },
+  './src/styles/util/lang': { pth: 'styles/util/lang.ts', imports: {} },
+  './src/styles/util/LayerPlacement': { pth: 'styles/util/LayerPlacement.ts', imports: { './src/styles/util/Placement': [], './src/styles/util/types': [] } },
+  './src/styles/util/Placement': { pth: 'styles/util/Placement.ts', imports: { './src/styles/util/types': [] } },
+  './src/styles/util/Polygon': {
+    pth: 'styles/util/Polygon.ts',
+    imports: {
+      './src/styles/util/Placement': [],
+      './src/styles/util/Fill': [],
+      './src/styles/util/types': [],
+      './src/styles/util/Border': [],
+      './src/styles/util/Shadow': []
+    }
+  },
+  './src/styles/util/react/SketchElement': {
+    pth: 'styles/util/react/SketchElement.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/react/SketchImage': [],
+      './src/styles/util/react/SketchTextBox': [],
+      './src/styles/util/react/SketchSlice9': [],
+      './src/styles/util/react/SketchPolygon': [],
+      './src/styles/util/types': []
+    }
+  },
+  './src/styles/util/react/SketchImage': {
+    pth: 'styles/util/react/SketchImage.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/types': [],
+      './src/styles/util/lang': [],
+      './src/styles/util/Placement': []
+    }
+  },
+  './src/styles/util/react/SketchPolygon': {
+    pth: 'styles/util/react/SketchPolygon.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      'expo-linear-gradient': [],
+      './src/styles/util/types': [],
+      './src/styles/util/lang': []
+    }
+  },
+  './src/styles/util/react/SketchSlice9': {
+    pth: 'styles/util/react/SketchSlice9.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/types': [],
+      './src/styles/util/Placement': []
+    }
+  },
+  './src/styles/util/react/SketchTextBox': {
+    pth: 'styles/util/react/SketchTextBox.tsx',
+    imports: {
+      react: [],
+      'react-native': [],
+      './src/styles/util/types': []
+    }
+  },
+  './src/styles/util/Shadow': { pth: 'styles/util/Shadow.ts', imports: {} },
+  './src/styles/util/Slice9Placement': {
+    pth: 'styles/util/Slice9Placement.ts',
+    imports: {
+      'react-native': [],
+      './src/styles/util/Placement': [],
+      './src/styles/util/types': []
+    }
+  },
+  './src/styles/util/TextBox': {
+    pth: 'styles/util/TextBox.ts',
+    imports: {
+      'react-native': [],
+      './src/styles/util/Placement': [],
+      './src/styles/util/types': []
+    }
+  },
+  './src/styles/util/types': { pth: 'styles/util/types.ts', imports: {} }
 }
+const runtimeImports = new Set(['react', 'react-native'])
 
 export function * generateOutput (document: Document, opts: IExpoExportOpts, url: string, context: any): Generator<IOutput> {
   const imports: Imports = {}
@@ -78,11 +168,13 @@ export function * generateOutput (document: Document, opts: IExpoExportOpts, url
     if (!missingImport) {
       break
     }
+    // Preventing infinite loop
+    written.add(missingImport)
     const missingFile = knownTSDeps[missingImport]
     if (!missingFile) {
-      console.log(`Warning: ${missingImport} was referenced by ${imports[missingImport].join(', ')} but not generated this time!`)
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete imports[missingImport]
+      if (!runtimeImports.has(missingImport)) {
+        console.log(`Warning: ${missingImport} was referenced by ${imports[missingImport].join(', ')} but not generated this time!`)
+      }
       continue
     }
     const ts = readPluginTypeScript(missingFile.pth, missingFile.imports)

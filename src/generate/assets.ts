@@ -1,9 +1,7 @@
 import sketch, { Document, AnyLayer, Slice, Artboard } from 'sketch/dom'
-import { readPluginAsset } from '../util/fs'
-import { isIgnored, getSlice9Layer, isArtboard, isExported } from '../util/dom'
+import { isIgnored, getSlice9Layer, isArtboard, isExported, getDesignName } from '../util/dom'
 import { slugifyName, childName, stringSort } from '../util/string'
-import { template, replace } from '../util/template'
-import { ITypeScript, IOutput, IDataOutput } from '../util/render'
+import { ITypeScript, IOutput, IDataOutput, addImport, Imports, isFilled } from '../util/render'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
@@ -30,8 +28,10 @@ export interface ISlice9 {
   slice: {
     x: number
     y: number
-    width: number
-    height: number
+    w: number
+    h: number
+    r: number
+    b: number
   }
 }
 
@@ -68,23 +68,115 @@ function * slice9Export (artboard: Artboard, item: Slice, slice9s: { [assetName:
     slice: {
       x: item.frame.x,
       y: item.frame.y,
-      width: item.frame.width,
-      height: item.frame.height
+      w: item.frame.width,
+      h: item.frame.height,
+      r: artboard.frame.width - item.frame.x - item.frame.width,
+      b: artboard.frame.height - item.frame.y - item.frame.height
     }
   }
   workSlice.remove()
 }
 
-function isFilled (obj: Object): boolean {
-  for (const _ in obj) {
-    return true
+interface IAssetData {
+  width: number
+  height: number
+  source: string
+}
+
+interface IAssetsData { [name: string]: IAssetData }
+interface ISlice9s { [key: string]: ISlice9 }
+
+function generateImages (designName: string, assets: IAssetsData): ITypeScript {
+  const imports: Imports = {}
+  addImport(imports, 'react-native', 'ImageSourcePropType')
+  addImport(imports, './src/styles/util/Cache', 'createCache')
+  addImport(imports, './src/styles/util/types', 'IImageAsset')
+  return {
+    pth: `./src/styles/${designName}/ImageAsset.ts`,
+    imports,
+    code: `
+const lazySource = createCache<ImageSourcePropType>()
+
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
+export const ImageAsset = {${
+Object
+  .keys(assets)
+  .sort(stringSort)
+  .map(name => {
+    const asset = assets[name]
+    return `
+  ${name}: {
+    name: '${name}',
+    width: ${asset.width},
+    height: ${asset.height},
+    source: lazySource('${name}', () => require('../../../${asset.source}'))
+  } as IImageAsset`
+})
+  .join(',')
+}
+}`
   }
-  return false
+}
+
+function generateSlice9s (designName: string, slice9s: ISlice9s): ITypeScript {
+  const imports: Imports = {}
+  addImport(imports, 'react-native', 'ImageSourcePropType')
+  addImport(imports, './src/styles/util/Cache', 'createCache')
+  addImport(imports, './src/styles/util/Placement', 'Placement')
+  addImport(imports, './src/styles/util/types', 'ISlice9')
+  return {
+    pth: `./src/styles/${designName}/Slice9.ts`,
+    imports,
+    code: `
+const lazySlices = createCache<[
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType,
+  ImageSourcePropType
+]>()
+
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
+export const Slice9 = {${
+Object
+  .keys(slice9s)
+  .sort(stringSort)
+  .map(name => {
+    const slice9 = slice9s[name]
+    const { slice } = slice9
+    return `
+  ${name}: {
+    name: '${name}',
+    width: ${slice9.width},
+    height: ${slice9.height},
+    slice: new Placement({ x: ${slice.x}, y: ${slice.y}, w: ${slice.w}, h: ${slice.h}, r: ${slice.r}, b: ${slice.b} }),
+    slices: lazySlices('${name}', () => [
+      require('../../../${slice9.path(0, 0)}'),
+      require('../../../${slice9.path(0, 1)}'),
+      require('../../../${slice9.path(0, 2)}'),
+      require('../../../${slice9.path(1, 0)}'),
+      require('../../../${slice9.path(1, 1)}'),
+      require('../../../${slice9.path(1, 2)}'),
+      require('../../../${slice9.path(2, 0)}'),
+      require('../../../${slice9.path(2, 1)}'),
+      require('../../../${slice9.path(2, 2)}')
+    ])
+  } as ISlice9`
+  })
+  .join(',')
+}
+}`
+  }
 }
 
 export function * generateAssets (document: Document): Generator<IOutput> {
-  const assets: { [key: string]: string } = {}
-  const slice9s: { [key: string]: ISlice9 } = {}
+  const designName = getDesignName(document)
+  const assets: IAssetsData = {}
+  const slice9s: ISlice9s = {}
   for (const page of document.pages) {
     for (const artboard of page.layers) {
       if (!isArtboard(artboard)) continue
@@ -101,7 +193,11 @@ export function * generateAssets (document: Document): Generator<IOutput> {
           } as IDataOutput)
         }
         const assetName = childName(artboard.name)
-        assets[assetName] = assetPathForLayer(artboard, null)
+        assets[assetName] = {
+          source: assetPathForLayer(artboard, null),
+          width: artboard.frame.width,
+          height: artboard.frame.height
+        }
         continue
       }
       const slice9 = getSlice9Layer(artboard)
@@ -120,70 +216,10 @@ export function * generateAssets (document: Document): Generator<IOutput> {
       }
     }
   }
-  if (isFilled(assets) || isFilled(slice9s)) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    yield ({
-      pth: 'src/Asset.tsx',
-      imports: {
-        'src/styles/util/lang': []
-      },
-      code: template(
-        readPluginAsset('Asset.tsx').toString(),
-        {
-          lines: {
-            skip: () => '',
-            images: input => Object.keys(assets).length > 0 ? input : '',
-            slice9: input => Object.keys(slice9s).length > 0 ? input : ''
-          },
-          blocks: {
-            properties: parts => {
-              let result = []
-              template(parts, {
-                blocks: {
-                  image: template => {
-                    result = result.concat(
-                      Object.keys(assets).sort(stringSort).map(name => {
-                        const asset = assets[name]
-                        return replace(template, {
-                          name, asset
-                        })
-                      })
-                    )
-                    return ''
-                  },
-                  slice9: template => {
-                    result = result.concat(
-                      Object.keys(slice9s).sort(stringSort).map(name => {
-                        const slice9 = slice9s[name]
-                        return replace(template, {
-                          slice9: name,
-                          width: slice9.width,
-                          height: slice9.height,
-                          sliceX: slice9.slice.x,
-                          sliceY: slice9.slice.y,
-                          sliceW: slice9.slice.width,
-                          sliceH: slice9.slice.height,
-                          path0: slice9.path(0, 0),
-                          path1: slice9.path(0, 1),
-                          path2: slice9.path(0, 2),
-                          path3: slice9.path(1, 0),
-                          path4: slice9.path(1, 1),
-                          path5: slice9.path(1, 2),
-                          path6: slice9.path(2, 0),
-                          path7: slice9.path(2, 1),
-                          path8: slice9.path(2, 2)
-                        })
-                      })
-                    )
-                    return ''
-                  }
-                }
-              })
-              return result.map(entry => entry.replace(/\n$/ig, '')).join(',\n') + '\n'
-            }
-          }
-        }
-      )
-    } as ITypeScript)
+  if (isFilled(assets)) {
+    yield generateImages(designName, assets)
+  }
+  if (isFilled(slice9s)) {
+    yield generateSlice9s(designName, slice9s)
   }
 }
