@@ -220,7 +220,7 @@ declare module "sketch/dom" {
     height: number
   }
 
-  export class Override<Layer = Text | Image | Symbol, Value = string | ImageData> {
+  export class Override<Layer = Text | Image | SymbolInstance, Value = string | ImageData> {
     path: string
     property: 'stringValue' | 'symbolID' | 'layerStyle' | 'textStyle' | 'flowDestination' | 'image'
     // The unique ID of the override (${path}_${property}).

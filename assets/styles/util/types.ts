@@ -31,8 +31,8 @@ export interface IBaseLayer extends ISize {
   backgroundColor?: string | undefined
 }
 
-export interface ILayer <Type = any> extends IBaseLayer {
-  layers?: Type
+export interface ILayer <TLayers extends Object = {}> extends IBaseLayer {
+  layers: TLayers
 }
 
 export interface IImageAsset extends IBaseLayer {

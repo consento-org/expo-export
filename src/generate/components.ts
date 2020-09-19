@@ -1,5 +1,5 @@
-import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance, Override } from 'sketch/dom'
-import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, isTextOverride, recursiveLayers, isExported, hasSlice9, getDesignName, svgLinejoin, svgLinecap } from '../util/dom'
+import { Document, Artboard, Text, AnyLayer, ShapePath, Fill, Border, BorderOptions, Shadow, Style, GradientType, SymbolInstance } from 'sketch/dom'
+import { isTextLayer, isArtboard, isSymbolInstance, isIgnored, isShape, isShapePath, FillType, recursiveLayers, isExported, hasSlice9, getDesignName, svgLinejoin, svgLinecap } from '../util/dom'
 import { GradientType as OutputGradientType } from '../../assets/styles/util/types'
 import { IConfig } from '../util/fs'
 import { getColorFactory, FGetColor } from './color'
@@ -9,6 +9,7 @@ import { childName } from '../util/string'
 import { renderTextStyle } from './text/renderTextStyle'
 import { TIDLookup } from './text'
 import { ITextStyleEntry, processStyle } from './text/collectStyleHierarchy'
+import { SymbolOverride, processOverrides, IOverrides } from './component/overrides'
 
 abstract class Component {
   layer: AnyLayer
@@ -96,55 +97,55 @@ class TextComponent extends Component {
   }
 }
 
-interface ITextOverride {
-  path: string
-  value: string
-}
-
-function collectName (document: Document, override: Override<Text>): string {
-  var paths = override.path.split('/')
-  var prefix = ''
-  while (paths.length > 1) {
-    var parent = paths.shift()
-    var parentLayer = document.getLayerWithID(parent)
-    prefix += String(parentLayer.name) + '-'
-  }
-  return childName(prefix + override.affectedLayer.name)
+function formatSymbolOverride (textStyles: TIDLookup, designName: string, imports: Imports, indent: string, target: string, frame: string, overrides: IOverrides): string {
+  return `new LayerPlacement(${target}, ${target}.layers, ${frame}${
+    !isFilled(overrides)
+      ? ''
+      : `, ({ ${Object.keys(overrides).join(', ')} }) => ({${
+        Object.entries(overrides)
+          .map(([key, override]): string => {
+            if (override instanceof SymbolOverride) {
+              const target = override.target !== null ? override.target : `${key}.layer`
+              if (override.target !== null) {
+                addImport(imports, `./src/styles/${designName}/layer/${target}`, target)
+              }
+              return `
+${indent}  ${key}: ${formatSymbolOverride(textStyles, designName, imports, indent + '  ', target, `${key}.place`, override.overrides)}`
+            }
+            addImport(imports, './src/styles/util/TextBox', 'TextBox')
+            addImport(imports, './src/styles/util/react/SketchTextBox', [])
+            let style = `${key}.style`
+            if (override.styleID === undefined) {
+              const textStyle = textStyles[override.styleID]
+              if (textStyle) {
+                style = `TextStyles.${textStyle.name}`
+              }
+            }
+            return `
+${indent}  ${key}: new TextBox(${override.text !== undefined ? `'${override.text}'` : `${key}.text`}, ${style}, ${key}.place)`
+          })
+          .join(',')
+      }
+${indent}})`
+  })`
 }
 
 class Link extends Component {
   target: string
-  textOverrides: ITextOverride[]
-  document: Document
+  textStyles: TIDLookup
+  overrides?: IOverrides
 
-  constructor (document: Document, layer: SymbolInstance, target: string) {
+  constructor (textStyles: TIDLookup, layer: SymbolInstance, target: string, overrides?: IOverrides) {
     super(layer, 'link')
+    this.textStyles = textStyles
     this.target = target
-    this.document = document
-    this.textOverrides = layer.overrides
-      .map(override => isTextOverride(override) ? override : null)
-      .filter(override => override !== null && !override.isDefault)
-      .map(override => {
-        return {
-          path: collectName(document, override),
-          value: override.value
-        }
-      })
+    this.overrides = overrides
   }
 
   format (designName: string, imports: Imports): string {
-    addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
     addImport(imports, './src/styles/util/LayerPlacement', 'LayerPlacement')
-    return `new LayerPlacement(${this.target}, ${this.renderFrame()}, ${this.renderTextOverrides()})`
-  }
-
-  renderTextOverrides (): string {
-    if (this.textOverrides.length === 0) {
-      return '{}'
-    }
-    return `{${this.textOverrides.map(override => `
-      ${override.path}: '${safeText(override.value)}'`).join(',')}
-    }`
+    addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
+    return formatSymbolOverride(this.textStyles, designName, imports, '    ', this.target, this.renderFrame(), this.overrides)
   }
 }
 
@@ -306,7 +307,7 @@ function collectItem (document: Document, layer: AnyLayer, textStyles: TIDLookup
         return new Slice9(layer, masterName)
       }
     }
-    return new Link(document, layer, masterName)
+    return new Link(textStyles, layer, masterName, processOverrides(document, layer))
   }
   if (isShape(layer)) {
     if (layer.layers.length === 1) {
