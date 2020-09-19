@@ -90,12 +90,14 @@ function generateImages (designName: string, assets: IAssetsData): ITypeScript {
   const imports: Imports = {}
   addImport(imports, 'react-native', 'ImageSourcePropType')
   addImport(imports, './src/styles/util/Cache', 'createCache')
+  addImport(imports, './src/styles/util/types', 'IImageAsset')
   return {
     pth: `./src/styles/${designName}/ImageAsset.ts`,
     imports,
     code: `
 const lazySource = createCache<ImageSourcePropType>()
 
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 export const ImageAsset = {${
 Object
   .keys(assets)
@@ -108,7 +110,7 @@ Object
     width: ${asset.width},
     height: ${asset.height},
     source: lazySource('${name}', () => require('../../../${asset.source}'))
-  }`
+  } as IImageAsset`
 })
   .join(',')
 }
@@ -121,6 +123,7 @@ function generateSlice9s (designName: string, slice9s: ISlice9s): ITypeScript {
   addImport(imports, 'react-native', 'ImageSourcePropType')
   addImport(imports, './src/styles/util/Cache', 'createCache')
   addImport(imports, './src/styles/util/Placement', 'Placement')
+  addImport(imports, './src/styles/util/types', 'ISlice9')
   return {
     pth: `./src/styles/${designName}/Slice9.ts`,
     imports,
@@ -137,6 +140,7 @@ const lazySlices = createCache<[
   ImageSourcePropType
 ]>()
 
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 export const Slice9 = {${
 Object
   .keys(slice9s)
@@ -161,7 +165,7 @@ Object
       require('../../../${slice9.path(2, 1)}'),
       require('../../../${slice9.path(2, 2)}')
     ])
-  }`
+  } as ISlice9`
   })
   .join(',')
 }
