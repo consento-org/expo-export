@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/consento-org/expo-export">
-    <img width="100" height="100" src="https://raw.githubusercontent.com/consento-org/expo-export/master/icon.png" />
+    <img width="100" height="100" src="https://raw.githubusercontent.com/consento-org/expo-export/main/icon.png" />
   </a>
   <h3 align="center">Export style definitions for use with Expo</h3>
   <h4 align="center">Opinionated one-click solution</h4>
