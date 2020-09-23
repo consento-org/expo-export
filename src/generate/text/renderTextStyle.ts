@@ -53,7 +53,7 @@ function renderProps (designName: string, imports: Imports, style: ITextStyle, g
     return `Font.${style.fontFamily}`
   })
   field('fontSize', () => toMaxDecimals(style.fontSize, 2).toString())
-  field('lineHeight', () => toMaxDecimals(style.fontSize, 2).toString())
+  field('lineHeight', () => toMaxDecimals(style.lineHeight, 2).toString())
   field('textAlign', () => `'${style.textAlign}'`)
   field('textTransform', () => `'${style.textTransform}'`)
   field('textAlignVertical', () => `'${style.textAlignVertical}'`)
