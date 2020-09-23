@@ -1,4 +1,4 @@
-import { ImageSourcePropType, TextStyle } from 'react-native'
+import { ImageSourcePropType, TextStyle, ViewStyle } from 'react-native'
 import { Placement } from './Placement'
 
 export interface ISize {
@@ -74,16 +74,26 @@ export interface IGradient {
   }
 }
 
+export interface TBorderData {
+  fill: FillData | null
+  thickness?: number
+  endArrowhead?: ArrowHead
+  startArrowhead?: ArrowHead
+  strokeLinecap?: Linecap
+  strokeLinejoin?: Linejoin
+  dashPattern?: number[]
+  radius?: number
+}
+
 export interface IBorder {
+  fill: IFill
   endArrowhead: ArrowHead
   startArrowhead: ArrowHead
   strokeLinecap: Linecap
   strokeLinejoin: Linejoin
   dashPattern: number[]
-  fill: IFill
   thickness: number
   radius: number
-  borderStyle: BorderStyle
 }
 
 export type FillData = string | IGradient | ISketchError | null
@@ -93,12 +103,65 @@ export interface IFill {
   color: string
 }
 
+export enum ViewBorders {
+  /* eslint-disable no-multi-spaces */
+  none        = 0b0000,
+  left        = 0b0001,
+  right       = 0b0010,
+  horizontal  = 0b0011,
+  top         = 0b0100,
+  topLeft     = 0b0101,
+  topRight    = 0b0110,
+  skipBottom  = 0b0111,
+  bottom      = 0b1000,
+  bottomLeft  = 0b1001,
+  bottomRight = 0b1010,
+  skipTop     = 0b1011,
+  vertical    = 0b1100,
+  skipRight   = 0b1101,
+  skipLeft    = 0b1110,
+  all         = 0b1111
+}
+
+export type BorderPropsBase = 'borderRadius' | 'borderColor'
+export type BorderPropsAll = BorderPropsBase | 'borderWidth' | 'borderStyle'
+export type BorderPropsLeft = BorderPropsBase | 'borderLeftColor' | 'borderLeftWidth'
+export type BorderPropsRight = BorderPropsBase | 'borderRightColor' | 'borderRightWidth'
+export type BorderPropsHorizontal = BorderPropsRight | BorderPropsLeft
+export type BorderPropsTop = BorderPropsBase | 'borderTopColor' | 'borderTopWidth'
+export type BorderPropsBottom = BorderPropsBase | 'borderBottomColor' | 'borderBottomWidth'
+export type BorderPropsVertical = BorderPropsTop | BorderPropsBottom
+
+export interface IPolygonSvgStroke {
+  stroke: string
+  strokeWidth: number
+  strokeDasharray: number[] | null
+  strokeLinecap: Linecap
+  strokeLinejoin: Linejoin
+}
+
 export interface IPolygon {
+  /* eslint-disable @typescript-eslint/method-signature-style */
   place: Placement
   fill: IFill
-  borderRadius: number
-  border: IBorder
   shadows: IShadow[]
+  svg: IPolygonSvgStroke
+  borderStyle (viewBorders: ViewBorders.none): Pick<ViewStyle, BorderPropsBase>
+  borderStyle (viewBorders: ViewBorders.left): Pick<ViewStyle, BorderPropsLeft>
+  borderStyle (viewBorders: ViewBorders.right): Pick<ViewStyle, BorderPropsRight>
+  borderStyle (viewBorders: ViewBorders.horizontal): Pick<ViewStyle, BorderPropsHorizontal>
+  borderStyle (viewBorders: ViewBorders.top): Pick<ViewStyle, BorderPropsTop>
+  borderStyle (viewBorders: ViewBorders.topLeft): Pick<ViewStyle, BorderPropsTop | BorderPropsLeft>
+  borderStyle (viewBorders: ViewBorders.topRight): Pick<ViewStyle, BorderPropsTop | BorderPropsRight>
+  borderStyle (viewBorders: ViewBorders.skipBottom): Pick<ViewStyle, BorderPropsTop | BorderPropsHorizontal>
+  borderStyle (viewBorders: ViewBorders.bottom): Pick<ViewStyle, BorderPropsBottom>
+  borderStyle (viewBorders: ViewBorders.bottomLeft): Pick<ViewStyle, BorderPropsBottom | BorderPropsLeft>
+  borderStyle (viewBorders: ViewBorders.bottomRight): Pick<ViewStyle, BorderPropsBottom | BorderPropsRight>
+  borderStyle (viewBorders: ViewBorders.skipTop): Pick<ViewStyle, BorderPropsBottom | BorderPropsHorizontal>
+  borderStyle (viewBorders: ViewBorders.vertical): Pick<ViewStyle, BorderPropsVertical>
+  borderStyle (viewBorders: ViewBorders.skipRight): Pick<ViewStyle, BorderPropsVertical | BorderPropsLeft>
+  borderStyle (viewBorders: ViewBorders.skipLeft): Pick<ViewStyle, BorderPropsVertical | BorderPropsLeft>
+  borderStyle (viewBorders?: ViewBorders.all): Pick<ViewStyle, BorderPropsAll>
 }
 
 export interface ITextBox {

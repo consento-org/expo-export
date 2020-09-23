@@ -13,16 +13,12 @@ function getStyle (polygon: IPolygon): ViewStyle {
   let style = styleCache.get(polygon)
   if (style === undefined) {
     const data = polygon.fill.data
-    const border = polygon.border
     style = StyleSheet.create({
       internal: {
         width: polygon.place.width,
         height: polygon.place.height,
-        borderRadius: border.radius,
-        borderColor: border.fill.color,
-        borderWidth: border.thickness,
-        borderStyle: border.borderStyle,
-        backgroundColor: typeof data === 'string' ? data : undefined
+        backgroundColor: typeof data === 'string' ? data : undefined,
+        ...polygon.borderStyle()
       }
     }).internal
     styleCache.set(polygon, style)

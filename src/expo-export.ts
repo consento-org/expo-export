@@ -51,7 +51,6 @@ function * _generateOutput (document: Document, opts: IExpoExportOpts, url: stri
 }
 
 const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = {
-  './src/styles/util/Border': { pth: 'styles/util/Border.ts', imports: { 'react-native': [], './src/styles/util/Fill': [], './src/styles/util/types': [] } },
   './src/styles/util/Cache': { pth: 'styles/util/Cache.ts', imports: {} },
   './src/styles/util/createGlobalEffect': { pth: 'styles/util/createGlobalEffect.ts', imports: {} },
   './src/styles/util/Fill': { pth: 'styles/util/Fill.ts', imports: { './src/styles/util/lang': [], './src/styles/util/types': [] } },
@@ -69,10 +68,10 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
   './src/styles/util/Polygon': {
     pth: 'styles/util/Polygon.ts',
     imports: {
+      'react-native': [],
       './src/styles/util/Placement': [],
       './src/styles/util/Fill': [],
       './src/styles/util/types': [],
-      './src/styles/util/Border': [],
       './src/styles/util/Shadow': []
     }
   },
