@@ -1,13 +1,13 @@
 import { Override, SymbolInstance, Text, Document } from 'sketch/dom'
-import { isSymbolInstance, isIgnored } from '../../util/dom'
+import { isSymbolInstance, isIgnored, isTextLayer } from '../../util/dom'
 import { exists } from '../../../assets/styles/util/lang'
 import { isFilled } from '../../util/render'
 import { childName } from '../../util/string'
 
 class IPTextOverride {
   affectedLayer: Text
-  textStyle: Override<Text, string>
-  stringValue: Override<Text, string>
+  textStyle?: Override<Text, string>
+  stringValue?: Override<Text, string>
 }
 
 interface IPSymbolOverride {
@@ -28,6 +28,10 @@ function isIPSymbolOverride (override: IPOverride): override is IPSymbolOverride
   return isSymbolInstance(override.affectedLayer, true)
 }
 
+function isIPTextOverride (override: IPOverride): override is IPTextOverride {
+  return isTextLayer(override.affectedLayer, true)
+}
+
 function removeUnusedOverrides (overrides: IPOverrides): void {
   for (const [symbolId, override] of Object.entries(overrides)) {
     if (isIPSymbolOverride(override)) {
@@ -36,10 +40,14 @@ function removeUnusedOverrides (overrides: IPOverrides): void {
         removeUnusedOverrides(override.overrides)
         if (isFilled(override.overrides)) continue
       }
-    } else if (
-      !override.stringValue.isDefault ||
-      !override.textStyle.isDefault
-    ) continue
+    } else if (isIPTextOverride(override)) {
+      if (exists(override.textStyle) && !override.textStyle.isDefault) {
+        continue
+      }
+      if (exists(override.stringValue) && !override.stringValue.isDefault) {
+        continue
+      }
+    }
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete overrides[symbolId]
   }
@@ -84,8 +92,8 @@ function mapOverrides (document: Document, overrides: IPOverrides): IOverrides |
       result[name] = new SymbolOverride(target, mapOverrides(document, override.overrides))
     } else {
       result[name] = new TextOverride(
-        override.stringValue.isDefault ? null : override.stringValue.value,
-        override.textStyle.isDefault ? null : override.textStyle.value
+        !exists(override.stringValue) || override.stringValue.isDefault ? null : override.stringValue.value,
+        !exists(override.textStyle) || override.textStyle.isDefault ? null : override.textStyle.value
       )
     }
     return result

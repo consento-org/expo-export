@@ -226,15 +226,15 @@ class Polygon extends Component {
     const options = this.borderOptions
     return `{
       fill: ${this.renderFill(border, imports, getColor)},
-      thickness: ${border.thickness}${
-        options.endArrowhead === DEFAULT_ARROWHEAD ? '' : `,
+      thickness: ${border.thickness
+      }${options.endArrowhead === DEFAULT_ARROWHEAD ? '' : `,
       endArrowhead: '${options.endArrowhead}'`
       }${options.startArrowhead === DEFAULT_ARROWHEAD ? '' : `,
       startArrowhead: '${options.startArrowhead}'`
       }${options.lineEnd === DEFAULT_LINE_END ? '' : `,
-      strokeLinecap: '${svgLinecap(options.lineEnd)}'`
+      strokeLinecap: '${svgLinecap(options.lineEnd) as string}'`
       }${options.lineJoin === DEFAULT_LINE_JOIN ? '' : `,
-      strokeLinejoin: '${svgLinejoin(options.lineJoin)}'`
+      strokeLinejoin: '${svgLinejoin(options.lineJoin) as string}'`
       }${options.dashPattern.length === 0 ? '' : `,
       dashPattern: [ ${options.dashPattern.join(', ')} ]`
       }${this.borderRadius === 0 ? '' : `,
