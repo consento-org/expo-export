@@ -30,21 +30,21 @@ export class Placement implements IPlacement {
   centerY: number
 
   constructor ({ x, y, w, h, r, b }: IPlacement) {
-    this.x = x
-    this.y = y
     this.w = w
     this.h = h
+    this.x = x ?? 0
+    this.y = y ?? 0
     this.r = r ?? 0
     this.b = b ?? 0
 
-    this.left = x
-    this.top = y
+    this.left = this.x
+    this.top = this.y
     this.width = w
     this.height = h
     this.right = this.r
     this.bottom = this.b
-    this.centerX = x + w / 2
-    this.centerY = y + h / 2
+    this.centerX = this.x + w / 2
+    this.centerY = this.y + h / 2
   }
 
   toJSON (): IPlacement {

@@ -7,10 +7,10 @@ export interface ISize {
 }
 
 export interface IPlacement {
-  x: number
-  y: number
   w: number
   h: number
+  x?: number
+  y?: number
   r?: number
   b?: number
 }

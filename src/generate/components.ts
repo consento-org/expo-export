@@ -24,9 +24,15 @@ abstract class Component {
 
   renderFrame (): string {
     const parent = this.layer.getParentArtboard()
-    const b: string = parent !== undefined ? `, b: ${parent.frame.height - this.layer.frame.height - this.layer.frame.y}` : ''
-    const r: string = parent !== undefined ? `, r: ${parent.frame.width - this.layer.frame.width - this.layer.frame.x}` : ''
-    return `{ x: ${toMaxDecimals(this.layer.frame.x, 2)}, y: ${toMaxDecimals(this.layer.frame.y, 2)}, w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)}${r}${b} }`
+    const xNum = toMaxDecimals(this.layer.frame.x, 2)
+    const yNum = toMaxDecimals(this.layer.frame.y, 2)
+    const bNum = parent !== undefined ? toMaxDecimals(parent.frame.height - this.layer.frame.height - this.layer.frame.y, 2) : 0
+    const rNum = parent !== undefined ? toMaxDecimals(parent.frame.width - this.layer.frame.width - this.layer.frame.x, 2) : 0
+    const x: string = xNum !== 0 ? `x: ${xNum}, ` : ''
+    const y: string = yNum !== 0 ? `y: ${yNum}, ` : ''
+    const b: string = bNum !== 0 ? `, b: ${bNum}` : ''
+    const r: string = rNum !== 0 ? `, r: ${rNum}` : ''
+    return `{ ${x}${y}w: ${toMaxDecimals(this.layer.frame.width, 2)}, h: ${toMaxDecimals(this.layer.frame.height, 2)}${r}${b} }`
   }
 }
 
