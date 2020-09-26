@@ -1,7 +1,8 @@
 import { Placement } from './Placement'
 import { IImageAsset, IPlacement } from './types'
+import { ImageSourcePropType } from 'react-native'
 
-export class ImagePlacement {
+export class ImagePlacement implements IImageAsset {
   name: string
   place: Placement
   image: IImageAsset
@@ -10,5 +11,9 @@ export class ImagePlacement {
     this.name = name
     this.image = asset
     this.place = new Placement(frame)
+  }
+
+  source (): ImageSourcePropType {
+    return this.image.source()
   }
 }

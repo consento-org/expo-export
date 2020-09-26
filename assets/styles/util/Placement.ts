@@ -1,14 +1,7 @@
-import { ISize, IPlacement } from './types'
+import { IPlacement } from './types'
 
-const placeCache: WeakMap<ISize, Placement> = new WeakMap<ISize, Placement>()
-
-export function getPlace (size: ISize): Placement {
-  let place = placeCache.get(size)
-  if (place === undefined) {
-    place = new Placement({ x: 0, y: 0, w: size.width, h: size.height, r: 0, b: 0 })
-    placeCache.set(size, place)
-  }
-  return place
+export function forSize (w: number, h: number): Placement {
+  return new Placement({ w, h })
 }
 
 export class Placement implements IPlacement {

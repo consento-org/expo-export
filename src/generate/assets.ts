@@ -2,6 +2,7 @@ import sketch, { Document, AnyLayer, Slice, Artboard } from 'sketch/dom'
 import { isIgnored, getSlice9Layer, isArtboard, isExported, getDesignName } from '../util/dom'
 import { slugifyName, childName, stringSort } from '../util/string'
 import { ITypeScript, IOutput, IDataOutput, addImport, Imports, isFilled } from '../util/render'
+import { toMaxDecimals } from '../util/number'
 
 export function assetPath (name: string, size: string, fileFormat: string): string {
   let fileName = slugifyName(name).join('/')
@@ -91,6 +92,7 @@ function generateImages (designName: string, assets: IAssetsData): ITypeScript {
   addImport(imports, 'react-native', 'ImageSourcePropType')
   addImport(imports, './src/styles/util/Cache', 'createCache')
   addImport(imports, './src/styles/util/types', 'IImageAsset')
+  addImport(imports, './src/styles/util/Placement', 'forSize')
   return {
     pth: `./src/styles/${designName}/ImageAsset.ts`,
     imports,
@@ -107,8 +109,7 @@ Object
     return `
   ${name}: {
     name: '${name}',
-    width: ${asset.width},
-    height: ${asset.height},
+    place: forSize(${toMaxDecimals(asset.width, 2)}, ${toMaxDecimals(asset.height, 2)}),
     source: lazySource('${name}', () => require('../../../${asset.source}'))
   } as IImageAsset`
 })
@@ -122,7 +123,7 @@ function generateSlice9s (designName: string, slice9s: ISlice9s): ITypeScript {
   const imports: Imports = {}
   addImport(imports, 'react-native', 'ImageSourcePropType')
   addImport(imports, './src/styles/util/Cache', 'createCache')
-  addImport(imports, './src/styles/util/Placement', 'Placement')
+  addImport(imports, './src/styles/util/Placement', ['Placement', 'forSize'])
   addImport(imports, './src/styles/util/types', 'ISlice9')
   return {
     pth: `./src/styles/${designName}/Slice9.ts`,
@@ -151,9 +152,8 @@ Object
     return `
   ${name}: {
     name: '${name}',
-    width: ${slice9.width},
-    height: ${slice9.height},
-    slice: new Placement({ x: ${slice.x}, y: ${slice.y}, w: ${slice.w}, h: ${slice.h}, r: ${slice.r}, b: ${slice.b} }),
+    place: forSize(${toMaxDecimals(slice9.width, 2)}, ${toMaxDecimals(slice9.height, 2)}),
+    slice: new Placement({ x: ${toMaxDecimals(slice.x, 2)}, y: ${toMaxDecimals(slice.y, 2)}, w: ${toMaxDecimals(slice.w, 2)}, h: ${toMaxDecimals(slice.h, 2)}, r: ${toMaxDecimals(slice.r, 2)}, b: ${toMaxDecimals(slice.b, 2)} }),
     slices: lazySlices('${name}', () => [
       require('../../../${slice9.path(0, 0)}'),
       require('../../../${slice9.path(0, 1)}'),

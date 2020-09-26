@@ -1,10 +1,10 @@
 import React from 'react'
 import { View, ViewStyle, Image, ImageStyle, ViewProps, StyleSheet } from 'react-native'
-import { ISlice9, ISlice9Placement, ISketchElementProps, isSlice9Placement } from '../types'
-import { getPlace, Placement } from '../Placement'
+import { ISlice9, ISketchElementProps } from '../types'
+import { Placement } from '../Placement'
 
 export interface ISketchSlice9Props extends
-  ISketchElementProps<ISlice9 | ISlice9Placement>,
+  ISketchElementProps<ISlice9>,
   ViewProps {
   ref?: React.Ref<View>
 }
@@ -80,9 +80,8 @@ function getStyles (place: Placement, width: number, height: number): ISlicePart
 
 export const SketchSlice9 = (props: ISketchSlice9Props): JSX.Element => {
   const { src } = props
-  const { slice9, place } = isSlice9Placement(src) ? src : { slice9: src, place: getPlace(src) }
-  const styles = getStyles(slice9.slice, place.width, place.height)
-  const slices = slice9.slices()
+  const styles = getStyles(src.slice, src.place.width, src.place.height)
+  const slices = src.slices()
   if (slices.length !== 9) {
     throw new Error('For a slice-9 we need 9 resources!')
   }

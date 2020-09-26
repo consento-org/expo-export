@@ -366,13 +366,13 @@ function * collectComponents (document: Document, textStyles: TIDLookup, config:
 function renderComponent (designName: string, component: IComponent, getColor: FGetColor): Omit<ITypeScript, 'pth'> {
   const imports: Imports = {}
   addImport(imports, './src/styles/util/react/SketchElement', [])
+  addImport(imports, './src/styles/util/Placement', 'forSize')
   return {
     imports,
     code: `
 export const ${component.name} = {
   name: '${component.name}',
-  width: ${component.artboard.frame.width},
-  height: ${component.artboard.frame.height}${
+  place: forSize(${toMaxDecimals(component.artboard.frame.width, 2)}, ${toMaxDecimals(component.artboard.frame.height, 2)})${
     !component.artboard.background.enabled ? ''
     : `,
   backgroundColor: ${getColor(component.artboard.background.color, imports)}`}${

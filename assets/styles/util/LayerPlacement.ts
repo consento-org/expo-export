@@ -7,7 +7,7 @@ function isFn <Input, Type> (input: Type | FType<Input, Type>): input is FType<I
   return typeof input === 'function'
 }
 
-export class LayerPlacement <TLayer extends ILayer<TLayers>, TLayers, TOverrides extends Object = {}> {
+export class LayerPlacement <TLayer extends ILayer<TLayers>, TLayers, TOverrides extends Object = {}> implements ILayer<Omit<TLayers, keyof TOverrides> & TOverrides> {
   name: string
   place: Placement
   layer: TLayer
@@ -21,5 +21,9 @@ export class LayerPlacement <TLayer extends ILayer<TLayers>, TLayers, TOverrides
       ...layers,
       ...isFn(overrides) ? overrides(layers) : overrides
     } as any
+  }
+
+  get backgroundColor (): string | null {
+    return this.layer.backgroundColor
   }
 }
