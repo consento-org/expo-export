@@ -3,11 +3,13 @@ import { Placement } from './Placement'
 import { IPlacement } from './types'
 
 export class TextBox {
+  name: string
   text: string
   style: TextStyle
   place: Placement
 
-  constructor (text: string, style: TextStyle, place: IPlacement) {
+  constructor (name: string, text: string, style: TextStyle, place: IPlacement) {
+    this.name = name
     this.text = text
     this.style = StyleSheet.create({ input: style }).input
     this.place = new Placement(place)

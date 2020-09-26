@@ -14,8 +14,10 @@ import { SymbolOverride, processOverrides, IOverrides } from './component/overri
 abstract class Component {
   layer: AnyLayer
   type: string
+  name: string
 
-  constructor (layer: AnyLayer, type: string) {
+  constructor (name: string, layer: AnyLayer, type: string) {
+    this.name = name
     this.layer = layer
     this.type = type
   }
@@ -39,8 +41,8 @@ abstract class Component {
 class Image extends Component {
   asset: string
 
-  constructor (layer: AnyLayer, asset?: string) {
-    super(layer, 'image')
+  constructor (name: string, layer: AnyLayer, asset?: string) {
+    super(name, layer, 'image')
     this.asset = asset
   }
 
@@ -48,15 +50,15 @@ class Image extends Component {
     addImport(imports, `./src/styles/${designName}/ImageAsset`, 'ImageAsset')
     addImport(imports, './src/styles/util/ImagePlacement', 'ImagePlacement')
     addImport(imports, './src/styles/util/react/SketchImage', [])
-    return `new ImagePlacement(ImageAsset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return `new ImagePlacement('${this.name}', ImageAsset.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
 class Slice9 extends Component {
   asset: string
 
-  constructor (layer: AnyLayer, asset?: string) {
-    super(layer, 'image')
+  constructor (name: string, layer: AnyLayer, asset?: string) {
+    super(name, layer, 'image')
     this.asset = asset
   }
 
@@ -64,7 +66,7 @@ class Slice9 extends Component {
     addImport(imports, `./src/styles/${designName}/Slice9`, 'Slice9')
     addImport(imports, './src/styles/util/Slice9Placement', 'Slice9Placement')
     addImport(imports, './src/styles/util/react/SketchSlice9', [])
-    return `new Slice9Placement(Slice9.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
+    return `new Slice9Placement('${this.name}', Slice9.${this.asset === undefined ? name : this.asset}, ${this.renderFrame()})`
   }
 }
 
@@ -85,8 +87,8 @@ class TextComponent extends Component {
   text: string
   textStyle: ITextStyleEntry
 
-  constructor (layer: Text, textStyle: ITextStyleEntry) {
-    super(layer, 'text')
+  constructor (name: string, layer: Text, textStyle: ITextStyleEntry) {
+    super(name, layer, 'text')
     this._layer = layer
     this.text = layer.text
     this.textStyle = textStyle
@@ -95,7 +97,7 @@ class TextComponent extends Component {
   format (designName: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/TextBox', 'TextBox')
     addImport(imports, './src/styles/util/react/SketchTextBox', [])
-    return `new TextBox('${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
+    return `new TextBox('${this.name}', '${safeText(this.text)}', ${this.renderTextStyle(designName, imports, getColor)}, ${this.renderFrame()})`
   }
 
   renderTextStyle (designName: string, imports: Imports, getColor: FGetColor): string {
@@ -103,8 +105,8 @@ class TextComponent extends Component {
   }
 }
 
-function formatSymbolOverride (textStyles: TIDLookup, designName: string, imports: Imports, indent: string, target: string, frame: string, overrides: IOverrides): string {
-  return `new LayerPlacement(${target}, ${target}.layers, ${frame}${
+function formatSymbolOverride (name: string, textStyles: TIDLookup, designName: string, imports: Imports, indent: string, target: string, frame: string, overrides: IOverrides): string {
+  return `new LayerPlacement('${name}', ${target}, ${target}.layers, ${frame}${
     !isFilled(overrides)
       ? ''
       : `, ({ ${Object.keys(overrides).join(', ')} }) => ({${
@@ -116,7 +118,7 @@ function formatSymbolOverride (textStyles: TIDLookup, designName: string, import
                 addImport(imports, `./src/styles/${designName}/layer/${target}`, target)
               }
               return `
-${indent}  ${key}: ${formatSymbolOverride(textStyles, designName, imports, indent + '  ', target, `${key}.place`, override.overrides)}`
+${indent}  ${key}: ${formatSymbolOverride(key, textStyles, designName, imports, indent + '  ', target, `${key}.place`, override.overrides)}`
             }
             addImport(imports, './src/styles/util/TextBox', 'TextBox')
             addImport(imports, './src/styles/util/react/SketchTextBox', [])
@@ -128,7 +130,7 @@ ${indent}  ${key}: ${formatSymbolOverride(textStyles, designName, imports, inden
               }
             }
             return `
-${indent}  ${key}: new TextBox(${override.text !== undefined ? `'${override.text}'` : `${key}.text`}, ${style}, ${key}.place)`
+${indent}  ${key}: new TextBox('${key}', ${override.text !== undefined ? `'${override.text}'` : `${key}.text`}, ${style}, ${key}.place)`
           })
           .join(',')
       }
@@ -141,8 +143,8 @@ class Link extends Component {
   textStyles: TIDLookup
   overrides?: IOverrides
 
-  constructor (textStyles: TIDLookup, layer: SymbolInstance, target: string, overrides?: IOverrides) {
-    super(layer, 'link')
+  constructor (name: string, textStyles: TIDLookup, layer: SymbolInstance, target: string, overrides?: IOverrides) {
+    super(name, layer, 'link')
     this.textStyles = textStyles
     this.target = target
     this.overrides = overrides
@@ -151,7 +153,7 @@ class Link extends Component {
   format (designName: string, imports: Imports): string {
     addImport(imports, './src/styles/util/LayerPlacement', 'LayerPlacement')
     addImport(imports, `./src/styles/${designName}/layer/${this.target}`, this.target)
-    return formatSymbolOverride(this.textStyles, designName, imports, '    ', this.target, this.renderFrame(), this.overrides)
+    return formatSymbolOverride(this.name, this.textStyles, designName, imports, '    ', this.target, this.renderFrame(), this.overrides)
   }
 }
 
@@ -203,8 +205,8 @@ class Polygon extends Component {
   shadows: Shadow[]
   borderRadius: number
 
-  constructor (layer: ShapePath, style: ShapeStyle) {
-    super(layer, 'Polygon')
+  constructor (name: string, layer: ShapePath, style: ShapeStyle) {
+    super(name, layer, 'Polygon')
     this.borderRadius = getBorderRadius(layer)
     this.fills = style.fills.filter(isVisibleFill)
     this.borders = style.borders.filter(border => border.enabled)
@@ -215,7 +217,7 @@ class Polygon extends Component {
   format (_designName: string, imports: Imports, getColor: FGetColor): string {
     addImport(imports, './src/styles/util/Polygon', 'Polygon')
     addImport(imports, './src/styles/util/react/SketchPolygon', [])
-    return `new Polygon(${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
+    return `new Polygon('${this.name}', ${this.renderFrame()}, ${this.renderFills(imports, getColor)}, ${this.renderBorders(imports, getColor)}, ${this.renderShadows(imports, getColor)})`
   }
 
   renderBorders (imports, getColor: FGetColor): string {
@@ -298,7 +300,7 @@ interface IComponent {
   items: { [name: string]: Component }
 }
 
-function collectItem (document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
+function collectItem (name: string, document: Document, layer: AnyLayer, textStyles: TIDLookup): Component | undefined {
   if (isSymbolInstance(layer)) {
     const master = document.getSymbolMasterWithID(layer.symbolId)
     if (isIgnored(master)) {
@@ -307,34 +309,35 @@ function collectItem (document: Document, layer: AnyLayer, textStyles: TIDLookup
     const masterName = childName(master.name)
     if (isArtboard(master)) {
       if (isExported(master)) {
-        return new Image(layer, masterName)
+        return new Image(name, layer, masterName)
       }
       if (hasSlice9(master)) {
-        return new Slice9(layer, masterName)
+        return new Slice9(name, layer, masterName)
       }
     }
-    return new Link(textStyles, layer, masterName, processOverrides(document, layer))
+    return new Link(name, textStyles, layer, masterName, processOverrides(document, layer))
   }
   if (isShape(layer)) {
     if (layer.layers.length === 1) {
-      return new Polygon(layer.layers[0], layer.style)
+      return new Polygon(name, layer.layers[0], layer.style)
     }
   }
   if (isShapePath(layer)) {
-    return new Polygon(layer, layer.style)
+    return new Polygon(name, layer, layer.style)
   }
   if (isTextLayer(layer)) {
     const style = textStyles[layer.sharedStyleId]
-    return new TextComponent(layer, style)
+    return new TextComponent(name, layer, style)
   }
 }
 
 function collectItems (document: Document, artboard: Artboard, textStyles: TIDLookup, filter: (layer: AnyLayer) => boolean): { [name: string]: Component } {
   const items: { [name: string]: Component } = {}
   for (const layer of recursiveLayers(artboard, filter)) {
-    const item = collectItem(document, layer, textStyles)
+    const name = childName(layer.name)
+    const item = collectItem(name, document, layer, textStyles)
     if (item !== undefined) {
-      items[childName(layer.name)] = item
+      items[name] = item
     }
   }
   return items

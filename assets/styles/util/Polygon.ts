@@ -58,6 +58,7 @@ function createBorderViewStyle (borderColor: string, border: IBorder, borders: n
 }
 
 export class Polygon implements IPolygon {
+  name: string
   place: Placement
   fill: Fill
   shadows: Shadow[]
@@ -65,7 +66,8 @@ export class Polygon implements IPolygon {
   private readonly _styles: { [key: number]: ViewStyle }
   private readonly _border: IBorder
 
-  constructor (place: IPlacement, fill: FillData | null, border: TBorderData | null, shadows: IShadow[]) {
+  constructor (name: string, place: IPlacement, fill: FillData | null, border: TBorderData | null, shadows: IShadow[]) {
+    this.name = name
     this._border = borderDefaults(border)
     this.place = new Placement(place)
     this.fill = new Fill(fill)
