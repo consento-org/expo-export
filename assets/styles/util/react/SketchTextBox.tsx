@@ -1,5 +1,6 @@
 import React from 'react'
-import { Text, TextInput, TextProps, TextInputProps } from 'react-native'
+import { Text, TextInput, TextProps, TextInputProps, StyleSheet } from 'react-native'
+import { exists } from '../lang'
 import { ISketchElementProps, ITextBox } from '../types'
 
 export interface ISketchTextBoxViewProps extends
@@ -21,14 +22,18 @@ export type ISketchTextBoxProps = ISketchTextBoxInputProps | ISketchTextBoxViewP
 
 export const SketchTextBoxView = (props: ISketchTextBoxViewProps): JSX.Element => {
   const { text } = props.src
-  return React.createElement(Text, {
-    children: props.value ?? props.children ?? text,
-    ...props
-  })
+  const textProps: TextProps = {
+    ...props,
+    style: exists(props.style) ? StyleSheet.compose(props.src.style, props.style) : props.src.style
+  }
+  return React.createElement(Text, textProps, props.value ?? props.children ?? text)
 }
 
 export const SketchTextBoxInput = (props: ISketchTextBoxInputProps): JSX.Element => {
-  return React.createElement(TextInput, props)
+  return React.createElement(TextInput, {
+    ...props,
+    style: exists(props.style) ? StyleSheet.compose(props.src.style, props.style) : props.src.style
+  })
 }
 
 function isSketchTextBoxInputProps (props: ISketchTextBoxProps): props is ISketchTextBoxInputProps {

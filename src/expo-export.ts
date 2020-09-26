@@ -121,7 +121,8 @@ const knownTSDeps: { [importKey: string]: { pth: string, imports: Imports } } = 
     imports: {
       react: [],
       'react-native': [],
-      './src/styles/util/types': []
+      './src/styles/util/types': [],
+      './src/styles/util/lang': []
     }
   },
   './src/styles/util/Shadow': { pth: 'styles/util/Shadow.ts', imports: {} },
