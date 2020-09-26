@@ -100,7 +100,7 @@ export type FillData = string | IGradient | ISketchError | null
 
 export interface IFill {
   data: FillData
-  color: string
+  color: string | undefined
 }
 
 export enum ViewBorders {

@@ -32,10 +32,12 @@ export class RGBA {
   }
 }
 
+export const WHITE = '#ffffffff'
+
 export function calcAvgColor (stops: IStop[]): string {
   const first = stops[0]
-  if (first === undefined) {
-    return '#ffffffff'
+  if (first === undefined || first === null) {
+    return WHITE
   }
   let rgba: RGBA = new RGBA(first.color)
   for (let i = 1; i < stops.length; i++) {
@@ -45,19 +47,17 @@ export function calcAvgColor (stops: IStop[]): string {
   return rgba.toString()
 }
 
-export const WHITE = '#ffffffff'
-
 export class Fill implements IFill {
   data: FillData
-  color: string
+  color: string | undefined
   constructor (data: FillData) {
     this.data = data
-    if (!exists(this.data) || isSketchError(this.data)) {
-      this.color = WHITE
-    } else if (typeof this.data === 'string') {
-      this.color = this.data
-    } else {
-      this.color = calcAvgColor(this.data.gradient.stops)
+    if (exists(this.data) && !isSketchError(this.data)) {
+      if (typeof this.data === 'string') {
+        this.color = this.data
+      } else {
+        this.color = calcAvgColor(this.data.gradient.stops)
+      }
     }
   }
 }
