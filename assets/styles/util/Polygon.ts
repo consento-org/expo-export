@@ -82,7 +82,7 @@ export class Polygon implements IPolygon {
       } else {
         this._svg = {
           stroke: this._border.fill.color,
-          strokeDasharray: this._border?.dashPattern.length > 0 ? this._border?.dashPattern : null,
+          strokeDasharray: this._border?.dashPattern.length > 0 ? this._border.dashPattern.join(' ') : undefined,
           strokeLinecap: this._border.strokeLinecap,
           strokeLinejoin: this._border.strokeLinejoin,
           strokeWidth: this._border.thickness

@@ -131,7 +131,7 @@ export type BorderPropsVertical = BorderPropsTop | BorderPropsBottom
 export interface IPolygonSvgStroke {
   stroke: string
   strokeWidth: number
-  strokeDasharray: number[] | null
+  strokeDasharray: string | undefined
   strokeLinecap: Linecap
   strokeLinejoin: Linejoin
 }
