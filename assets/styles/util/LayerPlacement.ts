@@ -23,7 +23,7 @@ export class LayerPlacement <TLayer extends ILayer<TLayers>, TLayers, TOverrides
     } as any
   }
 
-  get backgroundColor (): string | null {
+  get backgroundColor (): string | undefined {
     return this.layer.backgroundColor
   }
 }

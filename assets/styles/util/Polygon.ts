@@ -27,7 +27,7 @@ export function borderDefaults (border: TBorderData | null): IBorder {
   }
 }
 
-function createBorderViewStyle (borderColor: string, border: IBorder, borders: number): ViewStyle {
+function createBorderViewStyle (borderColor: string | undefined, border: IBorder, borders: number): ViewStyle {
   const borderStyle = dashPatternToBorderStyle(border.dashPattern)
   const result: ViewStyle = {
     borderRadius: border.radius,
@@ -62,7 +62,7 @@ export class Polygon implements IPolygon {
   place: Placement
   fill: Fill
   shadows: Shadow[]
-  private _svg?: IPolygonSvgStroke
+  private _svg?: IPolygonSvgStroke | null
   private readonly _styles: { [key: number]: ViewStyle }
   private readonly _border: IBorder
 
@@ -75,14 +75,18 @@ export class Polygon implements IPolygon {
     this._styles = {}
   }
 
-  get svg (): IPolygonSvgStroke {
+  get svg (): IPolygonSvgStroke | null {
     if (this._svg === undefined) {
-      this._svg = {
-        stroke: this._border.fill.color,
-        strokeDasharray: this._border?.dashPattern.length > 0 ? this._border?.dashPattern : null,
-        strokeLinecap: this._border.strokeLinecap,
-        strokeLinejoin: this._border.strokeLinejoin,
-        strokeWidth: this._border.thickness
+      if (this._border.fill.color === undefined) {
+        this._svg = null
+      } else {
+        this._svg = {
+          stroke: this._border.fill.color,
+          strokeDasharray: this._border?.dashPattern.length > 0 ? this._border?.dashPattern : null,
+          strokeLinecap: this._border.strokeLinecap,
+          strokeLinejoin: this._border.strokeLinejoin,
+          strokeWidth: this._border.thickness
+        }
       }
     }
     return this._svg
@@ -114,7 +118,7 @@ export class Polygon implements IPolygon {
     let style = this._styles[borders]
     if (style === undefined) {
       style = StyleSheet.create({
-        viewStyle: createBorderViewStyle(this.svg.stroke, this._border, borders)
+        viewStyle: createBorderViewStyle(this.svg?.stroke, this._border, borders)
       }).viewStyle
       this._styles[borders] = style
     }

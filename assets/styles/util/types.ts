@@ -140,7 +140,7 @@ export interface IPolygon extends IBaseLayer {
   /* eslint-disable @typescript-eslint/method-signature-style */
   fill: IFill
   shadows: IShadow[]
-  svg: IPolygonSvgStroke
+  svg: IPolygonSvgStroke | null
   borderStyle (viewBorders: ViewBorders.none): Pick<ViewStyle, BorderPropsBase>
   borderStyle (viewBorders: ViewBorders.left): Pick<ViewStyle, BorderPropsLeft>
   borderStyle (viewBorders: ViewBorders.right): Pick<ViewStyle, BorderPropsRight>
